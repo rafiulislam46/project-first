@@ -8,9 +8,7 @@ export default function Footer() {
           © {new Date().getFullYear()} Lux Starter. All rights reserved.
         </p>
         <div className="flex items-center gap-4 text-sm">
-          <Link href="/privacy" className="hover:text-text-hi focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-1/40 rounded-md px-1">
-            Privacy
-          </Link>
+          
           <Link href="/terms" className="hover:text-text-hi focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-1/40 rounded-md px-1">
             Terms
           </Link>
