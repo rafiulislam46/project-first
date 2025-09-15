@@ -1,8 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { fadeUp, staggerContainer } from "@/lib/utils";
-import { IS_MOCK } from "@/lib/config";
+import { fadeUp, staggerContainer, loadAssetManifest, loadLocalJSON, overrideTemplatesWithManifest } from "@/lib/utils";
+import { IS_MOCK, IS_FREE } from "@/lib/config";
 import { useEffect, useState } from "react";
 
 type Template = { id: string; name: string; category?: string; refUrl?: string; thumb?: string };
@@ -15,11 +15,13 @@ export default function TemplatesPage() {
     async function load() {
       try {
         if (IS_MOCK) {
-          const res = await fetch("/data/templates.json", { cache: "no-store" });
-          const data = (await res.json()) as Template[];
-          if (!ignore) setTemplates(data);
+          const [local, manifest] = await Promise.all([
+            loadLocalJSON<Template[]>("/data/templates.json"),
+            loadAssetManifest(),
+          ]);
+          const merged = overrideTemplatesWithManifest(local || [], manifest);
+          if (!ignore) setTemplates(merged);
         } else {
-          // live mode placeholder (to be implemented in a later ticket)
           if (!ignore) setTemplates([]);
         }
       } catch {
@@ -48,22 +50,30 @@ export default function TemplatesPage() {
               Loading...
             </motion.div>
           )}
-          {templates?.map((t) => (
-            <motion.div key={t.id} className="glass-card p-6" variants={fadeUp}>
-              <h3 className="mb-2">{t.name}</h3>
-              <p className="text-text-body text-sm mb-2">{t.category ? t.category : "—"}</p>
-              <div className="flex items-center gap-3">
-                <a
-                  href={t.refUrl || "#"}
-                  target="_blank"
-                  className="text-accent-1/80 hover:text-accent-1 underline underline-offset-2 text-sm"
-                >
-                  Reference
-                </a>
-                <button className="btn-gradient ml-auto">Use template</button>
-              </div>
-            </motion.div>
-          ))}
+          {templates?.map((t) => {
+            const thumb = t.thumb || "/catalog/templates/template_card.svg";
+            return (
+              <motion.div key={t.id} className={"glass-card p-0 overflow-hidden " + (IS_MOCK && IS_FREE ? "demo-watermark" : "")} variants={fadeUp}>
+                <div className="aspect-[4/3] w-full bg-black/20">
+                  <img src={thumb} alt={t.name} className="h-full w-full object-cover" />
+                </div>
+                <div className="p-6">
+                  <h3 className="mb-2">{t.name}</h3>
+                  <p className="text-text-body text-sm mb-2">{t.category ? t.category : "—"}</p>
+                  <div className="flex items-center gap-3">
+                    <a
+                      href={t.refUrl || "#"}
+                      target="_blank"
+                      className="text-accent-1/80 hover:text-accent-1 underline underline-offset-2 text-sm"
+                    >
+                      Reference
+                    </a>
+                    <button className="btn-gradient ml-auto">Use template</button>
+                  </div>
+                </div>
+              </motion.div>
+            );
+          })}
         </motion.div>
       </motion.div>
     </section>

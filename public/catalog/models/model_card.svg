@@ -1,0 +1,26 @@
+<svg width="640" height="480" viewBox="0 0 640 480" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0F1620"/>
+      <stop offset="100%" stop-color="#0B0F14"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="75%" cy="20%" r="70%">
+      <stop offset="0%" stop-color="#3B82F6" stop-opacity="0.25"/>
+      <stop offset="60%" stop-color="#F5C44F" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#000" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="640" height="480" fill="url(#bg)"/>
+  <g opacity="0.8">
+    <ellipse cx="520" cy="80" rx="240" ry="180" fill="url(#glow)"/>
+  </g>
+  <rect x="32" y="32" width="576" height="416" rx="28" fill="rgba(19,26,36,0.72)" stroke="rgba(255,255,255,0.08)"/>
+  <rect x="32" y="32" width="576" height="416" rx="28" fill="url(#glow)" opacity="0.15"/>
+  <text x="56" y="96" fill="#E8EEF6" font-family="Plus Jakarta Sans, Sora, Inter, Arial" font-size="28" font-weight="700" letter-spacing="1">MODEL</text>
+  <text x="56" y="132" fill="#B7C1CF" font-family="Inter, Arial" font-size="16" opacity="0.9">Premium placeholder</text>
+  <g transform="translate(56,168)">
+    <rect x="0" y="0" width="144" height="96" rx="14" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.06)"/>
+    <rect x="160" y="0" width="144" height="96" rx="14" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.06)"/>
+    <rect x="320" y="0" width="144" height="96" rx="14" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.06)"/>
+  </g>
+</svg>

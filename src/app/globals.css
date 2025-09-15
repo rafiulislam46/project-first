@@ -67,6 +67,27 @@ body {
   .input-premium {
     @apply rounded-2xl bg-surface/60 border px-4 py-2 text-text-hi placeholder:text-text-body/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-1/40;
   }
+
+  /* DEMO ribbon overlay for free plan mock mode */
+  .demo-watermark {
+    @apply relative overflow-hidden;
+  }
+  .demo-watermark::before {
+    content: "DEMO";
+    position: absolute;
+    top: 12px;
+    right: -40px;
+    transform: rotate(30deg);
+    color: rgba(232, 238, 246, 0.8);
+    background: linear-gradient(135deg, rgba(59,130,246,0.18), rgba(245,196,79,0.18));
+    border: 1px solid rgba(255,255,255,0.12);
+    backdrop-filter: blur(4px);
+    padding: 4px 60px;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    border-radius: 8px;
+    pointer-events: none;
+  }
 }
 
 /* Reduced motion preference */
