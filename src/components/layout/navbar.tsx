@@ -1,15 +1,16 @@
 "use client";
 
 import Link from "next/link";
+import type { Route } from "next";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 
-const nav = [
+const nav: ReadonlyArray<{ href: Route; label: string }> = [
   { href: "/", label: "Home" },
   { href: "/components", label: "Components" },
   { href: "/about", label: "About" },
-];
+] as const;
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -27,7 +28,7 @@ export default function Navbar() {
             return (
               <Link
                 key={item.href}
-                href={item.href as string}
+                href={item.href}
                 className={cn(
                   "relative rounded-xl px-3 py-2 text-sm text-text-body transition-colors hover:text-text-hi focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-1/40",
                   active && "text-text-hi"
