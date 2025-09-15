@@ -1,0 +1,182 @@
+[
+  {
+    "id": "m01",
+    "name": "Aurora",
+    "gender": "female",
+    "styles": [
+      { "key": "studio_clean", "thumb": "/placeholders/aurora_studio.jpg" },
+      { "key": "lifestyle_indoor", "thumb": "/placeholders/aurora_indoor.jpg" }
+    ]
+  },
+  {
+    "id": "m02",
+    "name": "Orion",
+    "gender": "male",
+    "styles": [
+      { "key": "street_casual", "thumb": "/placeholders/orion_street.jpg" },
+      { "key": "studio_clean", "thumb": "/placeholders/orion_studio.jpg" }
+    ]
+  },
+  {
+    "id": "m03",
+    "name": "Nova",
+    "gender": "female",
+    "styles": [
+      { "key": "luxury_black_gold", "thumb": "/placeholders/nova_luxury.jpg" },
+      { "key": "color_gradient", "thumb": "/placeholders/nova_gradient.jpg" }
+    ]
+  },
+  {
+    "id": "m04",
+    "name": "Atlas",
+    "gender": "male",
+    "styles": [
+      { "key": "studio_clean", "thumb": "/placeholders/atlas_studio.jpg" },
+      { "key": "street_casual", "thumb": "/placeholders/atlas_street.jpg" }
+    ]
+  },
+  {
+    "id": "m05",
+    "name": "Luna",
+    "gender": "female",
+    "styles": [
+      { "key": "lifestyle_indoor", "thumb": "/placeholders/luna_indoor.jpg" },
+      { "key": "studio_clean", "thumb": "/placeholders/luna_studio.jpg" }
+    ]
+  },
+  {
+    "id": "m06",
+    "name": "Rex",
+    "gender": "male",
+    "styles": [
+      { "key": "street_casual", "thumb": "/placeholders/rex_street.jpg" },
+      { "key": "color_gradient", "thumb": "/placeholders/rex_gradient.jpg" }
+    ]
+  },
+  {
+    "id": "m07",
+    "name": "Vega",
+    "gender": "female",
+    "styles": [
+      { "key": "studio_clean", "thumb": "/placeholders/vega_studio.jpg" },
+      { "key": "luxury_black_gold", "thumb": "/placeholders/vega_luxury.jpg" }
+    ]
+  },
+  {
+    "id": "m08",
+    "name": "Kai",
+    "gender": "male",
+    "styles": [
+      { "key": "lifestyle_indoor", "thumb": "/placeholders/kai_indoor.jpg" },
+      { "key": "studio_clean", "thumb": "/placeholders/kai_studio.jpg" }
+    ]
+  },
+  {
+    "id": "m09",
+    "name": "Zara",
+    "gender": "female",
+    "styles": [
+      { "key": "street_casual", "thumb": "/placeholders/zara_street.jpg" },
+      { "key": "color_gradient", "thumb": "/placeholders/zara_gradient.jpg" }
+    ]
+  },
+  {
+    "id": "m10",
+    "name": "Max",
+    "gender": "male",
+    "styles": [
+      { "key": "studio_clean", "thumb": "/placeholders/max_studio.jpg" },
+      { "key": "lifestyle_indoor", "thumb": "/placeholders/max_indoor.jpg" }
+    ]
+  },
+  {
+    "id": "m11",
+    "name": "Iris",
+    "gender": "female",
+    "styles": [
+      { "key": "luxury_black_gold", "thumb": "/placeholders/iris_luxury.jpg" },
+      { "key": "studio_clean", "thumb": "/placeholders/iris_studio.jpg" }
+    ]
+  },
+  {
+    "id": "m12",
+    "name": "Leo",
+    "gender": "male",
+    "styles": [
+      { "key": "street_casual", "thumb": "/placeholders/leo_street.jpg" },
+      { "key": "studio_clean", "thumb": "/placeholders/leo_studio.jpg" }
+    ]
+  },
+  {
+    "id": "m13",
+    "name": "Maya",
+    "gender": "female",
+    "styles": [
+      { "key": "lifestyle_indoor", "thumb": "/placeholders/maya_indoor.jpg" },
+      { "key": "color_gradient", "thumb": "/placeholders/maya_gradient.jpg" }
+    ]
+  },
+  {
+    "id": "m14",
+    "name": "Finn",
+    "gender": "male",
+    "styles": [
+      { "key": "studio_clean", "thumb": "/placeholders/finn_studio.jpg" },
+      { "key": "luxury_black_gold", "thumb": "/placeholders/finn_luxury.jpg" }
+    ]
+  },
+  {
+    "id": "m15",
+    "name": "Aria",
+    "gender": "female",
+    "styles": [
+      { "key": "studio_clean", "thumb": "/placeholders/aria_studio.jpg" },
+      { "key": "street_casual", "thumb": "/placeholders/aria_street.jpg" }
+    ]
+  },
+  {
+    "id": "m16",
+    "name": "Jax",
+    "gender": "male",
+    "styles": [
+      { "key": "lifestyle_indoor", "thumb": "/placeholders/jax_indoor.jpg" },
+      { "key": "color_gradient", "thumb": "/placeholders/jax_gradient.jpg" }
+    ]
+  },
+  {
+    "id": "m17",
+    "name": "Eve",
+    "gender": "female",
+    "styles": [
+      { "key": "luxury_black_gold", "thumb": "/placeholders/eve_luxury.jpg" },
+      { "key": "studio_clean", "thumb": "/placeholders/eve_studio.jpg" }
+    ]
+  },
+  {
+    "id": "m18",
+    "name": "Noah",
+    "gender": "male",
+    "styles": [
+      { "key": "street_casual", "thumb": "/placeholders/noah_street.jpg" },
+      { "key": "studio_clean", "thumb": "/placeholders/noah_studio.jpg" }
+    ]
+  },
+  {
+    "id": "m19",
+    "name": "Ada",
+    "gender": "female",
+    "styles": [
+      { "key": "lifestyle_indoor", "thumb": "/placeholders/ada_indoor.jpg" },
+      { "key": "studio_clean", "thumb": "/placeholders/ada_studio.jpg" }
+    ]
+  },
+  {
+    "id": "m20",
+    "name": "Theo",
+    "gender": "male",
+    "styles": [
+      { "key": "studio_clean", "thumb": "/placeholders/theo_studio.jpg" },
+      { "key": "street_casual", "thumb": "/placeholders/theo_street.jpg" }
+    ]
+  }
+]
