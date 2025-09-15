@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import type { Route } from "next";
 import { motion, AnimatePresence } from "framer-motion";
