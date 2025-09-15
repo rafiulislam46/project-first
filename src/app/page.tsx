@@ -1,3 +1,5 @@
+import Link from "next/link";
+import type { Route } from "next";
 import { motion, AnimatePresence } from "framer-motion";
 import { fadeUp, staggerContainer } from "@/lib/utils";
 import { ArrowRight } from "lucide-react";
@@ -21,9 +23,9 @@ export default function HomePage() {
               Framer Motion. Accessible by default, animated when allowed.
             </motion.p>
             <motion.div variants={fadeUp} className="flex items-center justify-center gap-3">
-              <a href="/components" className="btn-gradient">
+              <Link href={"/components" as Route} className="btn-gradient">
                 Explore Components
-              </a>
+              </Link>
               <a
                 href="https://nextjs.org"
                 target="_blank"
