@@ -2,14 +2,35 @@
 
 import { motion } from "framer-motion";
 import { fadeUp, staggerContainer } from "@/lib/utils";
+import { IS_MOCK } from "@/lib/config";
+import { useEffect, useState } from "react";
+
+type Template = { id: string; name: string; category?: string; refUrl?: string; thumb?: string };
 
 export default function TemplatesPage() {
-  const templates = [
-    { name: "Blog Post", desc: "SEO-friendly long-form article." },
-    { name: "Marketing Email", desc: "High-converting newsletter." },
-    { name: "Support Reply", desc: "Polished, on-brand responses." },
-    { name: "Landing Copy", desc: "Hero, features, and CTA." },
-  ];
+  const [templates, setTemplates] = useState<Template[] | null>(null);
+
+  useEffect(() => {
+    let ignore = false;
+    async function load() {
+      try {
+        if (IS_MOCK) {
+          const res = await fetch("/data/templates.json", { cache: "no-store" });
+          const data = (await res.json()) as Template[];
+          if (!ignore) setTemplates(data);
+        } else {
+          // live mode placeholder (to be implemented in a later ticket)
+          if (!ignore) setTemplates([]);
+        }
+      } catch {
+        if (!ignore) setTemplates([]);
+      }
+    }
+    load();
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   return (
     <section className="container py-12 md:py-16">
@@ -22,11 +43,25 @@ export default function TemplatesPage() {
         </motion.p>
 
         <motion.div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3" variants={staggerContainer}>
-          {templates.map((t) => (
-            <motion.div key={t.name} className="glass-card p-6" variants={fadeUp}>
+          {!templates && (
+            <motion.div className="text-text-body" variants={fadeUp}>
+              Loading...
+            </motion.div>
+          )}
+          {templates?.map((t) => (
+            <motion.div key={t.id} className="glass-card p-6" variants={fadeUp}>
               <h3 className="mb-2">{t.name}</h3>
-              <p className="text-text-body">{t.desc}</p>
-              <button className="btn-gradient mt-4">Use template</button>
+              <p className="text-text-body text-sm mb-2">{t.category ? t.category : "—"}</p>
+              <div className="flex items-center gap-3">
+                <a
+                  href={t.refUrl || "#"}
+                  target="_blank"
+                  className="text-accent-1/80 hover:text-accent-1 underline underline-offset-2 text-sm"
+                >
+                  Reference
+                </a>
+                <button className="btn-gradient ml-auto">Use template</button>
+              </div>
             </motion.div>
           ))}
         </motion.div>
