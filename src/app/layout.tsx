@@ -19,8 +19,31 @@ const sora = Sora({
 });
 
 export const metadata: Metadata = {
-  title: "Lux Next App",
-  description: "Premium dark, luxurious, minimal Next.js starter",
+  metadataBase: new URL("https://example.com"),
+  title: {
+    default: "AI Product Studio — Model Try‑On, Templates, Copy & Variations",
+    template: "%s · AI Product Studio",
+  },
+  description:
+    "Generate premium visuals in minutes. Model try‑ons, reference templates, auto copywriting, and 5 fast variations. Accessible, fast, and delightful.",
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    type: "website",
+    url: "https://example.com/",
+    title: "AI Product Studio — Model Try‑On, Templates, Copy & Variations",
+    description:
+      "Generate premium visuals in minutes. Model try‑ons, reference templates, auto copywriting, and 5 fast variations.",
+    images: [{ url: "/demo/tryon/1.svg", width: 1200, height: 630, alt: "Demo preview" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "AI Product Studio — Model Try‑On, Templates, Copy & Variations",
+    description:
+      "Generate premium visuals in minutes. Model try‑ons, reference templates, auto copywriting, and 5 fast variations.",
+    images: ["/demo/tryon/1.svg"],
+  },
 };
 
 export default function RootLayout({
