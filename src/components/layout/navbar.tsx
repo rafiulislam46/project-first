@@ -8,8 +8,13 @@ import { motion } from "framer-motion";
 
 const nav: ReadonlyArray<{ href: Route; label: string }> = [
   { href: "/", label: "Home" },
-  { href: "/components", label: "Components" },
-  { href: "/about", label: "About" },
+  { href: "/pricing", label: "Pricing" },
+  { href: "/models", label: "Models" },
+  { href: "/templates", label: "Templates" },
+  { href: "/upload", label: "Upload" },
+  { href: "/result", label: "Result" },
+  { href: "/dashboard", label: "Dashboard" },
+  { href: "/admin", label: "Admin" },
 ] as const;
 
 export default function Navbar() {
