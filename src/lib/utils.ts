@@ -102,3 +102,29 @@ export function getDemoImages(manifest: AssetManifest | null, kind: "tryon" | "t
   if (!manifest?.demos?.[kind]?.length) return [];
   return manifest.demos![kind]!.filter(Boolean) as string[];
 }
+
+/* Selection persistence */
+
+const SELECTED_MODEL_KEY = "selected_model_id";
+
+export function getSelectedModelId(): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    return window.localStorage.getItem(SELECTED_MODEL_KEY);
+  } catch {
+    return null;
+  }
+}
+
+export function setSelectedModelId(id: string | null) {
+  if (typeof window === "undefined") return;
+  try {
+    if (id) {
+      window.localStorage.setItem(SELECTED_MODEL_KEY, id);
+    } else {
+      window.localStorage.removeItem(SELECTED_MODEL_KEY);
+    }
+  } catch {
+    // ignore
+  }
+}
