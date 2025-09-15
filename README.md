@@ -34,7 +34,7 @@ Open http://localhost:3000.
 - src/components/ui/button.tsx — shadcn-style Button
 - src/components/theme-provider.tsx — dark theme wrapper
 - src/components/motion-provider.tsx — MotionConfig with reduced-motion
-- src/lib/utils.ts — cn, motion variants
+- src/lib/utils.ts — cn, motion variants, manifest helpers
 - src/app/globals.css — theme tokens, utilities
 
 ## Design System
@@ -64,8 +64,57 @@ Accessibility
 - WCAG AA contrast, :focus-visible rings
 - Reduced motion respected globally via MotionProvider
 
-## Notes
+---
 
-- This starter locks to dark mode but keeps a ThemeProvider for expansion.
-- Tailwind content scanning is limited to src/**.
-- To add more shadcn/ui components, follow the same Button pattern (cva + radix Slot) or install the shadcn CLI and generate components into src/components/ui.
+## Premium placeholders and Cloudinary manifest
+
+Out of the box, the app ships with premium placeholders:
+
+- public/catalog/models — model thumbnails
+- public/catalog/templates — template thumbnails
+- public/demo/tryon — demo result images (try-on styles)
+- public/demo/template — demo result images (template mode)
+- public/brand — small SVG badges (bkash, nagad, rocket, card)
+
+Data definitions live in public/data/*.json.
+
+### Runtime manifest override
+
+If you host your assets on Cloudinary (or anywhere with absolute URLs), you can publish a JSON manifest and point the app to it without code changes.
+
+- Env variable: ASSET_MANIFEST_URL (or NEXT_PUBLIC_ASSET_MANIFEST_URL)
+- When present, the app fetches the JSON at runtime and overrides local placeholders.
+- If the fetch fails, the app gracefully falls back to local JSON and built-in placeholders.
+
+Schema example:
+{
+  "models":[{"id":"M01","name":"Young Male Studio","gender":"male","styles":[{"key":"studio_clean","thumb":"https://.../M01_studio.png"}]}],
+  "templates":[{"id":"T01","name":"T-shirt Premium","category":"fashion","refUrl":"https://.../T01_ref.png","thumb":"https://.../T01_thumb.png"}],
+  "demos":{
+    "tryon":["https://.../demo_tryon_1.jpg","..."],
+    "template":["https://.../demo_tmpl_1.jpg","..."]
+  }
+}
+
+### How to use placeholders
+
+- MODE=mock by default uses local JSON in public/data and renders built-in premium thumbnails if no manifest is provided.
+- You can replace or add assets under public/catalog and public/demo as needed.
+
+### Host on Cloudinary and publish a manifest
+
+1) Upload your assets (models, templates, demo images) to Cloudinary and obtain absolute URLs.
+2) Create a JSON file matching the schema above, e.g. at https://your-domain.com/asset-manifest.json.
+3) Set ASSET_MANIFEST_URL to that JSON URL.
+
+### Set ASSET_MANIFEST_URL on Vercel
+
+- In the Vercel dashboard, go to your Project → Settings → Environment Variables
+- Add key ASSET_MANIFEST_URL with your manifest URL (you can also add NEXT_PUBLIC_ASSET_MANIFEST_URL)
+- Redeploy. In MODE=mock, the app will fetch and use these URLs at runtime.
+
+### Watermark in mock + Free
+
+When MODE=mock and PLAN=free (or NEXT_PUBLIC_PLAN=free), result and thumbnail cards render a subtle DEMO ribbon watermark to indicate non-production assets.
+
+You can disable this by upgrading PLAN (set PLAN=pro) or switching to live mode.
