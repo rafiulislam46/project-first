@@ -12,13 +12,16 @@ import {
   cn,
 } from "@/lib/utils";
 import { IS_MOCK, IS_FREE } from "@/lib/config";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type Template = { id: string; name: string; category?: string; refUrl?: string; thumb?: string };
+
+type CategoryKey = string | "all";
 
 export default function TemplatesPage() {
   const [templates, setTemplates] = useState<Template[] | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [category, setCategory] = useState<CategoryKey>("all");
   const controls = useAnimation();
 
   useEffect(() => {
@@ -49,9 +52,24 @@ export default function TemplatesPage() {
     };
   }, []);
 
+  const categoryOptions = useMemo(() => {
+    const set = new Set<string>();
+    (templates || []).forEach((t) => {
+      const c = (t.category || "").trim();
+      if (c) set.add(c);
+    });
+    return ["all", ...Array.from(set).sort()];
+  }, [templates]);
+
+  const filtered = useMemo(() => {
+    if (!templates) return null;
+    if (category === "all") return templates;
+    return templates.filter((t) => (t.category || "").toLowerCase() === String(category).toLowerCase());
+  }, [templates, category]);
+
   useEffect(() => {
     controls.start("show");
-  }, [templates, controls]);
+  }, [filtered, controls]);
 
   return (
     <section className="container py-12 md:py-16">
@@ -59,9 +77,28 @@ export default function TemplatesPage() {
         <motion.h2 className="mb-2" variants={fadeUp}>
           Templates
         </motion.h2>
-        <motion.p className="mb-8 text-text-body" variants={fadeUp}>
+        <motion.p className="mb-6 text-text-body" variants={fadeUp}>
           Start from curated templates and customize to your needs.
         </motion.p>
+
+        {/* Filters */}
+        <motion.div className="mb-6 flex flex-wrap items-center gap-2" variants={fadeUp}>
+          {categoryOptions.map((c) => (
+            <button
+              key={c}
+              onClick={() => setCategory(c)}
+              className={cn(
+                "px-3 py-1.5 rounded-full text-xs transition border",
+                category === c
+                  ? "border-accent-1/60 bg-accent-1/10 text-text-hi"
+                  : "border-white/10 bg-white/5 text-text-body hover:bg-white/10"
+              )}
+              title={c}
+            >
+              {c}
+            </button>
+          ))}
+        </motion.div>
 
         {/* Grid */}
         <motion.div
@@ -73,12 +110,12 @@ export default function TemplatesPage() {
           }}
           className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
         >
-          {!templates && (
+          {!filtered && (
             <motion.div className="text-text-body" variants={fadeUp}>
               Loading...
             </motion.div>
           )}
-          {templates?.map((t, idx) => {
+          {filtered?.map((t, idx) => {
             const thumb = t.thumb || "/catalog/templates/template_card.svg";
             const selected = selectedId === t.id;
 
