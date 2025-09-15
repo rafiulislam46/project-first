@@ -106,6 +106,7 @@ export function getDemoImages(manifest: AssetManifest | null, kind: "tryon" | "t
 /* Selection persistence */
 
 const SELECTED_MODEL_KEY = "selected_model_id";
+const SELECTED_TEMPLATE_KEY = "selected_template_id";
 
 export function getSelectedModelId(): string | null {
   if (typeof window === "undefined") return null;
@@ -123,6 +124,28 @@ export function setSelectedModelId(id: string | null) {
       window.localStorage.setItem(SELECTED_MODEL_KEY, id);
     } else {
       window.localStorage.removeItem(SELECTED_MODEL_KEY);
+    }
+  } catch {
+    // ignore
+  }
+}
+
+export function getSelectedTemplateId(): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    return window.localStorage.getItem(SELECTED_TEMPLATE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+export function setSelectedTemplateId(id: string | null) {
+  if (typeof window === "undefined") return;
+  try {
+    if (id) {
+      window.localStorage.setItem(SELECTED_TEMPLATE_KEY, id);
+    } else {
+      window.localStorage.removeItem(SELECTED_TEMPLATE_KEY);
     }
   } catch {
     // ignore
