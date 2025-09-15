@@ -1,4 +1,4 @@
-import Link from "next/link";
+
 
 export default function Footer() {
   return (
@@ -8,10 +8,8 @@ export default function Footer() {
           © {new Date().getFullYear()} Lux Starter. All rights reserved.
         </p>
         <div className="flex items-center gap-4 text-sm">
-          
-          <Link href="/terms" className="hover:text-text-hi focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-1/40 rounded-md px-1">
-            Terms
-          </Link>
+          <span>Terms</span>
+          <span>Privacy</span>
         </div>
       </div>
     </footer>
