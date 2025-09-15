@@ -27,7 +27,7 @@ export default function Navbar() {
             return (
               <Link
                 key={item.href}
-                href={item.href}
+                href={item.href as string}
                 className={cn(
                   "relative rounded-xl px-3 py-2 text-sm text-text-body transition-colors hover:text-text-hi focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-1/40",
                   active && "text-text-hi"
