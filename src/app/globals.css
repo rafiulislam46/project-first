@@ -1,0 +1,80 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --radius: 1rem;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background: linear-gradient(180deg, #0F1620 0%, #0B0F14 100%);
+}
+
+@layer base {
+  * {
+    @apply border-[rgba(255,255,255,0.06)];
+  }
+  body {
+    @apply bg-base text-text-body;
+  }
+  h1 {
+    @apply text-h1 font-semibold text-text-hi;
+    font-family: var(--font-plus-jakarta), var(--font-sora), system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  }
+  h2 {
+    @apply text-h2 font-semibold text-text-hi;
+    font-family: var(--font-plus-jakarta), var(--font-sora), system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial, "Noto Sans";
+  }
+  h3 {
+    @apply text-h3 font-medium text-text-hi;
+    font-family: var(--font-plus-jakarta), var(--font-sora), system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial, "Noto Sans";
+  }
+  p {
+    @apply text-body;
+    font-family: var(--font-inter), system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans";
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply rounded-3xl border bg-card/60 backdrop-blur-md shadow-soft-1;
+  }
+
+  .btn-gradient {
+    @apply relative inline-flex items-center justify-center rounded-2xl px-5 py-2.5 text-sm font-medium text-text-hi transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-1/50;
+    background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(245,196,79,0.15));
+    border: 1px solid rgba(255,255,255,0.06);
+    box-shadow: 0 1px 0 rgba(255,255,255,0.06) inset, 0 10px 30px rgba(0,0,0,0.35);
+  }
+  .btn-gradient::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.08) 100%);
+    opacity: 0.6;
+    transition: opacity 200ms ease, transform 200ms ease;
+  }
+  .btn-gradient:hover::after {
+    opacity: 0.9;
+    transform: translateY(-1px);
+  }
+
+  .input-premium {
+    @apply rounded-2xl bg-surface/60 border px-4 py-2 text-text-hi placeholder:text-text-body/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-1/40;
+  }
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
