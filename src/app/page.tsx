@@ -5,7 +5,8 @@ import type { Route } from "next";
 import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
 import { fadeUp, staggerContainer } from "@/lib/utils";
 import { ArrowRight } from "lucide-react";
-import { useMemo } from "rea_code "react";
+import { useMemo } from "react";
+import type React from "react";
 
 export const metadata: Metadata = {
   title: "AI Product Studio — Model Try‑On, Templates, Copy & Variations",
