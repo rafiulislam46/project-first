@@ -40,7 +40,11 @@ export default function ModelsPage() {
             loadLocalJSON<Model[]>("/data/models.json"),
             loadAssetManifest(),
           ]);
-          const merged = overrideModelsWithManifest(local || [], manifest);
+          let merged = overrideModelsWithManifest(local || [], manifest);
+          // Restrict free users to a subset
+          if (IS_FREE) {
+            merged = merged.slice(0, 6);
+          }
           if (!ignore) setModels(merged);
         } else {
           if (!ignore) setModels([]);
@@ -82,9 +86,14 @@ export default function ModelsPage() {
         <motion.h2 className="mb-2" variants={fadeUp}>
           Models
         </motion.h2>
-        <motion.p className="mb-8 text-text-body" variants={fadeUp}>
+        <motion.p className="mb-2 text-text-body" variants={fadeUp}>
           Choose a model to continue. Your selection will be used on upload.
         </motion.p>
+        {IS_FREE && (
+          <motion.p className="mb-8 text-xs text-text-body/70" variants={fadeUp}>
+            Free plan shows a limited set of models. Upgrade to unlock the full catalog.
+          </motion.p>
+        )}
 
         {/* Filters */}
         <motion.div className="mb-6 flex flex-wrap items-center gap-3" variants={fadeUp}>
@@ -158,7 +167,10 @@ export default function ModelsPage() {
                 }}
                 selected={selected}
                 variants={fadeUp}
-                className={cn("glass-card p-0 overflow-hidden cursor-pointer transition", IS_MOCK && IS_FREE ? "demo-watermark" : "")}
+                className={cn(
+                  "glass-card p-0 overflow-hidden cursor-pointer transition",
+                  IS_MOCK && IS_FREE ? "demo-watermark" : ""
+                )}
               >
                 <div className="relative aspect-[4/3] w-full bg-black/20">
                   <img src={thumb} alt={m.name} className="h-full w-full object-cover" />

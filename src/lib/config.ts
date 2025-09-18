@@ -9,7 +9,7 @@ export const MODE: AppMode = (envMode?.toLowerCase() as AppMode) || "mock";
 export const IS_MOCK = MODE === "mock";
 
 /** Plan */
-type Plan = "free" | "pro" | "team";
+export type Plan = "free" | "pro" | "business" | "enterprise";
 const envPlan =
   (typeof process !== "undefined" &&
     (process.env.NEXT_PUBLIC_PLAN || process.env.PLAN)) ||

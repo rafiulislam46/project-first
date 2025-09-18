@@ -8,8 +8,10 @@ import {
   getSelectedTemplateId,
 } from "@/lib/utils";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { IS_MOCK } from "@/lib/config";
+import { canGenerate as canUseCredit, useOneCredit, getCredits } from "@/lib/credits";
 
-type Toast = { id: number; type: "success" | "error" | "info"; message: string };
+type Toast = { id: number; type: "success" | "error" | "info"; message: string; actionLabel?: string; action?: () => void };
 
 function useToasts() {
   const [toasts, setToasts] = useState<Toast[]>([]);
@@ -125,6 +127,24 @@ export default function UploadPage() {
       push({ type: "error", message: "Image not ready yet. Please wait a moment." });
       return;
     }
+
+    // Credits check (mock mode)
+    if (IS_MOCK) {
+      if (!canUseCredit()) {
+        push({
+          type: "error",
+          message: "You’ve reached your plan limit. Upgrade to continue.",
+          actionLabel: "View Pricing",
+          action: () => {
+            try {
+              window.location.href = "/pricing";
+            } catch {}
+          },
+        });
+        return;
+      }
+    }
+
     let endpoint: "/api/tryon" | "/api/template" | null = null;
     let payload: any = { productImageUrl: fileDataUrl };
     if (selectedModelId) {
@@ -141,6 +161,21 @@ export default function UploadPage() {
 
     try {
       setSubmitting(true);
+
+      // Decrement one credit before starting
+      if (IS_MOCK) {
+        const ok = useOneCredit();
+        if (!ok) {
+          push({
+            type: "error",
+            message: "No credits remaining on your plan.",
+            actionLabel: "Upgrade",
+            action: () => (window.location.href = "/pricing"),
+          });
+          return;
+        }
+      }
+
       const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -157,11 +192,7 @@ export default function UploadPage() {
         return;
       }
 
-      // Optional: parse response
-      // const data = await res.json();
-
       push({ type: "success", message: "Your job has started. Redirecting to results..." });
-      // Navigate to result page if it exists; otherwise just keep toast
       window.setTimeout(() => {
         try {
           window.location.href = "/result";
@@ -180,8 +211,14 @@ export default function UploadPage() {
         <motion.h2 className="mb-2" variants={fadeUp}>
           Upload
         </motion.h2>
-        <motion.p className="mb-4 text-text-body" variants={fadeUp}>
+        <motion.p className="mb-1 text-text-body" variants={fadeUp}>
           Upload a PNG/JPG product photo. Optionally add a prompt. We’ll use your selected Model or Template.
+        </motion.p>
+        <motion.p className="mb-4 text-xs text-text-body/70" variants={fadeUp}>
+          {IS_MOCK ? `Credits remaining: ${(() => {
+            const c = getCredits();
+            return c === -1 ? "∞" : c;
+          })()}` : ""}
         </motion.p>
 
         <motion.div variants={fadeUp} className="glass-card p-6">
@@ -307,6 +344,14 @@ export default function UploadPage() {
           >
             <div className="mt-0.5 h-2 w-2 shrink-0 rounded-full bg-current"></div>
             <div className="flex-1 text-sm">{t.message}</div>
+            {t.action && t.actionLabel ? (
+              <button
+                onClick={t.action}
+                className="rounded-md px-2 text-xs text-white/90 hover:text-white underline underline-offset-2"
+              >
+                {t.actionLabel}
+              </button>
+            ) : null}
             <button
               onClick={() => remove(t.id)}
               className="rounded-md px-2 text-xs text-white/80 hover:text-white"
