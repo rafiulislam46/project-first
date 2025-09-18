@@ -1,5 +1,5 @@
 import { cookies, headers } from "next/headers";
-import { createServerClient } from "@supabase/auth-helpers-nextjs";
+import { createPagesServerClient } from "@supabase/auth-helpers-nextjs";
 import { SUPABASE_URL, SUPABASE_ANON_KEY, HAS_SUPABASE } from "@/lib/config";
 
 /**
@@ -21,7 +21,7 @@ export function getServerSupabase() {
     set() {},
     remove() {},
   };
-  const supabase = createServerClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  const supabase = createPagesServerClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     cookies: {
       get: cookieAdapter.get as any,
       set: cookieAdapter.set as any,
