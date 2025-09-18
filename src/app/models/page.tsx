@@ -109,13 +109,13 @@ export default function ModelsPage() {
           <p className="text-text-body">Choose a model to continue. Your selection will be used on upload.</p>
         </motion.div>
 
-        <div className="flex gap-6">
+        <div className="flex flex-col md:flex-row gap-6">
           <Sidebar items={sidebarItems} value={String(style)} onChange={(k) => setStyle(k as StyleKey)} title="Styles" />
 
           <div className="flex-1">
             <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <SearchBar value={q} onChange={setQ} placeholder="Search models…" className="sm:max-w-xs" />
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 {(["all", "female", "male"] as Gender[]).map((g) => (
                   <button
                     key={g}
