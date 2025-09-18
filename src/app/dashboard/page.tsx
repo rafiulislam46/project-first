@@ -11,12 +11,21 @@ export default function DashboardPage() {
   const [items, setItems] = useState<SavedItem[]>([]);
 
   useEffect(() => {
-    setItems(listSaved());
+    let isMounted = true;
+    const fetchData = async () => {
+      const data = await listSaved();
+      if (isMounted) setItems(data);
+    };
+    fetchData();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
-  const handleRemove = (id: string) => {
-    removeFavorite(id);
-    setItems(listSaved());
+  const handleRemove = async (id: string) => {
+    await removeFavorite(id);
+    const data = await listSaved();
+    setItems(data);
   };
 
   return (
