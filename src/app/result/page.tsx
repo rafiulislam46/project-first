@@ -81,8 +81,8 @@ export default function ResultPage() {
         </motion.p>
 
         {/* Quick actions */}
-        <motion.div className="mb-6 flex items-center gap-3" variants={fadeUp}>
-          <Button onClick={handleDownloadAll} className="gap-2">
+        <motion.div className="mb-6 flex flex-col sm:flex-row sm:items-center gap-3" variants={fadeUp}>
+          <Button onClick={handleDownloadAll} className="gap-2 w-full sm:w-auto">
             <Download size={16} />
             Download All
           </Button>
@@ -93,7 +93,7 @@ export default function ResultPage() {
         <motion.div className="grid gap-6 lg:grid-cols-[2fr,1fr]" variants={staggerContainer}>
           <motion.div className="glass-card p-6" variants={fadeUp}>
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-h3">Variations</h3>
+              <h3 className="">Variations</h3>
             </div>
 
             {!tryon && !tmpl && <div className="text-text-body">Loading...</div>}

@@ -22,15 +22,15 @@ body {
     @apply bg-base text-text-body;
   }
   h1 {
-    @apply text-h1 font-semibold text-text-hi;
+    @apply text-3xl sm:text-4xl md:text-h1 font-semibold text-text-hi;
     font-family: var(--font-plus-jakarta), var(--font-sora), system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   }
   h2 {
-    @apply text-h2 font-semibold text-text-hi;
+    @apply text-2xl sm:text-3xl md:text-h2 font-semibold text-text-hi;
     font-family: var(--font-plus-jakarta), var(--font-sora), system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial, "Noto Sans";
   }
   h3 {
-    @apply text-h3 font-medium text-text-hi;
+    @apply text-xl sm:text-2xl md:text-h3 font-medium text-text-hi;
     font-family: var(--font-plus-jakarta), var(--font-sora), system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial, "Noto Sans";
   }
   p {

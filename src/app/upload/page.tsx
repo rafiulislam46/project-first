@@ -305,12 +305,12 @@ export default function UploadPage() {
             />
           </div>
 
-          <div className="mt-6 flex items-center justify-between">
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-xs text-text-body/70">
               Tip: If a model is selected, we’ll use Try-On. Otherwise we’ll apply a Template.
             </p>
             <button
-              className="btn-gradient"
+              className="btn-gradient w-full sm:w-auto"
               onClick={onGenerate}
               disabled={!canGenerate || submitting}
             >

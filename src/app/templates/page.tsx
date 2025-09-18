@@ -110,7 +110,7 @@ export default function TemplatesPage() {
           <p className="text-text-body">Start from curated templates and customize to your needs.</p>
         </motion.div>
 
-        <div className="flex gap-6">
+        <div className="flex flex-col md:flex-row gap-6">
           <Sidebar items={sidebarItems} value={String(category)} onChange={(k) => setCategory(k as CategoryKey)} />
 
           <div className="flex-1">
@@ -140,7 +140,7 @@ export default function TemplatesPage() {
               {filtered?.map((t, idx) => {
                 const thumb = t.thumb || "/catalog/templates/template_card.svg";
                 const selected = selectedId === t.id;
-                const isPro = IS_FREE ? idx % 3 === 0 : false;
+                const isPro = IS_MOCK ? idx % 3 === 0 : false;
 
                 return (
                   <Card3DTilt

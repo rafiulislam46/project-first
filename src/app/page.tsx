@@ -29,7 +29,6 @@ export default function Page() {
           variants={fadeUp}
           initial="hidden"
           animate="show"
-          className="text-h1 font-semibold text-text-hi"
         >
           AI Product Studio
         </motion.h1>
@@ -45,9 +44,9 @@ export default function Page() {
           variants={fadeUp}
           initial="hidden"
           animate="show"
-          className="mt-8"
+          className="mt-8 w-full sm:w-auto"
         >
-          <Link href="#features" className="btn-gradient inline-flex items-center gap-2 rounded-2xl px-6 py-3">
+          <Link href="#features" className="btn-gradient inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-2xl px-6 py-3">
             Get Started <ArrowRight size={18} />
           </Link>
         </motion.div>
@@ -72,7 +71,7 @@ export default function Page() {
                 <span className="mb-2 block text-xs text-text-body">Choose file</span>
                 <input type="file" className="input-premium w-full" />
               </label>
-              <Link href="/upload" className="btn-gradient mt-4 inline-block">Go to Upload</Link>
+              <Link href="/upload" className="btn-gradient mt-4 inline-block w-full sm:w-auto text-center">Go to Upload</Link>
             </motion.div>
 
             {/* Model select */}
@@ -84,7 +83,7 @@ export default function Page() {
               <div className="rounded-2xl border bg-white/5 p-3 text-xs text-text-body">
                 Current: <span className="font-medium text-text-hi">{selectedModel ?? "None"}</span>
               </div>
-              <Link href="/models" className="btn-gradient mt-4 inline-block">Browse Models</Link>
+              <Link href="/models" className="btn-gradient mt-4 inline-block w-full sm:w-auto text-center">Browse Models</Link>
             </motion.div>
 
             {/* Template select */}
@@ -96,7 +95,7 @@ export default function Page() {
               <div className="rounded-2xl border bg-white/5 p-3 text-xs text-text-body">
                 Current: <span className="font-medium text-text-hi">{selectedTemplate ?? "None"}</span>
               </div>
-              <Link href="/templates" className="btn-gradient mt-4 inline-block">Browse Templates</Link>
+              <Link href="/templates" className="btn-gradient mt-4 inline-block w-full sm:w-auto text-center">Browse Templates</Link>
             </motion.div>
 
             {/* Prompt box */}
@@ -109,7 +108,7 @@ export default function Page() {
                 className="input-premium w-full h-24 resize-none"
                 placeholder="e.g., Soft daylight studio, clean backdrop, premium beauty aesthetic"
               />
-              <button className={cn("btn-gradient mt-4")}>Generate</button>
+              <button className={cn("btn-gradient mt-4 w-full sm:w-auto")}>Generate</button>
             </motion.div>
           </motion.div>
         </motion.div>
@@ -139,7 +138,7 @@ export default function Page() {
           </motion.div>
 
           <div className="mt-6">
-            <Link href="/dashboard" className="btn-gradient inline-block">Open Dashboard</Link>
+            <Link href="/dashboard" className="btn-gradient inline-block w-full sm:w-auto text-center">Open Dashboard</Link>
           </div>
         </motion.div>
       </section>
