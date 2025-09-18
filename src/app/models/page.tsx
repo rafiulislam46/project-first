@@ -13,6 +13,8 @@ import {
 } from "@/lib/utils";
 import { IS_MOCK, IS_FREE } from "@/lib/config";
 import { useEffect, useMemo, useState } from "react";
+import Sidebar, { type SidebarItem } from "@/components/layout/sidebar";
+import SearchBar from "@/components/ui/search-bar";
 
 type ModelStyle = { key: string; thumb?: string };
 type Model = { id: string; name: string; gender?: string; styles?: ModelStyle[] };
@@ -25,6 +27,7 @@ export default function ModelsPage() {
   const [gender, setGender] = useState<Gender>("all");
   const [style, setStyle] = useState<StyleKey>("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [q, setQ] = useState("");
   const controls = useAnimation();
 
   useEffect(() => {
@@ -43,7 +46,7 @@ export default function ModelsPage() {
           let merged = overrideModelsWithManifest(local || [], manifest);
           // Restrict free users to a subset
           if (IS_FREE) {
-            merged = merged.slice(0, 6);
+            merged = merged.slice(0, 12);
           }
           if (!ignore) setModels(merged);
         } else {
@@ -66,146 +69,144 @@ export default function ModelsPage() {
     return ["all", ...Array.from(set).sort()];
   }, [models]);
 
+  const sidebarItems: SidebarItem[] = useMemo(
+    () =>
+      styleOptions.map((s) => ({
+        key: s,
+        label: s === "all" ? "All Styles" : s,
+        count:
+          s === "all"
+            ? (models || []).length
+            : (models || []).filter((m) => (m.styles || []).some((x) => x.key.toLowerCase() === String(s).toLowerCase()))
+                .length,
+      })),
+    [styleOptions, models]
+  );
+
   const filtered = useMemo(() => {
     if (!models) return null;
     return models.filter((m) => {
       const genderOk = gender === "all" || (m.gender || "").toLowerCase() === gender;
       const styleOk =
         style === "all" || (m.styles || []).some((s) => s.key.toLowerCase() === String(style).toLowerCase());
-      return genderOk && styleOk;
+      const searchOk =
+        !q.trim() ||
+        m.name.toLowerCase().includes(q.trim().toLowerCase()) ||
+        (m.gender || "").toLowerCase().includes(q.trim().toLowerCase());
+      return genderOk && styleOk && searchOk;
     });
-  }, [models, gender, style]);
+  }, [models, gender, style, q]);
 
   useEffect(() => {
     controls.start("show");
   }, [filtered, controls]);
 
   return (
-    <section className="container py-12 md:py-16">
+    <section className="container py-8 md:py-12">
       <motion.div initial="hidden" animate="show" variants={staggerContainer}>
-        <motion.h2 className="mb-2" variants={fadeUp}>
-          Models
-        </motion.h2>
-        <motion.p className="mb-2 text-text-body" variants={fadeUp}>
-          Choose a model to continue. Your selection will be used on upload.
-        </motion.p>
-        {IS_FREE && (
-          <motion.p className="mb-8 text-xs text-text-body/70" variants={fadeUp}>
-            Free plan shows a limited set of models. Upgrade to unlock the full catalog.
-          </motion.p>
-        )}
-
-        {/* Filters */}
-        <motion.div className="mb-6 flex flex-wrap items-center gap-3" variants={fadeUp}>
-          <div className="flex items-center gap-2">
-            {(["all", "female", "male"] as Gender[]).map((g) => (
-              <button
-                key={g}
-                onClick={() => setGender(g)}
-                className={cn(
-                  "px-3 py-1.5 rounded-full text-xs transition border",
-                  gender === g
-                    ? "border-accent-1/60 bg-accent-1/10 text-text-hi"
-                    : "border-white/10 bg-white/5 text-text-body hover:bg-white/10"
-                )}
-              >
-                {g[0].toUpperCase() + g.slice(1)}
-              </button>
-            ))}
-          </div>
-          <div className="mx-2 h-5 w-px bg-white/10" />
-          <div className="flex flex-wrap items-center gap-2">
-            {styleOptions.map((s) => (
-              <button
-                key={s}
-                onClick={() => setStyle(s)}
-                className={cn(
-                  "px-3 py-1.5 rounded-full text-xs transition border",
-                  style === s
-                    ? "border-accent-1/60 bg-accent-1/10 text-text-hi"
-                    : "border-white/10 bg-white/5 text-text-body hover:bg-white/10"
-                )}
-                title={s}
-              >
-                {s}
-              </button>
-            ))}
-          </div>
+        <motion.div className="mb-6" variants={fadeUp}>
+          <h2 className="mb-1">Mockups</h2>
+          <p className="text-text-body">Choose a model to continue. Your selection will be used on upload.</p>
         </motion.div>
 
-        {/* Grid */}
-        <motion.div
-          initial="hidden"
-          animate={controls}
-          variants={{
-            hidden: {},
-            show: { transition: { staggerChildren: 0.08, delayChildren: 0.04 } },
-          }}
-          className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
-        >
-          {!filtered && (
-            <motion.div className="text-text-body" variants={fadeUp}>
-              Loading...
+        <div className="flex gap-6">
+          <Sidebar items={sidebarItems} value={String(style)} onChange={(k) => setStyle(k as StyleKey)} title="Styles" />
+
+          <div className="flex-1">
+            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <SearchBar value={q} onChange={setQ} placeholder="Search models…" className="sm:max-w-xs" />
+              <div className="flex items-center gap-2">
+                {(["all", "female", "male"] as Gender[]).map((g) => (
+                  <button
+                    key={g}
+                    onClick={() => setGender(g)}
+                    className={cn(
+                      "rounded-full border px-3 py-1.5 text-xs transition",
+                      gender === g
+                        ? "bg-accent-1/10 text-text-hi ring-1 ring-accent-1/20"
+                        : "text-text-body hover:bg-surface"
+                    )}
+                  >
+                    {g[0].toUpperCase() + g.slice(1)}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <motion.div
+              initial="hidden"
+              animate={controls}
+              variants={{
+                hidden: {},
+                show: { transition: { staggerChildren: 0.08, delayChildren: 0.04 } },
+              }}
+              className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+            >
+              {!filtered && (
+                <motion.div className="text-text-body" variants={fadeUp}>
+                  Loading...
+                </motion.div>
+              )}
+              {filtered?.map((m, idx) => {
+                const styleThumb = m.styles?.[0]?.thumb;
+                const isAbsolute = styleThumb && /^https?:\/\//.test(styleThumb);
+                const fallbackThumb = `/catalog/models/model_card.svg`;
+                const thumb = isAbsolute ? styleThumb! : fallbackThumb;
+
+                const selected = selectedId === m.id;
+
+                return (
+                  <Card3DTilt
+                    key={m.id}
+                    index={idx}
+                    onClick={() => {
+                      const next = selected ? null : m.id;
+                      setSelectedId(next);
+                      setSelectedModelId(next);
+                    }}
+                    selected={selected}
+                    variants={fadeUp}
+                    className={cn(
+                      "glass-card p-0 overflow-hidden cursor-pointer transition bg-white",
+                      IS_MOCK && IS_FREE ? "demo-watermark" : ""
+                    )}
+                  >
+                    <div className="relative aspect-[4/3] w-full bg-surface">
+                      <img src={thumb} alt={m.name} className="h-full w-full object-cover" />
+                      {selected && (
+                        <div className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-emerald-500/90 px-2 py-1 text-[10px] font-medium text-white shadow">
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                            <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                          Selected
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-5">
+                      <h3 className="mb-1">{m.name}</h3>
+                      <p className="mb-3 text-xs text-text-body/70">{m.gender ? m.gender : "—"}</p>
+                      {m.styles && m.styles.length > 0 ? (
+                        <div className="flex flex-wrap gap-2">
+                          {m.styles.slice(0, 4).map((s) => (
+                            <span
+                              key={s.key}
+                              className="rounded-md bg-surface px-2 py-1 text-xs text-text-body"
+                              title={s.key}
+                            >
+                              {s.key}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-text-body text-sm">No styles listed.</p>
+                      )}
+                    </div>
+                  </Card3DTilt>
+                );
+              })}
             </motion.div>
-          )}
-          {filtered?.map((m, idx) => {
-            const styleThumb = m.styles?.[0]?.thumb;
-            const isAbsolute = styleThumb && /^https?:\/\//.test(styleThumb);
-            const fallbackThumb = `/catalog/models/model_card.svg`;
-            const thumb = isAbsolute ? styleThumb! : fallbackThumb;
-
-            const selected = selectedId === m.id;
-
-            return (
-              <Card3DTilt
-                key={m.id}
-                index={idx}
-                onClick={() => {
-                  const next = selected ? null : m.id;
-                  setSelectedId(next);
-                  setSelectedModelId(next);
-                }}
-                selected={selected}
-                variants={fadeUp}
-                className={cn(
-                  "glass-card p-0 overflow-hidden cursor-pointer transition",
-                  IS_MOCK && IS_FREE ? "demo-watermark" : ""
-                )}
-              >
-                <div className="relative aspect-[4/3] w-full bg-black/20">
-                  <img src={thumb} alt={m.name} className="h-full w-full object-cover" />
-                  {selected && (
-                    <div className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-emerald-500/90 px-2 py-1 text-[10px] font-medium text-white shadow">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-                        <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                      Selected
-                    </div>
-                  )}
-                </div>
-                <div className="p-6">
-                  <h3 className="mb-1">{m.name}</h3>
-                  <p className="mb-3 text-xs text-text-body/70">{m.gender ? m.gender : "—"}</p>
-                  {m.styles && m.styles.length > 0 ? (
-                    <div className="flex flex-wrap gap-2">
-                      {m.styles.slice(0, 4).map((s) => (
-                        <span
-                          key={s.key}
-                          className="rounded-md bg-white/5 px-2 py-1 text-xs text-text-body"
-                          title={s.key}
-                        >
-                          {s.key}
-                        </span>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-text-body text-sm">No styles listed.</p>
-                  )}
-                </div>
-              </Card3DTilt>
-            );
-          })}
-        </motion.div>
+          </div>
+        </div>
       </motion.div>
     </section>
   );
@@ -235,7 +236,7 @@ function Card3DTilt({
         className,
         "relative will-change-transform",
         "transition-transform duration-200 hover:scale-[1.02]",
-        selected ? "ring-2 ring-emerald-400/70" : "ring-1 ring-white/10",
+        selected ? "ring-2 ring-emerald-400/50" : "ring-1 ring-[rgba(15,23,42,0.08)]",
       )}
       style={{
         transformStyle: "preserve-3d",
@@ -251,7 +252,7 @@ function Card3DTilt({
         target.style.transform = `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg) scale(1.02)`;
         target.style.boxShadow = selected
           ? "0 8px 30px rgba(16, 185, 129, 0.25)"
-          : "0 8px 30px rgba(0,0,0,0.25)";
+          : "0 8px 30px rgba(2,6,23,0.10)";
       }}
       onMouseLeave={(e) => {
         const target = e.currentTarget as HTMLDivElement;
@@ -265,9 +266,9 @@ function Card3DTilt({
         aria-hidden
         className={cn(
           "pointer-events-none absolute inset-0 rounded-2xl",
-          selected ? "ring-2 ring-emerald-400/60" : "ring-1 ring-white/10"
+          selected ? "ring-2 ring-emerald-400/50" : "ring-1 ring-[rgba(15,23,42,0.08)]"
         )}
-        style={{ mixBlendMode: "screen" }}
+        style={{ mixBlendMode: "normal" }}
       />
     </motion.div>
   );

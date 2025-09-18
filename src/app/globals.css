@@ -7,16 +7,16 @@
 }
 
 html {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 body {
-  background: linear-gradient(180deg, #0F1620 0%, #0B0F14 100%);
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
 }
 
 @layer base {
   * {
-    @apply border-[rgba(255,255,255,0.06)];
+    @apply border-[rgba(15,23,42,0.08)];
   }
   body {
     @apply bg-base text-text-body;
@@ -41,21 +41,21 @@ body {
 
 @layer components {
   .glass-card {
-    @apply rounded-3xl border bg-card/60 backdrop-blur-md shadow-soft-1;
+    @apply rounded-3xl border bg-card backdrop-blur-md shadow-soft-1;
   }
 
   .btn-gradient {
-    @apply relative inline-flex items-center justify-center rounded-2xl px-5 py-2.5 text-sm font-medium text-text-hi transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-1/50;
-    background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(245,196,79,0.15));
-    border: 1px solid rgba(255,255,255,0.06);
-    box-shadow: 0 1px 0 rgba(255,255,255,0.06) inset, 0 10px 30px rgba(0,0,0,0.35);
+    @apply relative inline-flex items-center justify-center rounded-2xl px-5 py-2.5 text-sm font-medium text-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-1/40;
+    background: linear-gradient(135deg, rgba(37,99,235,0.95), rgba(245,158,11,0.95));
+    border: 1px solid rgba(15,23,42,0.08);
+    box-shadow: 0 1px 0 rgba(255,255,255,0.9) inset, 0 8px 24px rgba(2,6,23,0.08);
   }
   .btn-gradient::after {
     content: "";
     position: absolute;
     inset: 0;
     border-radius: inherit;
-    background: linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.08) 100%);
+    background: linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 100%);
     opacity: 0.6;
     transition: opacity 200ms ease, transform 200ms ease;
   }
@@ -65,7 +65,7 @@ body {
   }
 
   .input-premium {
-    @apply rounded-2xl bg-surface/60 border px-4 py-2 text-text-hi placeholder:text-text-body/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-1/40;
+    @apply rounded-2xl bg-white border px-4 py-2 text-text-hi placeholder:text-text-body/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-1/30;
   }
 
   /* DEMO ribbon overlay for free plan mock mode */
@@ -78,9 +78,9 @@ body {
     top: 12px;
     right: -40px;
     transform: rotate(30deg);
-    color: rgba(232, 238, 246, 0.8);
-    background: linear-gradient(135deg, rgba(59,130,246,0.18), rgba(245,196,79,0.18));
-    border: 1px solid rgba(255,255,255,0.12);
+    color: rgba(15, 23, 42, 0.6);
+    background: linear-gradient(135deg, rgba(37,99,235,0.12), rgba(245,158,11,0.12));
+    border: 1px solid rgba(15,23,42,0.08);
     backdrop-filter: blur(4px);
     padding: 4px 60px;
     font-size: 10px;

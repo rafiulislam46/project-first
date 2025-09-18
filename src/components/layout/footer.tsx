@@ -2,10 +2,10 @@ import Link from "next/link";
 
 export default function Footer() {
   return (
-    <footer className="border-t border-white/10 bg-surface/40">
+    <footer className="border-t border-border bg-surface/80">
       <div className="container flex flex-col gap-4 py-8 md:flex-row md:items-center md:justify-between">
         <p className="text-sm text-text-body/80">
-          © {new Date().getFullYear()} Lux Starter. All rights reserved.
+          © {new Date().getFullYear()} AI Product Studio. All rights reserved.
         </p>
         <div className="flex items-center gap-4 text-sm">
           <Link href="/terms" className="hover:text-text-hi rounded-md px-1">
