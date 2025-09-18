@@ -23,3 +23,14 @@ export const ASSET_MANIFEST_URL =
     (process.env.NEXT_PUBLIC_ASSET_MANIFEST_URL ||
       process.env.ASSET_MANIFEST_URL)) ||
   "";
+
+/** Supabase configuration presence */
+export const SUPABASE_URL =
+  (typeof process !== "undefined" &&
+    (process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL)) ||
+  "";
+export const SUPABASE_ANON_KEY =
+  (typeof process !== "undefined" &&
+    (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY)) ||
+  "";
+export const HAS_SUPABASE = !!(SUPABASE_URL && SUPABASE_ANON_KEY);
