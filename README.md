@@ -125,7 +125,7 @@ You can disable this by upgrading PLAN (set PLAN=pro) or switching to live mode.
 
 If NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are present, the app will:
 
-- Use Supabase Auth for user sessions (cookies via @supabase/auth-helpers-nextjs).
+- Use Supabase Auth for user sessions (server client via @supabase/ssr).
 - Store user profiles and saved assets in Postgres.
 - Provide server adapters for plan/credits and saving assets.
 - Fall back to local mock storage when env vars are missing.
