@@ -18,25 +18,26 @@ const config: Config = {
     },
     extend: {
       colors: {
-        base: "#0B0F14",
-        surface: "#0F1620",
-        card: "#131A24",
+        // Light theme base
+        base: "#ffffff",
+        surface: "#f8fafc", // slate-50-ish
+        card: "#ffffff",
         accent: {
-          1: "#3B82F6",
-          2: "#F5C44F",
+          1: "#2563EB", // blue-600
+          2: "#F59E0B", // amber-500
         },
         text: {
-          hi: "#E8EEF6",
-          body: "#B7C1CF",
+          hi: "#0f172a", // slate-900
+          body: "#334155", // slate-700
         },
-        border: "rgba(255,255,255,0.06)",
+        border: "rgba(15, 23, 42, 0.08)", // subtle slate border
       },
       backgroundImage: {
-        "lux-gradient": "linear-gradient(180deg, #0F1620 0%, #0B0F14 100%)",
+        "lux-gradient": "linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)",
       },
       boxShadow: {
-        "soft-1": "0 10px 30px rgba(0,0,0,0.35)",
-        "soft-2": "0 20px 60px rgba(0,0,0,0.45)",
+        "soft-1": "0 8px 24px rgba(2, 6, 23, 0.08)",
+        "soft-2": "0 16px 48px rgba(2, 6, 23, 0.12)",
       },
       borderRadius: {
         "2xl": "1rem",
