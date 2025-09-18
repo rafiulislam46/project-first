@@ -42,12 +42,29 @@ export default function UploadPage() {
   const [fileDataUrl, setFileDataUrl] = useState<string | null>(null); // base64 for API
   const [prompt, setPrompt] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [credits, setCreditsState] = useState<number | null>(null);
 
   const { toasts, push, remove } = useToasts();
 
   useEffect(() => {
     setSelectedModelIdState(getSelectedModelId());
     setSelectedTemplateIdState(getSelectedTemplateId());
+  }, []);
+
+  // Load credits for display (mock or supabase-backed)
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        const c = await getCredits();
+        if (active) setCreditsState(c);
+      } catch {
+        if (active) setCreditsState(0);
+      }
+    })();
+    return () => {
+      active = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -130,7 +147,8 @@ export default function UploadPage() {
 
     // Credits check (mock mode)
     if (IS_MOCK) {
-      if (!canUseCredit()) {
+      const okToProceed = await canUseCredit();
+      if (!okToProceed) {
         push({
           type: "error",
           message: "You’ve reached your plan limit. Upgrade to continue.",
@@ -164,7 +182,7 @@ export default function UploadPage() {
 
       // Decrement one credit before starting
       if (IS_MOCK) {
-        const ok = useOneCredit();
+        const ok = await useOneCredit();
         if (!ok) {
           push({
             type: "error",
@@ -215,10 +233,9 @@ export default function UploadPage() {
           Upload a PNG/JPG product photo. Optionally add a prompt. We’ll use your selected Model or Template.
         </motion.p>
         <motion.p className="mb-4 text-xs text-text-body/70" variants={fadeUp}>
-          {IS_MOCK ? `Credits remaining: ${(() => {
-            const c = getCredits();
-            return c === -1 ? "∞" : c;
-          })()}` : ""}
+          {IS_MOCK ? `Credits remaining: ${
+            credits === null ? "…" : credits === -1 ? "∞" : credits
+          }` : ""}
         </motion.p>
 
         <motion.div variants={fadeUp} className="glass-card p-6">
