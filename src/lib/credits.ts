@@ -1,6 +1,5 @@
 /**
- * Client-side credits for MODE=mock
- * Uses localStorage to persist remaining credits.
+ * Credits API with Supabase integration (if configured), falling back to localStorage mock.
  *
  * Plans:
  * - Free: 5 images
@@ -9,7 +8,7 @@
  * - Enterprise: unlimited (represented by -1)
  */
 
-import { MODE, PLAN } from "@/lib/config";
+import { MODE, PLAN, HAS_SUPABASE } from "@/lib/config";
 
 const KEY = "mock_credits_v1";
 
@@ -45,7 +44,17 @@ function ensureInitialized() {
   }
 }
 
-export function getCredits(): number {
+export async function getCredits(): Promise<number> {
+  if (HAS_SUPABASE) {
+    try {
+      const res = await fetch("/api/user/credits", { cache: "no-store" });
+      if (!res.ok) return 0;
+      const data = (await res.json()) as { credits: number };
+      return typeof data.credits === "number" ? data.credits : 0;
+    } catch {
+      return 0;
+    }
+  }
   if (typeof window === "undefined") return 0;
   ensureInitialized();
   try {
@@ -59,20 +68,35 @@ export function getCredits(): number {
   }
 }
 
-export function canGenerate(): boolean {
+export async function canGenerate(): Promise<boolean> {
+  if (HAS_SUPABASE) {
+    const n = await getCredits();
+    return n === -1 || n > 0;
+  }
   if (MODE !== "mock") return true;
-  const credits = getCredits();
+  const credits = await getCredits();
   return credits === -1 || credits > 0;
 }
 
 // Attempt to use one credit. Returns true if allowed and decremented.
-export function useOneCredit(): boolean {
+export async function useOneCredit(): Promise<boolean> {
+  if (HAS_SUPABASE) {
+    try {
+      const res = await fetch("/api/user/credits/use", { method: "POST" });
+      if (!res.ok) return false;
+      const data = (await res.json()) as { ok: boolean };
+      return !!data.ok;
+    } catch {
+      return false;
+    }
+  }
+
   if (MODE !== "mock") return true;
   if (typeof window === "undefined") return false;
 
   ensureInitialized();
   try {
-    const current = getCredits();
+    const current = await getCredits();
     if (current === -1) return true; // unlimited
     if (current <= 0) return false;
     const next = current - 1;

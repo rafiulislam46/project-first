@@ -118,3 +118,70 @@ Schema example:
 When MODE=mock and PLAN=free (or NEXT_PUBLIC_PLAN=free), result and thumbnail cards render a subtle DEMO ribbon watermark to indicate non-production assets.
 
 You can disable this by upgrading PLAN (set PLAN=pro) or switching to live mode.
+
+---
+
+## Supabase Auth + Postgres (optional)
+
+If NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are present, the app will:
+
+- Use Supabase Auth for user sessions (cookies via @supabase/auth-helpers-nextjs).
+- Store user profiles and saved assets in Postgres.
+- Provide server adapters for plan/credits and saving assets.
+- Fall back to local mock storage when env vars are missing.
+
+### 1) Configure environment
+
+Set these environment variables (locally in .env.local or in Vercel):
+
+- NEXT_PUBLIC_SUPABASE_URL
+- NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+Optional:
+
+- PLAN (or NEXT_PUBLIC_PLAN) default plan for mock mode
+- MODE (or NEXT_PUBLIC_MODE) default is mock
+
+### 2) Run migrations
+
+Use the Supabase SQL editor or psql against your Supabase database and run:
+
+- sql/000_init.sql
+
+This will create:
+
+- profiles (id uuid PK->auth.users.id, display_name, plan text default 'free', credits int default 5, created_at timestamp default now())
+- assets   (id uuid PK default gen_random_uuid(), user_id uuid, kind text, src_urls jsonb, copy jsonb, created_at timestamp default now())
+- catalog_models (id text PK, name text, gender text, thumb_url text, styles jsonb)
+- catalog_templates (id text PK, name text, category text, ref_url text, thumb text)
+- RLS policies
+- RPC public.use_one_credit(p_user_id uuid) to decrement a credit atomically
+
+psql example:
+psql "$SUPABASE_DB_URL" -f sql/000_init.sql
+
+### 3) Seed catalog
+
+Run:
+
+- sql/seed.sql
+
+psql example:
+psql "$SUPABASE_DB_URL" -f sql/seed.sql
+
+### 4) Using the API
+
+- Credits
+  - GET /api/user/credits → { plan, credits }
+  - POST /api/user/credits/use → { ok, remaining? }
+
+- Saved assets
+  - GET /api/assets → { items: [...] }
+  - POST /api/assets with JSON { kind: "tryon" | "template", src_urls: string[]|jsonb, copy?: json } → { item }
+  - DELETE /api/assets/:id → { ok }
+
+In mock mode or when Supabase env is not configured, these endpoints return safe defaults and the client will continue to use localStorage.
+
+### 5) Sign-in
+
+This starter wires the server client. Add a simple sign-in flow on the client using @supabase/supabase-js if you need authentication UI (e.g., magic links). With an active session, the APIs above will operate under Row Level Security.
