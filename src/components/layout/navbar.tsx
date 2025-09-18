@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 
 const nav: ReadonlyArray<{ href: Route; label: string }> = [
   { href: "/", label: "Home" },
@@ -54,16 +55,20 @@ export default function Navbar() {
           <Link href="/result" className="ml-2 rounded-xl px-3 py-2 text-sm text-text-body hover:text-text-hi">
             Result
           </Link>
-          <a href="https://github.com" className="btn-gradient ml-3">
-            GitHub
-          </a>
+
+          {/* Auth actions (desktop) */}
+          <div className="ml-3 flex items-center gap-2">
+            <Button asChild variant="outline" className="rounded-xl hover:-translate-y-0.5 transition-transform">
+              <Link href="/signin">Sign in</Link>
+            </Button>
+            <Button asChild className="btn-gradient rounded-xl hover:-translate-y-0.5 transition-transform">
+              <Link href="/signup">Sign up</Link>
+            </Button>
+          </div>
         </nav>
 
         {/* Mobile actions */}
         <div className="md:hidden flex items-center gap-2">
-          <a href="https://github.com" className="btn-gradient px-4 py-2 text-sm">
-            GitHub
-          </a>
           <button
             aria-label="Open menu"
             className={cn(
@@ -112,6 +117,20 @@ export default function Navbar() {
                 >
                   Result
                 </Link>
+
+                {/* Auth actions (mobile) */}
+                <div className="mt-3 pt-3 border-t flex flex-col gap-2">
+                  <Link href="/signin" onClick={() => setOpen(false)} className="w-full">
+                    <div className="w-full inline-flex items-center justify-center rounded-xl border bg-transparent text-sm font-medium text-text-hi hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-1/40 h-10 transition">
+                      Sign in
+                    </div>
+                  </Link>
+                  <Link href="/signup" onClick={() => setOpen(false)} className="w-full">
+                    <div className="w-full inline-flex items-center justify-center rounded-xl text-sm font-medium btn-gradient h-10 transition-transform hover:-translate-y-0.5">
+                      Sign up
+                    </div>
+                  </Link>
+                </div>
               </div>
             </div>
           </motion.div>
