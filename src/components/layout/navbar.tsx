@@ -110,7 +110,7 @@ export default function Navbar() {
                   Tools
                 </Link>
 
-                <div className="mt-2 pt-2 border-t flex gap-2">
+                <div className="mt-2 pt-2 border-t">
                   <Link
                     href={{ pathname: "/pricing" }}
                     onClick={() => setOpen(false)}
@@ -118,14 +118,15 @@ export default function Navbar() {
                   >
                     Pricing
                   </Link>
-                  <div className="ml-auto flex gap-2">
+                  {/* Auth buttons stack on small screens */}
+                  <div className="mt-2 flex flex-col gap-2">
                     <Link href={{ pathname: "/signin" }} onClick={() => setOpen(false)}>
-                      <div className="inline-flex items-center justify-center rounded-xl border bg-white h-9 px-3 text-sm">
+                      <div className="inline-flex w-full items-center justify-center rounded-xl border bg-white h-10 px-3 text-sm">
                         Login
                       </div>
                     </Link>
                     <Link href={"/signup"} onClick={() => setOpen(false)}>
-                      <div className="inline-flex items-center justify-center rounded-xl btn-gradient h-9 px-3 text-sm">
+                      <div className="inline-flex w-full items-center justify-center rounded-xl btn-gradient h-10 px-3 text-sm">
                         Sign up
                       </div>
                     </Link>
