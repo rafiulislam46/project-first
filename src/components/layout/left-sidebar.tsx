@@ -55,7 +55,7 @@ export default function LeftSidebar() {
   return (
     <aside className="hidden lg:flex lg:w-64 xl:w-72 shrink-0 flex-col border-r bg-white/80 backdrop-blur-md">
       <div className="h-14 px-4 flex items-center">
-        <Link href="/" className="flex items-center gap-2">
+        <Link href={{ pathname: "/" }} className="flex items-center gap-2">
           <span className="text-text-hi font-semibold">Mockey</span>
           <span className="text-text-body/70">Clone</span>
         </Link>
@@ -63,15 +63,20 @@ export default function LeftSidebar() {
 
       <div className="px-3 pb-4">
         <nav className="mt-2 mb-4 space-y-1">
-          {NAV_LINKS.map((l) => (
-            <Link
-              key={l.href}
-              href={l.href}
-              className="block rounded-xl px-3 py-2 text-sm text-text-body hover:text-text-hi hover:bg-surface transition"
-            >
-              {l.label}
-            </Link>
-          ))}
+          {NAV_LINKS.map((l) => {
+            const hrefObj = l.href.includes("?")
+              ? { pathname: l.href.split("?")[0], query: Object.fromEntries(new URLSearchParams(l.href.split("?")[1])) }
+              : { pathname: l.href };
+            return (
+              <Link
+                key={l.href}
+                href={hrefObj}
+                className="block rounded-xl px-3 py-2 text-sm text-text-body hover:text-text-hi hover:bg-surface transition"
+              >
+                {l.label}
+              </Link>
+            );
+          })}
         </nav>
 
         <div className="rounded-2xl border bg-white p-3 shadow-soft-1">
@@ -110,11 +115,9 @@ export default function LeftSidebar() {
                         exit={{ height: 0, opacity: 0 }}
                         className="pl-2 mt-1 space-y-1 overflow-hidden"
                       >
-                        {c.children?.map((sc) => (
-                          <li key={sc.key}>
-                            <Link
-                              href={sc.href}
-                              className="block rounded-xl px-3 py-2 text-sm text-text-body hover:text-text-hi hover:bg-surface"
+                        {c.children?.map((sc) => {
+                          const hrefObj = sc.href.includes("?")
+                            ? { pathname: sc.href.split("?")[0], query: Object.fromEntries(newName="block rounded-xl px-3 py-2 text-sm text-text-body hover:text-text-hi hover:bg-surface"
                             >
                               {sc.label}
                             </Link>
