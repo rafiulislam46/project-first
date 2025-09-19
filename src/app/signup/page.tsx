@@ -21,7 +21,7 @@ export default function SignUpPage() {
         <motion.div className="glass-card p-6" variants={fadeUp}>
           <p className="text-text-body">
             Already have an account?{" "}
-            <Link href={"/signin"} className="text-accent-1 underline underline-offset-4">
+            <Link href={{ pathname: "/signin" }} className="text-accent-1 underline underline-offset-4">
               Sign in
             </Link>
             .
