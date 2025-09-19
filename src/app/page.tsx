@@ -82,38 +82,57 @@ export default function Page() {
 
   return (
     <main className="flex flex-col">
-      {/* Top hero (desktop + mobile) */}
+      {/* Top hero (responsive split on tablet/desktop, centered on mobile) */}
       <section className="border-b bg-white/70 backdrop-blur-md">
-        <div className="container py-10 md:py-14">
-          <motion.div variants={staggerContainer} initial="hidden" animate="show" className="text-center">
-            <motion.h1 variants={fadeUp} className="font-semibold">
-              Create mockups, superfast
-            </motion.h1>
-            <motion.p variants={fadeUp} className="mt-3 text-text-body max-w-2xl mx-auto">
-              Generate studio-grade product mockups in seconds. Apparel, accessories, books, boxes and more.
-            </motion.p>
-
-            {/* Featured thumbnails row - scrollable on mobile */}
+        <div className="container md:py-14">
+          <div className="grid md:grid-cols-2 gap-8">
+            {/* Left: Text */}
             <motion.div
-              variants={fadeUp}
-              className="mt-6 flex gap-3 overflow-x-auto px-0 md:justify-center"
+              variants={staggerContainer}
+              initial="hidden"
+              animate="show"
+              className="flex flex-col items-center text-center md:items-start md:text-left justify-center min-h-[340px] md:min-h-0 py-10"
             >
-              {[
-                { label: "T-shirt", img: "/catalog/templates/template_card.svg" },
-                { label: "Hoodie", img: "/catalog/templates/template_card.svg" },
-                { label: "Book", img: "/catalog/templates/template_card.svg" },
-                { label: "Box", img: "/catalog/templates/template_card.svg" },
-                { label: "Tote Bag", img: "/catalog/templates/template_card.svg" },
-              ].map((x) => (
-                <div key={x.label} className="shrink-0 w-28">
-                  <div className="rounded-2xl border bg-white aspect-square overflow-hidden">
-                    <img src={x.img} alt={x.label} className="h-full w-full object-cover" />
+              <motion.h1 variants={fadeUp} className="font-semibold">
+                Create mockups, superfast
+              </motion.h1>
+              <motion.p variants={fadeUp} className="mt-3 text-text-body max-w-2xl">
+                Generate studio-grade product mockups in seconds. Apparel, accessories, books, boxes and more.
+              </motion.p>
+
+              {/* Featured thumbnails row - scrollable on mobile */}
+              <motion.div
+                variants={fadeUp}
+                className="mt-6 flex gap-3 overflow-x-auto px-0 md:justify-start w-full"
+              >
+                {[
+                  { label: "T-shirt", img: "/catalog/templates/template_card.svg" },
+                  { label: "Hoodie", img: "/catalog/templates/template_card.svg" },
+                  { label: "Book", img: "/catalog/templates/template_card.svg" },
+                  { label: "Box", img: "/catalog/templates/template_card.svg" },
+                  { label: "Tote Bag", img: "/catalog/templates/template_card.svg" },
+                ].map((x) => (
+                  <div key={x.label} className="shrink-0 w-28">
+                    <div className="rounded-2xl border bg-white aspect-square overflow-hidden">
+                      <img src={x.img} alt={x.label} className="h-full w-full object-cover" />
+                    </div>
+                    <p className="mt-2 text-xs text-text-body text-center">{x.label}</p>
                   </div>
-                  <p className="mt-2 text-xs text-text-body text-center">{x.label}</p>
-                </div>
-              ))}
+                ))}
+              </motion.div>
             </motion.div>
-          </motion.div>
+
+            {/* Right: Hero image (hidden on mobile) */}
+            <div className="hidden md:block">
+              <div className="relative w-full max-w-xl mx-auto rounded-2xl border bg-white shadow-soft-2 overflow-hidden">
+                <img
+                  src="/demo/template/1.svg"
+                  alt="Mockup preview"
+                  className="w-full h-auto"
+                />
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
