@@ -215,12 +215,24 @@ export default function Page() {
                       >
                         {selectedTemplate === it.id ? "Selected" : "Use Template"}
                       </button>
-                      <Link
-                        href={(it.refUrl as string) || "/upload"}
-                        className="text-[12px] text-text-body hover:text-text-hi"
-                      >
-                        Preview
-                      </Link>
+                      {(() => {
+                        const ref = typeof it.refUrl === "string" ? it.refUrl : "/upload";
+                        const isInternal = ref.startsWith("/");
+                        return isInternal ? (
+                          <Link href={{ pathname: ref }} className="text-[12px] text-text-body hover:text-text-hi">
+                            Preview
+                          </Link>
+                        ) : (
+                          <a
+                            href={ref}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[12px] text-text-body hover:text-text-hi"
+                          >
+                            Preview
+                          </a>
+                        );
+                      })()}
                     </div>
                   </div>
                 </motion.div>
