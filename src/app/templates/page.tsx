@@ -9,21 +9,20 @@ import {
   loadLocalJSON,
   overrideTemplatesWithManifest,
   getSelectedTemplateId,
-  setSelectedTemplateId,
   cn,
 } from "@/lib/utils";
 import { IS_MOCK, IS_FREE } from "@/lib/config";
 import { useEffect, useMemo, useState } from "react";
 import Sidebar, { type SidebarItem } from "@/components/layout/sidebar";
 import SearchBar from "@/components/ui/search-bar";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
+import type { Route } from "next";
 
 type Template = { id: string; name: string; category?: string; refUrl?: string; thumb?: string };
 
 type CategoryKey = string | "all";
 
 export default function TemplatesPage() {
-  const router = useRouter();
   const [templates, setTemplates] = useState<Template[] | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [category, setCategory] = useState<CategoryKey>("all");
@@ -144,50 +143,51 @@ export default function TemplatesPage() {
                 const thumb = t.thumb || "/catalog/templates/template_card.svg";
                 const selected = selectedId === t.id;
                 const isPro = IS_MOCK ? idx % 3 === 0 : false;
+                const href = (`/generator?template=${encodeURIComponent(t.id)}`) as Route;
 
                 return (
-                  <Card3DTilt
-                    key={t.id}
-                    index={idx}
-                    onClick={() => {
-                      const next = selected ? null : t.id;
-                      setSelectedId(next);
-                      setSelectedTemplateId(next);
-                      try {
-                        router.back();
-                      } catch {
-                        router.push("/upload");
-                      }
-                    }}
-                    selected={selected}
-                    variants={fadeUp}
-                    className={cn(
-                      "glass-card p-0 overflow-hidden cursor-pointer transition bg-white",
-                      IS_MOCK && IS_FREE ? "demo-watermark" : ""
-                    )}
-                  >
-                    <div className="relative aspect-[4/3] w-full bg-surface">
-                      <img src={thumb} alt={t.name} className="h-full w-full object-cover" />
-                      <div className="absolute left-3 top-3 flex gap-2">
-                        <Badge kind={isPro ? "pro" : "free"} />
-                        {selected && <SelectedBadge />}
+                  <Link href={href} className="block">
+                    <Card3DTilt
+                      key={t.id}
+                      index={idx}
+                      selected={selected}
+                      variants={fadeUp}
+                      className={cn(
+                        "glass-card p-0 overflow-hidden cursor-pointer transition bg-white",
+                        "hover:scale-105",
+                        IS_MOCK && IS_FREE ? "demo-watermark" : ""
+                      )}
+                    >
+                      <div className="relative aspect-[4/3] w-full bg-surface">
+                        <img src={thumb} alt={t.name} className="h-full w-full object-cover" />
+                        <div className="absolute left-3 top-3 flex gap-2">
+                          <Badge kind={isPro ? "pro" : "free"} />
+                          {selected && <SelectedBadge />}
+                        </div>
                       </div>
-                    </div>
-                    <div className="p-5">
-                      <h3 className="mb-1">{t.name}</h3>
-                      <p className="mb-3 text-xs text-text-body/70">{t.category ? t.category : "—"}</p>
-                      <div className="flex items-center gap-3">
-                        <a
-                          href={t.refUrl || "#"}
-                          target="_blank"
-                          className="text-accent-1/90 hover:text-accent-1 underline underline-offset-2 text-sm"
-                        >
-                          Reference
-                        </a>
-                        <span className="ml-auto text-[11px] text-text-body">{selected ? "Selected" : "Click to use"}</span>
+                      <div className="p-5">
+                        <h3 className="mb-1">{t.name}</h3>
+                        <p className="mb-3 text-xs text-text-body/70">{t.category ? t.category : "—"}</p>
+                        <div className="flex items-center gap-3">
+                          {t.refUrl && t.refUrl.startsWith("http") ? (
+                            <a
+                              href={t.refUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-accent-1/90 hover:text-accent-1 underline underline-offset-2 text-sm"
+                            >
+                              Reference
+                            </a>
+                          ) : (
+                            <span className="text-xs text-text-body/70">No reference</span>
+                          )}
+                          <span className="ml-auto text-[11px] text-text-body">
+                            {selected ? "Selected" : "Click to select"}
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                  </Card3DTilt>
+                    </Card3DTilt>
+                  </Link>
                 );
               })}
             </motion.div>
@@ -221,7 +221,7 @@ function Card3DTilt({
       className={cn(
         className,
         "relative will-change-transform",
-        "transition-transform duration-200 hover:scale-[1.02]",
+        "transition-transform duration-200",
         selected ? "ring-2 ring-emerald-400/50" : "ring-1 ring-[rgba(15,23,42,0.08)]",
       )}
       style={{
