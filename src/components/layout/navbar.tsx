@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import Link from "next/link";
 import type { Route } from "next";
 import { usePathname } from "next/navigation";
@@ -10,7 +11,10 @@ import { Button } from "@/components/ui/button";
 
 const CENTER_NAV: { href: string; label: string }[] = [
   { href: "/models", label: "Mockups" },
-  { href: "/tools", label: "Tools" },
+  { href: "/select", label: "Models" },
+  { href: "/templates", label: "Templates" },
+  { href: "/upload", label: "Generator" },
+  { href: "/pricing", label: "Pricing" },
 ];
 
 export default function Navbar() {
@@ -20,7 +24,7 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-white/80 backdrop-blur-md">
       <div className="container flex h-14 items-center">
-        {/* Left: Logo (sidebar holds full nav) */}
+        {/* Left: Logo */}
         <div className="flex-1 md:flex-none">
           <Link href={"/" as Route} className="flex items-center gap-2">
             <span className="text-text-hi font-semibold">Mockey</span>
@@ -31,7 +35,7 @@ export default function Navbar() {
         {/* Center: main nav */}
         <nav className="hidden md:flex flex-1 items-center justify-center gap-2">
           {CENTER_NAV.map((item) => {
-            const active = pathname.startsWith(item.href);
+            const active = pathname === item.href || pathname.startsWith(item.href + "/");
             return (
               <Link
                 key={item.href}
@@ -53,14 +57,8 @@ export default function Navbar() {
           })}
         </nav>
 
-        {/* Right: pricing + auth */}
+        {/* Right: auth */}
         <div className="hidden md:flex items-center gap-2">
-          <Link
-            href={"/pricing" as Route}
-            className="rounded-xl px-3 py-2 text-sm text-text-body hover:text-text-hi"
-          >
-            Pricing
-          </Link>
           <Button asChild variant="outline" className="rounded-xl hover:-translate-y-0.5 transition-transform">
             <Link href={"/signin" as Route}>Log in</Link>
           </Button>
@@ -96,29 +94,18 @@ export default function Navbar() {
           >
             <div className="container py-3">
               <div className="flex flex-col gap-1">
-                <Link
-                  href={"/models" as Route}
-                  className="rounded-xl px-3 py-2 text-sm text-text-body hover:text-text-hi"
-                  onClick={() => setOpen(false)}
-                >
-                  Mockups
-                </Link>
-                <Link
-                  href={"/tools" as Route}
-                  className="rounded-xl px-3 py-2 text-sm text-text-body hover:text-text-hi"
-                  onClick={() => setOpen(false)}
-                >
-                  Tools
-                </Link>
+                {CENTER_NAV.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href as Route}
+                    className="rounded-xl px-3 py-2 text-sm text-text-body hover:text-text-hi"
+                    onClick={() => setOpen(false)}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
 
                 <div className="mt-2 pt-2 border-t">
-                  <Link
-                    href={"/pricing" as Route}
-                    onClick={() => setOpen(false)}
-                    className="rounded-xl px-3 py-2 text-sm text-text-body hover:text-text-hi"
-                  >
-                    Pricing
-                  </Link>
                   {/* Auth buttons stack on small screens */}
                   <div className="mt-2 flex flex-col gap-2">
                     <Link href={"/signin" as Route} onClick={() => setOpen(false)}>
@@ -127,7 +114,7 @@ export default function Navbar() {
                       </div>
                     </Link>
                     <Link href={"/signup" as Route} onClick={() => setOpen(false)}>
-                     < div className="inline-flex w-full items-center justify-center rounded-xl btn-gradient h-10 px-3-3 text-sm">
+                      <div className="inline-flex w-full items-center justify-center rounded-xl btn-gradient h-10 px-3 text-sm text-white">
                         Sign up
                       </div>
                     </Link>
