@@ -87,24 +87,24 @@ export default function Page() {
       {/* Hero - Outfits-AI style, split layout with gradient */}
       <section className="relative overflow-hidden border-b">
         <div className="absolute inset-0 bg-gradient-to-b from-pink-100 via-white to-white" />
-        <div className="relative container md:py-16 py-12">
-          <div className="grid md:grid-cols-2 gap-10 items-center">
+        <div className="relative max-w-screen-xl mx-auto px-4 md:py-16 py-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
             {/* Left: Headline + description + waitlist form */}
             <motion.div
               variants={staggerContainer}
               initial="hidden"
               animate="show"
-              className="flex flex-col items-center text-center md:items-start md:text-left justify-center"
+              className="flex flex-col items-center text-center md:items-start md:text-left justify-center space-y-4"
             >
               <motion.h1
                 variants={fadeUp}
-                className="font-semibold tracking-tight"
+                className="font-semibold tracking-tight text-2xl sm:text-3xl md:text-h1 text-center md:text-left"
               >
                 Dress your models with AI
               </motion.h1>
               <motion.p
                 variants={fadeUp}
-                className="mt-3 text-text-body max-w-xl"
+                className="text-sm md:text-body text-text-body max-w-xl"
               >
                 Upload an outfit and see it applied to a model in seconds. No photoshoots. No retouching. High‑res exports ready for your store.
               </motion.p>
@@ -123,19 +123,19 @@ export default function Page() {
                     (e.currentTarget as HTMLFormElement).reset();
                   }
                 }}
-                className="mt-6 w-full max-w-md"
+                className="w-full max-w-md"
               >
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <input
                     type="email"
                     name="email"
                     required
                     placeholder="Enter your email"
-                    className="flex-1 h-11 rounded-2xl border bg-white/90 px-4 text-sm text-text-hi placeholder:text-text-body/50 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-1/30"
+                    className="w-full sm:w-auto md:w-[300px] h-11 rounded-2xl border bg-white/90 px-4 text-sm text-text-hi placeholder:text-text-body/50 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-1/30"
                   />
                   <button
                     type="submit"
-                    className="h-11 shrink-0 rounded-2xl btn-gradient px-5 text-sm font-medium"
+                    className="h-11 w-full sm:w-auto shrink-0 rounded-2xl btn-gradient px-5 text-sm font-medium"
                   >
                     Join waitlist
                   </button>
@@ -146,11 +146,11 @@ export default function Page() {
               </motion.form>
 
               {/* Secondary CTAs */}
-              <motion.div variants={fadeUp} className="mt-6 flex items-center gap-3">
-                <Link href={"/upload" as Route} className="rounded-xl px-4 py-2 text-sm text-text-hi hover:bg-white/60 border bg-white/50 backdrop-blur">
+              <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+                <Link href={"/upload" as Route} className="w-full sm:w-auto rounded-xl px-4 py-2 text-sm text-text-hi hover:bg-white/60 border bg-white/50 backdrop-blur">
                   Try a demo
                 </Link>
-                <Link href={"/pricing" as Route} className="rounded-xl px-4 py-2 text-sm text-text-body hover:text-text-hi">
+                <Link href={"/pricing" as Route} className="w-full sm:w-auto rounded-xl px-4 py-2 text-sm text-text-body hover:text-text-hi">
                   View pricing
                 </Link>
               </motion.div>
@@ -206,12 +206,12 @@ export default function Page() {
       </section>
 
       {/* How-to section */}
-      <section className="container py-8 md:py-10">
+      <section className="max-w-screen-xl mx-auto px-4 py-8 md:py-10">
         <motion.div variants={staggerContainer} initial="hidden" animate="show">
           <motion.h3 variants={fadeUp} className="text-h3">
             How to create 3D Mockups
           </motion.h3>
-          <motion.div variants={fadeUp} className="mt-4 grid gap-4 md:grid-cols-3">
+          <motion.div variants={fadeUp} className="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             {[
               { t: "1. Choose a template", d: "Pick from apparel, accessories, books, boxes and more." },
               { t: "2. Upload artwork", d: "Drop your design, logo, or cover image onto the canvas." },
@@ -227,7 +227,7 @@ export default function Page() {
       </section>
 
       {/* Filter tabs */}
-      <section className="container">
+      <section className="max-w-screen-xl mx-auto px-4">
         <div className="flex gap-2 overflow-x-auto pb-2">
           {FILTER_TABS.map((t) => {
             const active = t === activeTab;
@@ -248,11 +248,11 @@ export default function Page() {
       </section>
 
       {/* Mockup grid */}
-      <section className="container py-6 md:py-8">
+      <section className="max-w-screen-xl mx-auto px-4 py-6 md:py-8">
         {!items ? (
           <div className="text-text-body">Loading…</div>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {mockups.map((it, idx) => {
               const thumb = it.thumb || "/catalog/templates/template_card.svg";
               // demo tags to mimic Mockey - mark some as Featured/PRO/3D

@@ -92,7 +92,7 @@ export default function ModelsPage() {
   }, [filtered, controls]);
 
   return (
-    <section className="container py-8 md:py-12">
+    <section className="max-w-screen-xl mx-auto px-4 py-8 md:py-12">
       <motion.div initial="hidden" animate="show" variants={staggerContainer}>
         <motion.div className="mb-6" variants={fadeUp}>
           <h2 className="mb-1">Models</h2>
@@ -124,7 +124,7 @@ export default function ModelsPage() {
                 hidden: {},
                 show: { transition: { staggerChildren: 0.08, delayChildren: 0.04 } },
               }}
-              className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+              className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
             >
               {!filtered && (
                 <motion.div className="text-text-body" variants={fadeUp}>

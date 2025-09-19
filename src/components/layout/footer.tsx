@@ -5,7 +5,7 @@ import type { Route } from "next";
 export default function Footer() {
   return (
     <footer className="border-t border-border bg-surface/80">
-      <div className="container flex flex-col gap-4 py-8 md:flex-row md:items-center md:justify-between">
+      <div className="max-w-screen-xl mx-auto px-4 flex flex-col gap-4 py-8 md:flex-row md:items-center md:justify-between">
         <p className="text-sm text-text-body/80">
           © {new Date().getFullYear()} AI Product Studio. All rights reserved.
         </p>
