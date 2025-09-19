@@ -1,37 +1,25 @@
 [
-  {
-    "id": "t01",
-    "name": "Blog Post",
-    "category": "content",
-    "refUrl": "https://example.com/templates/blog-post",
-    "thumb": "/placeholders/template_blog.jpg"
-  },
-  {
-    "id": "t02",
-    "name": "Marketing Email",
-    "category": "email",
-    "refUrl": "https://example.com/templates/marketing-email",
-    "thumb": "/placeholders/template_email.jpg"
-  },
-  {
-    "id": "t03",
-    "name": "Support Reply",
-    "category": "support",
-    "refUrl": "https://example.com/templates/support-reply",
-    "thumb": "/placeholders/template_support.jpg"
-  },
-  {
-    "id": "t04",
-    "name": "Landing Copy",
-    "category": "web",
-    "refUrl": "https://example.com/templates/landing-copy",
-    "thumb": "/placeholders/template_landing.jpg"
-  },
-  {
-    "id": "t05",
-    "name": "Product Description",
-    "category": "ecommerce",
-    "refUrl": "https://example.com/templates/product-description",
-    "thumb": "/placeholders/template_product.jpg"
-  }
+  { "id": "t01", "name": "Classic T‑Shirt", "category": "tshirt", "refUrl": "https://example.com/templates/tshirt-classic", "thumb": "/catalog/templates/template_card.svg" },
+  { "id": "t02", "name": "Premium Hoodie", "category": "hoodie", "refUrl": "https://example.com/templates/hoodie-premium", "thumb": "/catalog/templates/template_card.svg" },
+  { "id": "t03", "name": "Hardcover Book", "category": "book", "refUrl": "https://example.com/templates/book-hardcover", "thumb": "/catalog/templates/template_card.svg" },
+  { "id": "t04", "name": "Canvas Tote", "category": "tote bag", "refUrl": "https://example.com/templates/tote-canvas", "thumb": "/catalog/templates/template_card.svg" },
+  { "id": "t05", "name": "Poster A2", "category": "poster", "refUrl": "https://example.com/templates/poster-a2", "thumb": "/catalog/templates/template_card.svg" },
+
+  { "id": "t06", "name": "Mug", "category": "mug", "refUrl": "https://example.com/templates/mug", "thumb": "/catalog/templates/template_card.svg" },
+  { "id": "t07", "name": "Sticker Pack", "category": "sticker", "refUrl": "https://example.com/templates/sticker-pack", "thumb": "/catalog/templates/template_card.svg" },
+  { "id": "t08", "name": "Phone Case", "category": "case", "refUrl": "https://example.com/templates/phone-case", "thumb": "/catalog/templates/template_card.svg" },
+  { "id": "t09", "name": "Notebook", "category": "stationery", "refUrl": "https://example.com/templates/notebook", "thumb": "/catalog/templates/template_card.svg" },
+  { "id": "t10", "name": "Cap", "category": "apparel", "refUrl": "https://example.com/templates/cap", "thumb": "/catalog/templates/template_card.svg" },
+
+  { "id": "t11", "name": "Sweatshirt", "category": "hoodie", "refUrl": "https://example.com/templates/sweatshirt", "thumb": "/catalog/templates/template_card.svg" },
+  { "id": "t12", "name": "Long Sleeve Tee", "category": "tshirt", "refUrl": "https://example.com/templates/longsleeve", "thumb": "/catalog/templates/template_card.svg" },
+  { "id": "t13", "name": "Art Print", "category": "poster", "refUrl": "https://example.com/templates/art-print", "thumb": "/catalog/templates/template_card.svg" },
+  { "id": "t14", "name": "Dust Jacket Book", "category": "book", "refUrl": "https://example.com/templates/book-dustjacket", "thumb": "/catalog/templates/template_card.svg" },
+  { "id": "t15", "name": "Leather Tote", "category": "tote bag", "refUrl": "https://example.com/templates/tote-leather", "thumb": "/catalog/templates/template_card.svg" },
+
+  { "id": "t16", "name": "Crewneck Tee", "category": "tshirt", "refUrl": "https://example.com/templates/tee-crewneck", "thumb": "/catalog/templates/template_card.svg" },
+  { "id": "t17", "name": "Zip Hoodie", "category": "hoodie", "refUrl": "https://example.com/templates/hoodie-zip", "thumb": "/catalog/templates/template_card.svg" },
+  { "id": "t18", "name": "Softcover Book", "category": "book", "refUrl": "https://example.com/templates/book-softcover", "thumb": "/catalog/templates/template_card.svg" },
+  { "id": "t19", "name": "Mini Tote", "category": "tote bag", "refUrl": "https://example.com/templates/tote-mini", "thumb": "/catalog/templates/template_card.svg" },
+  { "id": "t20", "name": "Roll Poster", "category": "poster", "refUrl": "https://example.com/templates/poster-roll", "thumb": "/catalog/templates/template_card.svg" }
 ]
