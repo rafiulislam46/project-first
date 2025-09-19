@@ -130,6 +130,127 @@ export default function Page() {
             Core steps to create your visuals: upload, pick a model, choose a template, and prompt the generator.
           </motion.p>
 
+          {/* Featured preview section */}
+          <motion.div className="space-y-8 mb-8" variants={staggerContainer}>
+            {/* Featured Models */}
+            <motion.div variants={fadeUp}>
+              <div className="mb-3 flex items-center justify-between">
+                <h3 className="text-h3">Featured Models</h3>
+                <button
+                  onClick={() => setOpenPicker(true)}
+                  className="text-sm text-text-body hover:text-text-hi transition"
+                >
+                  Browse all
+                </button>
+              </div>
+              <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+                {(items || [])
+                  .filter((it) => it.kind === "model")
+                  .slice(0, 4)
+                  .map((it, idx) => {
+                    const thumb =
+                      (it as any).styles?.[0]?.thumb || "/catalog/models/model_card.svg";
+                    const isSelected = selectedModel === it.id;
+                    return (
+                      <motion.button
+                        key={`featured-model:${it.id}`}
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.02 * idx }}
+                        onClick={() => {
+                          const next = selectedModel === it.id ? null : it.id;
+                          setSelectedModel(next);
+                          setSelectedModelId(next);
+                        }}
+                        className={cn(
+                          "group overflow-hidden rounded-2xl border bg-white text-left transition",
+                          isSelected ? "ring-2 ring-emerald-400/50" : "ring-1 ring-[rgba(15,23,42,0.08)]"
+                        )}
+                      >
+                        <div className="relative aspect-[4/3] w-full bg-surface">
+                          <img src={thumb} alt={it.name} className="h-full w-full object-cover" />
+                          <div className="absolute left-3 top-3 flex items-center gap-2">
+                            <TypeBadge kind="model" />
+                            {isSelected && <SelectedBadge />}
+                          </div>
+                        </div>
+                        <div className="p-4">
+                          <p className="font-medium text-text-hi">{it.name}</p>
+                          <p className="text-xs text-text-body mt-1">
+                            {(it as any).gender ? `Model • ${(it as any).gender}` : "Model"}
+                          </p>
+                          <div className="mt-3 text-right">
+                            <span className="text-[11px] text-text-body/80 group-hover:text-text-hi transition">
+                              {isSelected ? "Selected" : "Click to select"}
+                            </span>
+                          </div>
+                        </div>
+                      </motion.button>
+                    );
+                  })}
+              </div>
+            </motion.div>
+
+            {/* Featured Templates */}
+            <motion.div variants={fadeUp}>
+              <div className="mb-3 flex items-center justify-between">
+                <h3 className="text-h3">Featured Templates</h3>
+                <button
+                  onClick={() => setOpenPicker(true)}
+                  className="text-sm text-text-body hover:text-text-hi transition"
+                >
+                  Browse all
+                </button>
+              </div>
+              <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+                {(items || [])
+                  .filter((it) => it.kind === "template")
+                  .slice(0, 4)
+                  .map((it, idx) => {
+                    const thumb = (it as any).thumb || "/catalog/templates/template_card.svg";
+                    const isSelected = selectedTemplate === it.id;
+                    return (
+                      <motion.button
+                        key={`featured-template:${it.id}`}
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.02 * idx }}
+                        onClick={() => {
+                          const next = selectedTemplate === it.id ? null : it.id;
+                          setSelectedTemplate(next);
+                          setSelectedTemplateId(next);
+                        }}
+                        className={cn(
+                          "group overflow-hidden rounded-2xl border bg-white text-left transition",
+                          isSelected ? "ring-2 ring-emerald-400/50" : "ring-1 ring-[rgba(15,23,42,0.08)]"
+                        )}
+                      >
+                        <div className="relative aspect-[4/3] w-full bg-surface">
+                          <img src={thumb} alt={it.name} className="h-full w-full object-cover" />
+                          <div className="absolute left-3 top-3 flex items-center gap-2">
+                            <TypeBadge kind="template" />
+                            {isSelected && <SelectedBadge />}
+                          </div>
+                        </div>
+                        <div className="p-4">
+                          <p className="font-medium text-text-hi">{it.name}</p>
+                          <p className="text-xs text-text-body mt-1">
+                            {(it as any).category ? `Template • ${(it as any).category}` : "Template"}
+                          </p>
+                          <div className="mt-3 text-right">
+                            <span className="text-[11px] text-text-body/80 group-hover:text-text-hi transition">
+                              {isSelected ? "Selected" : "Click to select"}
+                            </span>
+                          </div>
+                        </div>
+                      </motion.button>
+                    );
+                  })}
+              </div>
+            </motion.div>
+          </motion.div>
+
+          {/* Existing steps (Upload, Model Select, Prompt, etc.) */}
           <motion.div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4" variants={staggerContainer}>
             {/* Upload */}
             <motion.div className="glass-card p-6" variants={fadeUp}>
