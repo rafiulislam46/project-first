@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, useAnimation } from "framer-motion";
 import {
@@ -36,7 +36,7 @@ type Gender = "male" | "female" | "all";
 type StyleKey = string | "all";
 type CategoryKey = string | "all";
 
-export default function SelectPage() {
+function SelectPageInner() {
   const router = useRouter();
   const params = useSearchParams();
 
@@ -386,6 +386,14 @@ export default function SelectPage() {
         </div>
       </motion.div>
     </section>
+  );
+}
+
+export default function SelectPage() {
+  return (
+    <Suspense fallback={null}>
+      <SelectPageInner />
+    </Suspense>
   );
 }
 
