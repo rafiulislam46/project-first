@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import type { Route } from "next";
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -55,7 +56,7 @@ export default function LeftSidebar() {
   return (
     <aside className="hidden lg:flex lg:w-64 xl:w-72 shrink-0 flex-col border-r bg-white/80 backdrop-blur-md">
       <div className="h-14 px-4 flex items-center">
-        <Link href="/" className="flex items-center gap-2">
+        <Link href={"/" as Route} className="flex items-center gap-2">
           <span className="text-text-hi font-semibold">Mockey</span>
           <span className="text-text-body/70">Clone</span>
         </Link>
@@ -68,7 +69,7 @@ export default function LeftSidebar() {
             return (
               <Link
                 key={l.href}
-                href={href}
+                href={href as Route}
                 className="block rounded-xl px-3 py-2 text-sm text-text-body hover:text-text-hi hover:bg-surface transition"
               >
                 {l.label}
@@ -118,7 +119,7 @@ export default function LeftSidebar() {
                           return (
                             <li key={sc.key}>
                               <Link
-                                href={href}
+                                href={href as Route}
                                 className="block rounded-xl px-3 py-2 text-sm text-text-body hover:text-text-hi hover:bg-surface"
                               >
                                 {sc.label}
