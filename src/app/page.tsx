@@ -205,129 +205,38 @@ export default function Page() {
         </div>
       </section>
 
-      {/* How-to section */}
-      <section className="max-w-screen-xl mx-auto px-4 py-8 md:py-10">
-        <motion.div variants={staggerContainer} initial="hidden" animate="show">
-          <motion.h3 variants={fadeUp} className="text-h3">
-            How to create 3D Mockups
-          </motion.h3>
-          <motion.div variants={fadeUp} className="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {[
-              { t: "1. Choose a template", d: "Pick from apparel, accessories, books, boxes and more." },
-              { t: "2. Upload artwork", d: "Drop your design, logo, or cover image onto the canvas." },
-              { t: "3. Export in seconds", d: "Download high-res mockups instantly for your store or campaign." },
-            ].map((s) => (
-              <div key={s.t} className="rounded-2xl border bg-white p-4 shadow-soft-1">
-                <p className="font-medium text-text-hi">{s.t}</p>
-                <p className="text-sm text-text-body mt-1">{s.d}</p>
-              </div>
-            ))}
-          </motion.div>
-        </motion.div>
-      </section>
+      {/* Templates grid */}
+      <section className="w-full max-w-7xl mx-auto py-6 md:py-8">
+        <div className="w-full px-4">
+          {!items ? (
+            <div className="text-text-body">Loading…</div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 w-full">
+              {mockups.map((it, idx) => {
+                const thumb = it.thumb || "/catalog/templates/template_card.svg";
+                const href = (`/generator?item=${it.id}`) as Route;
 
-      {/* Filter tabs */}
-      <section className="max-w-screen-xl mx-auto px-4">
-        <div className="flex gap-2 overflow-x-auto pb-2">
-          {FILTER_TABS.map((t) => {
-            const active = t === activeTab;
-            return (
-              <button
-                key={t}
-                onClick={() => setActiveTab(t)}
-                className={cn(
-                  "rounded-full px-4 py-2 text-sm transition border",
-                  active ? "bg-black text-white border-black" : "bg-white text-text-body hover:text-text-hi"
-                )}
-              >
-                {t}
-              </button>
-            );
-          })}
+                return (
+                  <motion.div
+                    key={it.id}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.015 * (idx % 10) }}
+                    className="overflow-hidden rounded-2xl"
+                  >
+                    <Link href={href} className="block">
+                      <img
+                        src={thumb}
+                        alt="Template"
+                        className="w-full h-48 object-cover rounded-xl shadow hover:scale-105 transition-transform duration-300"
+                      />
+                    </Link>
+                  </motion.div>
+                );
+              })}
+            </div>
+          )}
         </div>
-      </section>
-
-      {/* Mockup grid */}
-      <section className="max-w-screen-xl mx-auto px-4 py-6 md:py-8">
-        {!items ? (
-          <div className="text-text-body">Loading…</div>
-        ) : (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {mockups.map((it, idx) => {
-              const thumb = it.thumb || "/catalog/templates/template_card.svg";
-              // demo tags to mimic Mockey - mark some as Featured/PRO/3D
-              const tags: string[] = [];
-              if (idx % 7 === 0) tags.push("Featured");
-              if (idx % 5 === 0) tags.push("PRO");
-              if ((it.category || "").toLowerCase().includes("3d")) tags.push("3D");
-
-              return (
-                <motion.div
-                  key={it.id}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.015 * (idx % 10) }}
-                  className="group overflow-hidden rounded-2xl border bg-white shadow-soft-1"
-                >
-                  <div className="relative aspect-[4/3] bg-surface">
-                    <img src={thumb} alt={it.name} className="h-full w-full object-cover" />
-                    <div className="absolute left-3 top-3 flex items-center gap-2">
-                      {tags.map((tg) => (
-                        <span
-                          key={tg}
-                          className={cn(
-                            "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium shadow-sm ring-1",
-                            tg === "PRO"
-                              ? "bg-amber-50 text-amber-700 ring-amber-200"
-                              : tg === "3D"
-                              ? "bg-indigo-50 text-indigo-700 ring-indigo-200"
-                              : "bg-emerald-50 text-emerald-700 ring-emerald-200"
-                          )}
-                        >
-                          {tg}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="p-4">
-                    <p className="font-medium text-text-hi">{it.name}</p>
-                    <p className="text-xs text-text-body mt-1">{it.category || "Template"}</p>
-                    <div className="mt-3 flex items-center justify-between">
-                      <button
-                        onClick={() => {
-                          const next = selectedTemplate === it.id ? null : it.id;
-                          setSelectedTemplate(next);
-                          setSelectedTemplateId(next);
-                        }}
-                        className="text-[12px] rounded-xl px-3 py-1 border hover:bg-surface transition"
-                      >
-                        {selectedTemplate === it.id ? "Selected" : "Use Template"}
-                      </button>
-                      {(() => {
-                        const ref = typeof it.refUrl === "string" ? it.refUrl : "/upload";
-                        const isInternal = ref.startsWith("/");
-                        return isInternal ? (
-                          <Link href={ref as Route} className="text-[12px] text-text-body hover:text-text-hi">
-                            Preview
-                          </Link>
-                        ) : (
-                          <a
-                            href={ref}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-[12px] text-text-body hover:text-text-hi"
-                          >
-                            Preview
-                          </a>
-                        );
-                      })()}
-                    </div>
-                  </div>
-                </motion.div>
-              );
-            })}
-          </div>
-        )}
       </section>
 
       {/* Unified Picker Modal for selecting model/template (kept for feature parity) */}
