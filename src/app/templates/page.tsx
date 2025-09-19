@@ -146,9 +146,8 @@ export default function TemplatesPage() {
                 const href = (`/generator?template=${encodeURIComponent(t.id)}`) as Route;
 
                 return (
-                  <Link href={href} className="block">
+                  <Link key={t.id} href={href} className="block">
                     <Card3DTilt
-                      key={t.id}
                       index={idx}
                       selected={selected}
                       variants={fadeUp}
