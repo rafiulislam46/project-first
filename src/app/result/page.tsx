@@ -77,7 +77,7 @@ export default function ResultPage() {
           Result
         </motion.h2>
         <motion.p className="mb-8 text-text-body" variants={fadeUp}>
-          Five premium variations plus polished copywriting. Use quick actions to download or save favorites.
+          4–6 premium variations plus polished copywriting. Use quick actions to download or save favorites.
         </motion.p>
 
         {/* Quick actions */}
@@ -98,7 +98,7 @@ export default function ResultPage() {
 
             {!tryon && !tmpl && <div className="text-text-body">Loading...</div>}
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4">
               {images.map((src, i) => {
                 const kind: "tryon" | "template" = tryon && tryon.includes(src) ? "tryon" : "template";
                 return (
@@ -183,9 +183,9 @@ export default function ResultPage() {
 /* utils */
 function padToFive(arr: string[]) {
   const base = [...arr];
-  const fallback = [1, 2, 3, 4, 5].map((i) => `/demo/template/${i}.svg`);
-  while (base.length < 5) base.push(fallback[base.length] || fallback[0]);
-  return base.slice(0, 5);
+  const fallback = [1, 2, 3, 4, 5, 6].map((i) => `/demo/template/${i}.svg`);
+  while (base.length < 6) base.push(fallback[base.length] || fallback[0]);
+  return base.slice(0, 6);
 }
 function triggerDownload(url: string) {
   const a = document.createElement("a");

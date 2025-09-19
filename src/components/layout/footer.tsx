@@ -1,5 +1,4 @@
 import Link from "next/link";
-import type { Route } from "next";
 
 export default function Footer() {
   return (
@@ -9,10 +8,10 @@ export default function Footer() {
           © {new Date().getFullYear()} AI Product Studio. All rights reserved.
         </p>
         <div className="flex items-center gap-4 text-sm">
-          <Link href={"/terms" as Route} className="hover:text-text-hi rounded-md px-1">
+          <Link href="/terms" className="hover:text-text-hi rounded-md px-1">
             Terms
           </Link>
-          <Link href={"/privacy" as Route} className="hover:text-text-hi rounded-md px-1">
+          <Link href="/privacy" className="hover:text-text-hi rounded-md px-1">
             Privacy
           </Link>
         </div>
