@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import type { Route } from "next";
 import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -145,10 +146,10 @@ export default function Page() {
 
               {/* Secondary CTAs */}
               <motion.div variants={fadeUp} className="mt-6 flex items-center gap-3">
-                <Link href="/upload" className="rounded-xl px-4 py-2 text-sm text-text-hi hover:bg-white/60 border bg-white/50 backdrop-blur">
+                <Link href={"/upload" as Route} className="rounded-xl px-4 py-2 text-sm text-text-hi hover:bg-white/60 border bg-white/50 backdrop-blur">
                   Try a demo
                 </Link>
-                <Link href="/pricing" className="rounded-xl px-4 py-2 text-sm text-text-body hover:text-text-hi">
+                <Link href={"/pricing" as Route} className="rounded-xl px-4 py-2 text-sm text-text-body hover:text-text-hi">
                   View pricing
                 </Link>
               </motion.div>
@@ -305,7 +306,7 @@ export default function Page() {
                         const ref = typeof it.refUrl === "string" ? it.refUrl : "/upload";
                         const isInternal = ref.startsWith("/");
                         return isInternal ? (
-                          <Link href={ref} className="text-[12px] text-text-body hover:text-text-hi">
+                          <Link href={ref as Route} className="text-[12px] text-text-body hover:text-text-hi">
                             Preview
                           </Link>
                         ) : (
