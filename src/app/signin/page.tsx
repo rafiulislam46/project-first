@@ -25,7 +25,7 @@ export default function SignInPage() {
             Don't have an account?{" "}
             <Link href={"/signup" as Route} className="text-accent-1 underline underline-offset-4">
               Sign up
-          </  Link </Link>
+            </Link>
             .
           </p>
         </motion.div>
