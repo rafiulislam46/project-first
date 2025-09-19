@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import React, { Suspense, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import type { Route } from "next";
 import { motion } from "framer-motion";
@@ -23,8 +23,7 @@ type ModelStyle = { key: string; thumb?: string };
 type Model = { id: string; name: string; gender?: string; styles?: ModelStyle[] };
 type Template = { id: string; name: string; category?: string; refUrl?: string; thumb?: string };
 
-export default function GeneratorPage() {
-  const router = useRouter();
+function GeneratorContent() {
   const params = useSearchParams();
 
   const [models, setModels] = useState<Model[] | null>(null);
@@ -45,8 +44,8 @@ export default function GeneratorPage() {
     async function load() {
       try {
         const [modelsLocal, templatesLocal, manifest] = await Promise.all([
-          loadLocalJSON<Model[]>("/data/models.json"),
-          loadLocalJSON<Template[]>("/data/templates.json"),
+          loadLocalJSON<Model[]>(`/data/models.json`),
+          loadLocalJSON<Template[]>(`/data/templates.json`),
           loadAssetManifest(),
         ]);
         if (!ignore) {
@@ -188,5 +187,13 @@ export default function GeneratorPage() {
         </motion.div>
       </motion.div>
     </section>
+  );
+}
+
+export default function GeneratorPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <GeneratorContent />
+    </Suspense>
   );
 }
