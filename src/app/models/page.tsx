@@ -15,6 +15,7 @@ import { IS_MOCK, IS_FREE } from "@/lib/config";
 import { useEffect, useMemo, useState } from "react";
 import Sidebar, { type SidebarItem } from "@/components/layout/sidebar";
 import SearchBar from "@/components/ui/search-bar";
+import { useRouter } from "next/navigation";
 
 type ModelStyle = { key: string; thumb?: string };
 type Model = { id: string; name: string; gender?: string; styles?: ModelStyle[] };
@@ -23,6 +24,7 @@ type Gender = "male" | "female" | "all";
 type StyleKey = string | "all";
 
 export default function ModelsPage() {
+  const router = useRouter();
   const [models, setModels] = useState<Model[] | null>(null);
   const [gender, setGender] = useState<Gender>("all");
   const [style, setStyle] = useState<StyleKey>("all");
@@ -163,6 +165,11 @@ export default function ModelsPage() {
                       const next = selected ? null : m.id;
                       setSelectedId(next);
                       setSelectedModelId(next);
+                      try {
+                        router.back();
+                      } catch {
+                        router.push("/upload");
+                      }
                     }}
                     selected={selected}
                     variants={fadeUp}

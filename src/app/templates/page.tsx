@@ -15,12 +15,14 @@ import { IS_MOCK, IS_FREE } from "@/lib/config";
 import { useEffect, useMemo, useState } from "react";
 import Sidebar, { type SidebarItem } from "@/components/layout/sidebar";
 import SearchBar from "@/components/ui/search-bar";
+import { useRouter } from "next/navigation";
 
 type Template = { id: string; name: string; category?: string; refUrl?: string; thumb?: string };
 
 type CategoryKey = string | "all";
 
 export default function TemplatesPage() {
+  const router = useRouter();
   const [templates, setTemplates] = useState<Template[] | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [category, setCategory] = useState<CategoryKey>("all");
@@ -150,6 +152,11 @@ export default function TemplatesPage() {
                       const next = selected ? null : t.id;
                       setSelectedId(next);
                       setSelectedTemplateId(next);
+                      try {
+                        router.back();
+                      } catch {
+                        router.push("/upload");
+                      }
                     }}
                     selected={selected}
                     variants={fadeUp}
