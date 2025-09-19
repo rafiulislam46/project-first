@@ -21,7 +21,7 @@ export default function Navbar() {
       <div className="container flex h-14 items-center">
         {/* Left: Logo (sidebar holds full nav) */}
         <div className="flex-1 md:flex-none">
-          <Link href={{ pathname: "/" }} className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2">
             <span className="text-text-hi font-semibold">Mockey</span>
             <span className="text-text-body/70">Clone</span>
           </Link>
@@ -34,7 +34,7 @@ export default function Navbar() {
             return (
               <Link
                 key={item.href}
-                href={{ pathname: item.href as string }}
+                href={item.href}
                 className={cn(
                   "relative rounded-xl px-3 py-2 text-sm text-text-body transition-colors hover:text-text-hi focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-1/20",
                   active && "text-text-hi"
@@ -55,16 +55,16 @@ export default function Navbar() {
         {/* Right: pricing + auth */}
         <div className="hidden md:flex items-center gap-2">
           <Link
-            href={{ pathname: "/pricing" }}
+            href="/pricing"
             className="rounded-xl px-3 py-2 text-sm text-text-body hover:text-text-hi"
           >
             Pricing
           </Link>
           <Button asChild variant="outline" className="rounded-xl hover:-translate-y-0.5 transition-transform">
-            <Link href={"/signin"}>Log in</Link>
+            <Link href="/signin">Log in</Link>
           </Button>
           <Button asChild className="btn-gradient rounded-xl hover:-translate-y-0.5 transition-transform">
-            <Link href={"/signup"}>Sign up</Link>
+            <Link href="/signup">Sign up</Link>
           </Button>
         </div>
 
@@ -96,14 +96,14 @@ export default function Navbar() {
             <div className="container py-3">
               <div className="flex flex-col gap-1">
                 <Link
-                  href={{ pathname: "/models" }}
+                  href="/models"
                   className="rounded-xl px-3 py-2 text-sm text-text-body hover:text-text-hi"
                   onClick={() => setOpen(false)}
                 >
                   Mockups
                 </Link>
                 <Link
-                  href={{ pathname: "/tools" }}
+                  href="/tools"
                   className="rounded-xl px-3 py-2 text-sm text-text-body hover:text-text-hi"
                   onClick={() => setOpen(false)}
                 >
@@ -112,7 +112,7 @@ export default function Navbar() {
 
                 <div className="mt-2 pt-2 border-t">
                   <Link
-                    href={{ pathname: "/pricing" }}
+                    href="/pricing"
                     onClick={() => setOpen(false)}
                     className="rounded-xl px-3 py-2 text-sm text-text-body hover:text-text-hi"
                   >
@@ -120,13 +120,13 @@ export default function Navbar() {
                   </Link>
                   {/* Auth buttons stack on small screens */}
                   <div className="mt-2 flex flex-col gap-2">
-                    <Link href={{ pathname: "/signin" }} onClick={() => setOpen(false)}>
+                    <Link href="/signin" onClick={() => setOpen(false)}>
                       <div className="inline-flex w-full items-center justify-center rounded-xl border bg-white h-10 px-3 text-sm">
                         Login
                       </div>
                     </Link>
-                    <Link href={"/signup"} onClick={() => setOpen(false)}>
-                      <div className="inline-flex w-full items-center justify-center rounded-xl btn-gradient h-10 px-3 text-sm">
+                    <Link href="/signup" onClick={() => setOpen(false)}>
+                     < div className="inline-flex w-full items-center justify-center rounded-xl btn-gradient h-10 px-3-3 text-sm">
                         Sign up
                       </div>
                     </Link>
