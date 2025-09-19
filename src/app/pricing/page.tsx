@@ -60,7 +60,7 @@ export default function PricingPage() {
   };
 
   return (
-    <section className="container py-12 md:py-16">
+    <section className="max-w-screen-xl mx-auto px-4 py-12 md:py-16">
       <motion.div initial="hidden" animate="show" variants={staggerContainer}>
         <motion.h2 className="mb-2" variants={fadeUp}>
           Pricing
@@ -69,7 +69,7 @@ export default function PricingPage() {
           Flexible plans to match your workflow. Upgrade anytime.
         </motion.p>
 
-        <motion.div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4" variants={staggerContainer}>
+        <motion.div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4" variants={staggerContainer}>
           {plans.map((p) => (
             <motion.div
               key={p.key}

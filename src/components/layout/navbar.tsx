@@ -23,7 +23,7 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-white/80 backdrop-blur-md">
-      <div className="container flex h-14 items-center">
+      <div className="max-w-screen-xl mx-auto px-4 flex h-14 items-center">
         {/* Left: Logo */}
         <div className="flex-1 md:flex-none">
           <Link href={"/" as Route} className="flex items-center gap-2">
