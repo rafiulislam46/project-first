@@ -219,7 +219,7 @@ export default function Page() {
                         const ref = typeof it.refUrl === "string" ? it.refUrl : "/upload";
                         const isInternal = ref.startsWith("/");
                         return isInternal ? (
-                          <Link href={{ pathname: ref }} className="text-[12px] text-text-body hover:text-text-hi">
+                          <Link href={ref as string} className="text-[12px] text-text-body hover:text-text-hi">
                             Preview
                           </Link>
                         ) : (
