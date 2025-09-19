@@ -22,7 +22,7 @@ export default function BottomNav() {
           return (
             <Link
               key={it.href}
-              href={{ pathname: it.href as string }}
+              href={it.href}
               className={cn(
                 "flex flex-col items-center justify-center py-2 text-xs",
                 active ? "text-text-hi" : "text-text-body"

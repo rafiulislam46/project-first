@@ -82,56 +82,123 @@ export default function Page() {
 
   return (
     <main className="flex flex-col">
-      {/* Top hero (responsive split on tablet/desktop, centered on mobile) */}
-      <section className="border-b bg-white/70 backdrop-blur-md">
-        <div className="container md:py-14">
-          <div className="grid md:grid-cols-2 gap-8">
-            {/* Left: Text */}
+      {/* Hero - Outfits-AI style, split layout with gradient */}
+      <section className="relative overflow-hidden border-b">
+        <div className="absolute inset-0 bg-gradient-to-b from-pink-100 via-white to-white" />
+        <div className="relative container md:py-16 py-12">
+          <div className="grid md:grid-cols-2 gap-10 items-center">
+            {/* Left: Headline + description + waitlist form */}
             <motion.div
               variants={staggerContainer}
               initial="hidden"
               animate="show"
-              className="flex flex-col items-center text-center md:items-start md:text-left justify-center min-h-[340px] md:min-h-0 py-10"
+              className="flex flex-col items-center text-center md:items-start md:text-left justify-center"
             >
-              <motion.h1 variants={fadeUp} className="font-semibold">
-                Create mockups, superfast
+              <motion.h1
+                variants={fadeUp}
+                className="font-semibold tracking-tight"
+              >
+                Dress your models with AI
               </motion.h1>
-              <motion.p variants={fadeUp} className="mt-3 text-text-body max-w-2xl">
-                Generate studio-grade product mockups in seconds. Apparel, accessories, books, boxes and more.
+              <motion.p
+                variants={fadeUp}
+                className="mt-3 text-text-body max-w-xl"
+              >
+                Upload an outfit and see it applied to a model in seconds. No photoshoots. No retouching. High‑res exports ready for your store.
               </motion.p>
 
-              {/* Featured thumbnails row - scrollable on mobile */}
-              <motion.div
+              {/* Waitlist form */}
+              <motion.form
                 variants={fadeUp}
-                className="mt-6 flex gap-3 overflow-x-auto px-0 md:justify-start w-full"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const fd = new FormData(e.currentTarget as HTMLFormElement);
+                  const email = String(fd.get("email") || "");
+                  if (email) {
+                    // Simple demo submit – replace with real endpoint when ready.
+                    console.log("Join waitlist:", email);
+                    alert("Thanks! We’ll notify you as soon as we’re ready.");
+                    (e.currentTarget as HTMLFormElement).reset();
+                  }
+                }}
+                className="mt-6 w-full max-w-md"
               >
-                {[
-                  { label: "T-shirt", img: "/catalog/templates/template_card.svg" },
-                  { label: "Hoodie", img: "/catalog/templates/template_card.svg" },
-                  { label: "Book", img: "/catalog/templates/template_card.svg" },
-                  { label: "Box", img: "/catalog/templates/template_card.svg" },
-                  { label: "Tote Bag", img: "/catalog/templates/template_card.svg" },
-                ].map((x) => (
-                  <div key={x.label} className="shrink-0 w-28">
-                    <div className="rounded-2xl border bg-white aspect-square overflow-hidden">
-                      <img src={x.img} alt={x.label} className="h-full w-full object-cover" />
-                    </div>
-                    <p className="mt-2 text-xs text-text-body text-center">{x.label}</p>
-                  </div>
-                ))}
+                <div className="flex gap-2">
+                  <input
+                    type="email"
+                    name="email"
+                    required
+                    placeholder="Enter your email"
+                    className="flex-1 h-11 rounded-2xl border bg-white/90 px-4 text-sm text-text-hi placeholder:text-text-body/50 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-1/30"
+                  />
+                  <button
+                    type="submit"
+                    className="h-11 shrink-0 rounded-2xl btn-gradient px-5 text-sm font-medium"
+                  >
+                    Join waitlist
+                  </button>
+                </div>
+                <p className="mt-2 text-xs text-text-body">
+                  Get early access and 20 free try‑ons at launch.
+                </p>
+              </motion.form>
+
+              {/* Secondary CTAs */}
+              <motion.div variants={fadeUp} className="mt-6 flex items-center gap-3">
+                <Link href="/upload" className="rounded-xl px-4 py-2 text-sm text-text-hi hover:bg-white/60 border bg-white/50 backdrop-blur">
+                  Try a demo
+                </Link>
+                <Link href="/pricing" className="rounded-xl px-4 py-2 text-sm text-text-body hover:text-text-hi">
+                  View pricing
+                </Link>
               </motion.div>
             </motion.div>
 
-            {/* Right: Hero image (hidden on mobile) */}
-            <div className="hidden md:block">
-              <div className="relative w-full max-w-xl mx-auto rounded-2xl border bg-white shadow-soft-2 overflow-hidden">
-                <img
-                  src="/demo/template/1.svg"
-                  alt="Mockup preview"
-                  className="w-full h-auto"
-                />
+            {/* Right: Demo stack (before outfit + after on model) */}
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ type: "spring", stiffness: 120, damping: 18, delay: 0.05 }}
+              className="relative"
+            >
+              <div className="relative mx-auto w-full max-w-xl">
+                {/* Back card: outfit (before) */}
+                <div className="pointer-events-none absolute -left-6 -top-6 hidden md:block">
+                  <div className="rounded-2xl border bg-white/90 shadow-soft-2 backdrop-blur overflow-hidden w-44">
+                    <div className="flex items-center justify-between px-3 py-2 border-b">
+                      <span className="text-[11px] text-text-body">Outfit</span>
+                      <span className="text-[10px] text-text-body/70">Before</span>
+                    </div>
+                    <img src="/demo/template/1.svg" alt="Outfit before" className="h-40 w-full object-cover" />
+                  </div>
+                </div>
+
+                {/* Front card: model try-on (after) */}
+                <div className="relative rounded-3xl border bg-white shadow-soft-2 overflow-hidden">
+                  <div className="flex items-center justify-between px-4 py-2 border-b">
+                    <span className="text-xs font-medium text-text-hi">AI Try‑On</span>
+                    <span className="text-[11px] text-emerald-700 bg-emerald-50 ring-1 ring-emerald-200 rounded-full px-2 py-0.5">After</span>
+                  </div>
+                  <img
+                    src="/demo/tryon/1.svg"
+                    alt="Model wearing outfit"
+                    className="w-full h-auto"
+                  />
+                </div>
+
+                {/* Floating small previews */}
+                <div className="pointer-events-none absolute -right-6 bottom-8 hidden md:block">
+                  <div className="rounded-2xl border bg-white/90 shadow-soft-2 backdrop-blur overflow-hidden w-28">
+                    <img src="/demo/tryon/2.svg" alt="Preview 2" className="h-24 w-full object-cover" />
+                  </div>
+                </div>
+                <div className="pointer-events-none absolute -right-10 -top-6 hidden md:block">
+                  <div className="rounded-2xl border bg-white/90 shadow-soft-2 backdrop-blur overflow-hidden w-32">
+                    <img src="/demo/tryon/3.svg" alt="Preview 3" className="h-28 w-full object-cover" />
+                  </div>
+                </div>
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
@@ -238,7 +305,7 @@ export default function Page() {
                         const ref = typeof it.refUrl === "string" ? it.refUrl : "/upload";
                         const isInternal = ref.startsWith("/");
                         return isInternal ? (
-                          <Link href={{ pathname: ref }} className="text-[12px] text-text-body hover:text-text-hi">
+                          <Link href={ref} className="text-[12px] text-text-body hover:text-text-hi">
                             Preview
                           </Link>
                         ) : (
