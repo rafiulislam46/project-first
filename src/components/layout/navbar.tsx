@@ -2,7 +2,6 @@
 
 import React from "react";
 import Link from "next/link";
-import type { Route } from "next";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
@@ -26,7 +25,7 @@ export default function Navbar() {
       <div className="container flex h-14 items-center">
         {/* Left: Logo */}
         <div className="flex-1 md:flex-none">
-          <Link href={"/" as Route} className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2">
             <span className="text-text-hi font-semibold">Mockey</span>
             <span className="text-text-body/70">Clone</span>
           </Link>
@@ -39,7 +38,7 @@ export default function Navbar() {
             return (
               <Link
                 key={item.href}
-                href={item.href as Route}
+                href={item.href}
                 className={cn(
                   "relative rounded-xl px-3 py-2 text-sm text-text-body transition-colors hover:text-text-hi focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-1/20",
                   active && "text-text-hi"
@@ -60,10 +59,10 @@ export default function Navbar() {
         {/* Right: auth */}
         <div className="hidden md:flex items-center gap-2">
           <Button asChild variant="outline" className="rounded-xl hover:-translate-y-0.5 transition-transform">
-            <Link href={"/signin" as Route}>Log in</Link>
+            <Link href="/signin">Log in</Link>
           </Button>
           <Button asChild className="btn-gradient rounded-xl hover:-translate-y-0.5 transition-transform">
-            <Link href={"/signup" as Route}>Sign up</Link>
+            <Link href="/signup">Sign up</Link>
           </Button>
         </div>
 
@@ -97,7 +96,7 @@ export default function Navbar() {
                 {CENTER_NAV.map((item) => (
                   <Link
                     key={item.href}
-                    href={item.href as Route}
+                    href={item.href}
                     className="rounded-xl px-3 py-2 text-sm text-text-body hover:text-text-hi"
                     onClick={() => setOpen(false)}
                   >
@@ -108,12 +107,12 @@ export default function Navbar() {
                 <div className="mt-2 pt-2 border-t">
                   {/* Auth buttons stack on small screens */}
                   <div className="mt-2 flex flex-col gap-2">
-                    <Link href={"/signin" as Route} onClick={() => setOpen(false)}>
+                    <Link href="/signin" onClick={() => setOpen(false)}>
                       <div className="inline-flex w-full items-center justify-center rounded-xl border bg-white h-10 px-3 text-sm">
                         Login
                       </div>
                     </Link>
-                    <Link href={"/signup" as Route} onClick={() => setOpen(false)}>
+                    <Link href="/signup" onClick={() => setOpen(false)}>
                       <div className="inline-flex w-full items-center justify-center rounded-xl btn-gradient h-10 px-3 text-sm text-white">
                         Sign up
                       </div>

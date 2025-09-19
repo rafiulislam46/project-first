@@ -6,7 +6,9 @@ import {
   staggerContainer,
   getSelectedModelId,
   getSelectedTemplateId,
+  cn,
 } from "@/lib/utils";
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { IS_MOCK } from "@/lib/config";
 import { canGenerate as canUseCredit, useOneCredit, getCredits } from "@/lib/credits";
@@ -226,6 +228,33 @@ export default function UploadPage() {
   return (
     <section className="container py-12 md:py-16">
       <motion.div initial="hidden" animate="show" variants={staggerContainer}>
+        {/* Stepper */}
+        <motion.div variants={fadeUp} className="mb-5">
+          <ol className="grid grid-cols-2 md:grid-cols-4 gap-2">
+            {[
+              { key: 1, label: "Upload product", href: "/upload", active: true },
+              { key: 2, label: "Select model", href: "/select?section=models#models", active: !!selectedModelId },
+              { key: 3, label: "Select template", href: "/select?section=templates#templates", active: !!selectedTemplateId },
+              { key: 4, label: "Generate", href: "#", active: canGenerate },
+            ].map((s, idx) => (
+              <li key={idx}>
+                <Link
+                  href={s.href}
+                  className={cn(
+                    "flex items-center gap-2 rounded-2xl border bg-white px-3 py-2 text-xs shadow-soft-1 transition hover:bg-white/90",
+                    s.active ? "ring-1 ring-accent-1/30 text-text-hi" : "text-text-body"
+                  )}
+                >
+                  <span className={cn("inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px] border", s.active ? "bg-accent-1/10 border-accent-1/30" : "bg-surface")}>
+                    {idx + 1}
+                  </span>
+                  <span>{s.label}</span>
+                </Link>
+              </li>
+            ))}
+          </ol>
+        </motion.div>
+
         <motion.h2 className="mb-2" variants={fadeUp}>
           Upload
         </motion.h2>
@@ -247,6 +276,10 @@ export default function UploadPage() {
             <div>
               <span className="text-sm text-text-body">Selected template:</span>{" "}
               <span className="text-sm font-medium">{selectedTemplateId ?? "None"}</span>
+            </div>
+            <div className="ml-auto flex gap-2">
+              <Link href="/select?section=models#models" className="rounded-xl border bg-white px-3 py-1.5 text-xs hover:bg-white/90">Browse models</Link>
+              <Link href="/select?section=templates#templates" className="rounded-xl border bg-white px-3 py-1.5 text-xs hover:bg-white/90">Browse templates</Link>
             </div>
           </div>
 
@@ -324,7 +357,7 @@ export default function UploadPage() {
 
           <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-xs text-text-body/70">
-              Tip: If a model is selected, we’ll use Try-On. Otherwise we’ll apply a Template.
+              Step 4: Review selections, then generate 4–6 premium variations.
             </p>
             <button
               className="btn-gradient w-full sm:w-auto"

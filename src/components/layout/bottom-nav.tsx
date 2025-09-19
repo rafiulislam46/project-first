@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import type { Route } from "next";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
@@ -23,7 +22,7 @@ export default function BottomNav() {
           return (
             <Link
               key={it.href}
-              href={it.href as Route}
+              href={it.href}
               className={cn(
                 "flex flex-col items-center justify-center py-2 text-xs",
                 active ? "text-text-hi" : "text-text-body"
