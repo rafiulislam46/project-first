@@ -101,25 +101,33 @@ export default function Navbar() {
                   onClick={() => setOpen(false)}
                 >
                   Mockups
-              </  Link>
-  </Link>
+                </Link>
                 <Link
                   href={{ pathname: "/tools" }}
                   className="rounded-xl px-3 py-2 text-sm text-text-body hover:text-text-hi"
                   onClick={() => setOpen(false)}
                 >
                   Tools
-              </  L_codeinnewk</>
-  </Link>
+                </Link>
 
                 <div className="mt-2 pt-2 border-t flex gap-2">
-                  <Link href={{ pathname: "/pricing" }} onClick={() => setOpen(false)} className="rounded-xl px-3 py-2 text-sm text-text-body hover:text-text-hi         Pricing
+                  <Link
+                    href={{ pathname: "/pricing" }}
+                    onClick={() => setOpen(false)}
+                    className="rounded-xl px-3 py-2 text-sm text-text-body hover:text-text-hi"
+                  >
+                    Pricing
                   </Link>
                   <div className="ml-auto flex gap-2">
-                    <Link href={{ pathname: "/signin" }} onClick={() => set                      <div className="inline-flex items-center justify-center rounded-xl border bg-white h-9 px-3 text-sm">Login</div>
+                    <Link href={{ pathname: "/signin" }} onClick={() => setOpen(false)}>
+                      <div className="inline-flex items-center justify-center rounded-xl border bg-white h-9 px-3 text-sm">
+                        Login
+                      </div>
                     </Link>
                     <Link href={"/signup"} onClick={() => setOpen(false)}>
-                      <div className="inline-flex items-center justify-center rounded-xl btn-gradient h-9 px-3 text-sm">Sign up</div>
+                      <div className="inline-flex items-center justify-center rounded-xl btn-gradient h-9 px-3 text-sm">
+                        Sign up
+                      </div>
                     </Link>
                   </div>
                 </div>
