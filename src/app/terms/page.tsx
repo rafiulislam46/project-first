@@ -1,3 +1,5 @@
+import React from "react";
+
 export default function TermsPage() {
   return (
     <section className="container py-12 md:py-16">
