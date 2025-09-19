@@ -1,38 +1,36 @@
 "use client";
 
 import Link from "next/link";
-import type { Route } from "next";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
-const nav: ReadonlyArray<{ href: Route; label: string }> = [
-  { href: "/", label: "Home" },
-  { href: "/templates", label: "Templates" },
+const CENTER_NAV: { href: string; label: string }[] = [
   { href: "/models", label: "Mockups" },
-  { href: "/pricing", label: "Pricing" },
-  { href: "/upload", label: "Upload" },
-  { href: "/dashboard", label: "Dashboard" },
-] as const;
+  { href: "/tools", label: "Tools" },
+];
 
 export default function Navbar() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-white/80 backdrop-blur-md">
-      <div className="container flex h-14 items-center justify-between">
-        <Link href="/" className="flex items-center gap-2">
-          <span className="text-text-hi font-semibold">AI Product</span>
-          <span className="text-text-body/70">Studio</span>
-        </Link>
+    <header className="sticky top-0 z-40 w-full border-b bg-white/80 backdrop-blur-md">
+      <div className="container flex h-14 items-center">
+        {/* Left: Logo (sidebar holds full nav) */}
+        <div className="flex-1 md:flex-none">
+          <Link href="/" className="flex items-center gap-2">
+            <span className="text-text-hi font-semibold">Mockey</span>
+            <span className="text-text-body/70">Clone</span>
+          </Link>
+        </div>
 
-        {/* Desktop nav */}
-        <nav className="hidden md:flex items-center gap-1">
-          {nav.map((item) => {
-            const active = pathname === item.href;
+        {/* Center: main nav */}
+        <nav className="hidden md:flex flex-1 items-center justify-center gap-2">
+          {CENTER_NAV.map((item) => {
+            const active = pathname.startsWith(item.href);
             return (
               <Link
                 key={item.href}
@@ -52,23 +50,26 @@ export default function Navbar() {
               </Link>
             );
           })}
-          <Link href="/result" className="ml-2 rounded-xl px-3 py-2 text-sm text-text-body hover:text-text-hi">
-            Result
-          </Link>
-
-          {/* Auth actions (desktop) */}
-          <div className="ml-3 flex items-center gap-2">
-            <Button asChild variant="outline" className="rounded-xl hover:-translate-y-0.5 transition-transform">
-              <Link href="/signin">Sign in</Link>
-            </Button>
-            <Button asChild className="btn-gradient rounded-xl hover:-translate-y-0.5 transition-transform">
-              <Link href="/signup">Sign up</Link>
-            </Button>
-          </div>
         </nav>
 
-        {/* Mobile actions */}
-        <div className="md:hidden flex items-center gap-2">
+        {/* Right: pricing + auth */}
+        <div className="hidden md:flex items-center gap-2">
+          <Link
+            href="/pricing"
+            className="rounded-xl px-3 py-2 text-sm text-text-body hover:text-text-hi"
+          >
+            Pricing
+          </Link>
+          <Button asChild variant="outline" className="rounded-xl hover:-translate-y-0.5 transition-transform">
+            <Link href="/signin">Login</Link>
+          </Button>
+          <Button asChild className="btn-gradient rounded-xl hover:-translate-y-0.5 transition-transform">
+            <Link href="/signup">Sign up</Link>
+          </Button>
+        </div>
+
+        {/* Mobile hamburger */}
+        <div className="md:hidden ml-auto flex items-center gap-2">
           <button
             aria-label="Open menu"
             className={cn(
@@ -83,53 +84,44 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile menu panel */}
+      {/* Mobile sheet */}
       <AnimatePresence>
         {open && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="md:hidden overflow-hidden border-t bg-white/90 backdrop-blur-md"
+            className="md:hidden overflow-hidden border-t bg-white/95 backdrop-blur-md"
           >
             <div className="container py-3">
               <div className="flex flex-col gap-1">
-                {nav.map((item) => {
-                  const active = pathname === item.href;
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      onClick={() => setOpen(false)}
-                      className={cn(
-                        "rounded-xl px-3 py-2 text-sm transition-colors",
-                        active ? "text-text-hi bg-surface" : "text-text-body hover:text-text-hi"
-                      )}
-                    >
-                      {item.label}
-                    </Link>
-                  );
-                })}
                 <Link
-                  href="/result"
-                  onClick={() => setOpen(false)}
+                  href="/models"
                   className="rounded-xl px-3 py-2 text-sm text-text-body hover:text-text-hi"
+                  onClick={() => setOpen(false)}
                 >
-                  Result
+                  Mockups
+                </Link>
+                <Link
+                  href="/tools"
+                  className="rounded-xl px-3 py-2 text-sm text-text-body hover:text-text-hi"
+                  onClick={() => setOpen(false)}
+                >
+                  Tools
                 </Link>
 
-                {/* Auth actions (mobile) */}
-                <div className="mt-3 pt-3 border-t flex flex-col gap-2">
-                  <Link href="/signin" onClick={() => setOpen(false)} className="w-full">
-                    <div className="w-full inline-flex items-center justify-center rounded-xl border bg-transparent text-sm font-medium text-text-hi hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-1/40 h-10 transition">
-                      Sign in
-                    </div>
+                <div className="mt-2 pt-2 border-t flex gap-2">
+                  <Link href="/pricing" onClick={() => setOpen(false)} className="rounded-xl px-3 py-2 text-sm text-text-body hover:text-text-hi">
+                    Pricing
                   </Link>
-                  <Link href="/signup" onClick={() => setOpen(false)} className="w-full">
-                    <div className="w-full inline-flex items-center justify-center rounded-xl text-sm font-medium btn-gradient h-10 transition-transform hover:-translate-y-0.5">
-                      Sign up
-                    </div>
-                  </Link>
+                  <div className="ml-auto flex gap-2">
+                    <Link href="/signin" onClick={() => setOpen(false)}>
+                      <div className="inline-flex items-center justify-center rounded-xl border bg-white h-9 px-3 text-sm">Login</div>
+                    </Link>
+                    <Link href="/signup" onClick={() => setOpen(false)}>
+                      <div className="inline-flex items-center justify-center rounded-xl btn-gradient h-9 px-3 text-sm">Sign up</div>
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>

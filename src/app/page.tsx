@@ -16,7 +16,6 @@ import {
   overrideTemplatesWithManifest,
   cn,
 } from "@/lib/utils";
-import { ArrowRight } from "lucide-react";
 
 type ModelStyle = { key: string; thumb?: string };
 type Model = { id: string; name: string; gender?: string; styles?: ModelStyle[] };
@@ -26,21 +25,24 @@ type PickerItem =
   | ({ kind: "model" } & Model)
   | ({ kind: "template" } & Template);
 
+const FILTER_TABS = ["Featured", "Tshirt", "Hoodie", "Book", "Tote Bag"] as const;
+
 export default function Page() {
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
 
-  // Unified picker modal state
   const [openPicker, setOpenPicker] = useState(false);
   const [items, setItems] = useState<PickerItem[] | null>(null);
   const [q, setQ] = useState("");
+
+  // For grid filters
+  const [activeTab, setActiveTab] = useState<(typeof FILTER_TABS)[number]>("Featured");
 
   useEffect(() => {
     setSelectedModel(getSelectedModelId());
     setSelectedTemplate(getSelectedTemplateId());
   }, []);
 
-  // Load both models and templates (mock/local + manifest override)
   useEffect(() => {
     let ignore = false;
     async function load() {
@@ -67,6 +69,207 @@ export default function Page() {
     };
   }, []);
 
+  const mockups = useMemo(() => {
+    // Show only templates in the grid to mimic Mockey's mockups gallery
+    const all = (items || []).filter((i) => i.kind === "template") as ({ kind: "template" } & Template)[];
+    if (activeTab === "Featured") return all;
+    const s = activeTab.toLowerCase();
+    return all.filter((t) => {
+      const cat = (t.category || "").toLowerCase() + " " + (t.name || "").toLowerCase();
+      return cat.includes(s.replace("tshirt", "t-shirt").replace("tote bag", "tote"));
+    });
+  }, [items, activeTab]);
+
+  return (
+    <main className="flex flex-col">
+      {/* Top hero (desktop + mobile) */}
+      <section className="border-b bg-white/70 backdrop-blur-md">
+        <div className="container py-10 md:py-14">
+          <motion.div variants={staggerContainer} initial="hidden" animate="show" className="text-center">
+            <motion.h1 variants={fadeUp} className="font-semibold">
+              Create mockups, superfast
+            </motion.h1>
+            <motion.p variants={fadeUp} className="mt-3 text-text-body max-w-2xl mx-auto">
+              Generate studio-grade product mockups in seconds. Apparel, accessories, books, boxes and more.
+            </motion.p>
+
+            {/* Featured thumbnails row - scrollable on mobile */}
+            <motion.div
+              variants={fadeUp}
+              className="mt-6 flex gap-3 overflow-x-auto px-0 md:justify-center"
+            >
+              {[
+                { label: "T-shirt", img: "/catalog/templates/template_card.svg" },
+                { label: "Hoodie", img: "/catalog/templates/template_card.svg" },
+                { label: "Book", img: "/catalog/templates/template_card.svg" },
+                { label: "Box", img: "/catalog/templates/template_card.svg" },
+                { label: "Tote Bag", img: "/catalog/templates/template_card.svg" },
+              ].map((x) => (
+                <div key={x.label} className="shrink-0 w-28">
+                  <div className="rounded-2xl border bg-white aspect-square overflow-hidden">
+                    <img src={x.img} alt={x.label} className="h-full w-full object-cover" />
+                  </div>
+                  <p className="mt-2 text-xs text-text-body text-center">{x.label}</p>
+                </div>
+              ))}
+            </motion.div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* How-to section */}
+      <section className="container py-8 md:py-10">
+        <motion.div variants={staggerContainer} initial="hidden" animate="show">
+          <motion.h3 variants={fadeUp} className="text-h3">
+            How to create 3D Mockups
+          </motion.h3>
+          <motion.div variants={fadeUp} className="mt-4 grid gap-4 md:grid-cols-3">
+            {[
+              { t: "1. Choose a template", d: "Pick from apparel, accessories, books, boxes and more." },
+              { t: "2. Upload artwork", d: "Drop your design, logo, or cover image onto the canvas." },
+              { t: "3. Export in seconds", d: "Download high-res mockups instantly for your store or campaign." },
+            ].map((s) => (
+              <div key={s.t} className="rounded-2xl border bg-white p-4 shadow-soft-1">
+                <p className="font-medium text-text-hi">{s.t}</p>
+                <p className="text-sm text-text-body mt-1">{s.d}</p>
+              </div>
+            ))}
+          </motion.div>
+        </motion.div>
+      </section>
+
+      {/* Filter tabs */}
+      <section className="container">
+        <div className="flex gap-2 overflow-x-auto pb-2">
+          {FILTER_TABS.map((t) => {
+            const active = t === activeTab;
+            return (
+              <button
+                key={t}
+                onClick={() => setActiveTab(t)}
+                className={cn(
+                  "rounded-full px-4 py-2 text-sm transition border",
+                  active ? "bg-black text-white border-black" : "bg-white text-text-body hover:text-text-hi"
+                )}
+              >
+                {t}
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Mockup grid */}
+      <section className="container py-6 md:py-8">
+        {!items ? (
+          <div className="text-text-body">Loading…</div>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {mockups.map((it, idx) => {
+              const thumb = it.thumb || "/catalog/templates/template_card.svg";
+              // demo tags to mimic Mockey - mark some as Featured/PRO/3D
+              const tags: string[] = [];
+              if (idx % 7 === 0) tags.push("Featured");
+              if (idx % 5 === 0) tags.push("PRO");
+              if ((it.category || "").toLowerCase().includes("3d")) tags.push("3D");
+
+              return (
+                <motion.div
+                  key={it.id}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.015 * (idx % 10) }}
+                  className="group overflow-hidden rounded-2xl border bg-white shadow-soft-1"
+                >
+                  <div className="relative aspect-[4/3] bg-surface">
+                    <img src={thumb} alt={it.name} className="h-full w-full object-cover" />
+                    <div className="absolute left-3 top-3 flex items-center gap-2">
+                      {tags.map((tg) => (
+                        <span
+                          key={tg}
+                          className={cn(
+                            "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium shadow-sm ring-1",
+                            tg === "PRO"
+                              ? "bg-amber-50 text-amber-700 ring-amber-200"
+                              : tg === "3D"
+                              ? "bg-indigo-50 text-indigo-700 ring-indigo-200"
+                              : "bg-emerald-50 text-emerald-700 ring-emerald-200"
+                          )}
+                        >
+                          {tg}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="p-4">
+                    <p className="font-medium text-text-hi">{it.name}</p>
+                    <p className="text-xs text-text-body mt-1">{it.category || "Template"}</p>
+                    <div className="mt-3 flex items-center justify-between">
+                      <button
+                        onClick={() => {
+                          const next = selectedTemplate === it.id ? null : it.id;
+                          setSelectedTemplate(next);
+                          setSelectedTemplateId(next);
+                        }}
+                        className="text-[12px] rounded-xl px-3 py-1 border hover:bg-surface transition"
+                      >
+                        {selectedTemplate === it.id ? "Selected" : "Use Template"}
+                      </button>
+                      <Link href={it.refUrl || "/upload"} className="text-[12px] text-text-body hover:text-text-hi">
+                        Preview
+                      </Link>
+                    </div>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
+        )}
+      </section>
+
+      {/* Unified Picker Modal for selecting model/template (kept for feature parity) */}
+      <PickerModal
+        open={openPicker}
+        onClose={() => setOpenPicker(false)}
+        items={items}
+        q={q}
+        setQ={setQ}
+        selectedModel={selectedModel}
+        setSelectedModel={(v) => {
+          setSelectedModel(v);
+          setSelectedModelId(v);
+        }}
+        selectedTemplate={selectedTemplate}
+        setSelectedTemplate={(v) => {
+          setSelectedTemplate(v);
+          setSelectedTemplateId(v);
+        }}
+      />
+    </main>
+  );
+}
+
+function PickerModal({
+  open,
+  onClose,
+  items,
+  q,
+  setQ,
+  selectedModel,
+  setSelectedModel,
+  selectedTemplate,
+  setSelectedTemplate,
+}: {
+  open: boolean;
+  onClose: () => void;
+  items: PickerItem[] | null;
+  q: string;
+  setQ: (s: string) => void;
+  selectedModel: string | null;
+  setSelectedModel: (v: string | null) => void;
+  selectedTemplate: string | null;
+  setSelectedTemplate: (v: string | null) => void;
+}) {
   const filtered = useMemo(() => {
     if (!items) return null;
     if (!q.trim()) return items;
@@ -81,360 +284,103 @@ export default function Page() {
         );
       } else {
         const t = it as PickerItem & { kind: "template" };
-        return (
-          t.name.toLowerCase().includes(s) ||
-          (t.category || "").toLowerCase().includes(s)
-        );
+        return t.name.toLowerCase().includes(s) || (t.category || "").toLowerCase().includes(s);
       }
     });
   }, [items, q]);
 
   return (
-    <main className="flex flex-col">
-      {/* Hero */}
-      <section className="flex flex-col items-center justify-center min-h-[70vh] p-8 text-center">
-        <motion.h1
-          variants={fadeUp}
-          initial="hidden"
-          animate="show"
-        >
-          AI Product Studio
-        </motion.h1>
-        <motion.p
-          variants={fadeUp}
-          initial="hidden"
-          animate="show"
-          className="mt-4 max-w-2xl text-lg text-text-body"
-        >
-          Upload your product, choose a model and template, then generate premium styled variations in minutes.
-        </motion.p>
+    <AnimatePresence>
+      {open && (
         <motion.div
-          variants={fadeUp}
-          initial="hidden"
-          animate="show"
-          className="mt-8 w-full sm:w-auto"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
         >
-          <Link href="#features" className="btn-gradient inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-2xl px-6 py-3">
-            Get Started <ArrowRight size={18} />
-          </Link>
-        </motion.div>
-      </section>
-
-      {/* Features section */}
-      <section id="features" className="container py-12 md:py-16">
-        <motion.div initial="hidden" animate="show" variants={staggerContainer}>
-          <motion.h2 className="mb-2" variants={fadeUp}>
-            Features
-          </motion.h2>
-          <motion.p className="mb-8 text-text-body" variants={fadeUp}>
-            Core steps to create your visuals: upload, pick a model, choose a template, and prompt the generator.
-          </motion.p>
-
-          {/* Featured preview section */}
-          <motion.div className="space-y-8 mb-8" variants={staggerContainer}>
-            {/* Featured Models */}
-            <motion.div variants={fadeUp}>
-              <div className="mb-3 flex items-center justify-between">
-                <h3 className="text-h3">Featured Models</h3>
-                <button
-                  onClick={() => setOpenPicker(true)}
-                  className="text-sm text-text-body hover:text-text-hi transition"
-                >
-                  Browse all
-                </button>
-              </div>
-              <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-                {(items || [])
-                  .filter((it) => it.kind === "model")
-                  .slice(0, 4)
-                  .map((it, idx) => {
-                    const thumb =
-                      (it as any).styles?.[0]?.thumb || "/catalog/models/model_card.svg";
-                    const isSelected = selectedModel === it.id;
-                    return (
-                      <motion.button
-                        key={`featured-model:${it.id}`}
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.02 * idx }}
-                        onClick={() => {
-                          const next = selectedModel === it.id ? null : it.id;
-                          setSelectedModel(next);
-                          setSelectedModelId(next);
-                        }}
-                        className={cn(
-                          "group overflow-hidden rounded-2xl border bg-white text-left transition",
-                          isSelected ? "ring-2 ring-emerald-400/50" : "ring-1 ring-[rgba(15,23,42,0.08)]"
-                        )}
-                      >
-                        <div className="relative aspect-[4/3] w-full bg-surface">
-                          <img src={thumb} alt={it.name} className="h-full w-full object-cover" />
-                          <div className="absolute left-3 top-3 flex items-center gap-2">
-                            <TypeBadge kind="model" />
-                            {isSelected && <SelectedBadge />}
-                          </div>
-                        </div>
-                        <div className="p-4">
-                          <p className="font-medium text-text-hi">{it.name}</p>
-                          <p className="text-xs text-text-body mt-1">
-                            {(it as any).gender ? `Model • ${(it as any).gender}` : "Model"}
-                          </p>
-                          <div className="mt-3 text-right">
-                            <span className="text-[11px] text-text-body/80 group-hover:text-text-hi transition">
-                              {isSelected ? "Selected" : "Click to select"}
-                            </span>
-                          </div>
-                        </div>
-                      </motion.button>
-                    );
-                  })}
-              </div>
-            </motion.div>
-
-            {/* Featured Templates */}
-            <motion.div variants={fadeUp}>
-              <div className="mb-3 flex items-center justify-between">
-                <h3 className="text-h3">Featured Templates</h3>
-                <button
-                  onClick={() => setOpenPicker(true)}
-                  className="text-sm text-text-body hover:text-text-hi transition"
-                >
-                  Browse all
-                </button>
-              </div>
-              <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-                {(items || [])
-                  .filter((it) => it.kind === "template")
-                  .slice(0, 4)
-                  .map((it, idx) => {
-                    const thumb = (it as any).thumb || "/catalog/templates/template_card.svg";
-                    const isSelected = selectedTemplate === it.id;
-                    return (
-                      <motion.button
-                        key={`featured-template:${it.id}`}
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.02 * idx }}
-                        onClick={() => {
-                          const next = selectedTemplate === it.id ? null : it.id;
-                          setSelectedTemplate(next);
-                          setSelectedTemplateId(next);
-                        }}
-                        className={cn(
-                          "group overflow-hidden rounded-2xl border bg-white text-left transition",
-                          isSelected ? "ring-2 ring-emerald-400/50" : "ring-1 ring-[rgba(15,23,42,0.08)]"
-                        )}
-                      >
-                        <div className="relative aspect-[4/3] w-full bg-surface">
-                          <img src={thumb} alt={it.name} className="h-full w-full object-cover" />
-                          <div className="absolute left-3 top-3 flex items-center gap-2">
-                            <TypeBadge kind="template" />
-                            {isSelected && <SelectedBadge />}
-                          </div>
-                        </div>
-                        <div className="p-4">
-                          <p className="font-medium text-text-hi">{it.name}</p>
-                          <p className="text-xs text-text-body mt-1">
-                            {(it as any).category ? `Template • ${(it as any).category}` : "Template"}
-                          </p>
-                          <div className="mt-3 text-right">
-                            <span className="text-[11px] text-text-body/80 group-hover:text-text-hi transition">
-                              {isSelected ? "Selected" : "Click to select"}
-                            </span>
-                          </div>
-                        </div>
-                      </motion.button>
-                    );
-                  })}
-              </div>
-            </motion.div>
-          </motion.div>
-
-          {/* Existing steps (Upload, Model Select, Prompt, etc.) */}
-          <motion.div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4" variants={staggerContainer}>
-            {/* Upload */}
-            <motion.div className="glass-card p-6" variants={fadeUp}>
-              <h3 className="mb-2">Upload</h3>
-              <p className="text-sm text-text-body mb-4">Add your product photo to begin.</p>
-              <label className="block">
-                <span className="mb-2 block text-xs text-text-body">Choose file</span>
-                <input type="file" className="input-premium w-full" />
-              </label>
-              <Link href="/upload" className="btn-gradient mt-4 inline-block w-full sm:w-auto text-center">Go to Upload</Link>
-            </motion.div>
-
-            {/* Unified Model + Template selection */}
-            <motion.div className="glass-card p-6" variants={fadeUp}>
-              <h3 className="mb-2">Model & Template</h3>
-              <p className="text-sm text-text-body mb-4">
-                Browse models and templates from one place.
-              </p>
-
-              <div className="grid grid-cols-1 gap-3">
-                <div className="rounded-2xl border bg-white/5 p-3 text-xs text-text-body">
-                  Model: <span className="font-medium text-text-hi">{selectedModel ?? "None"}</span>
-                </div>
-                <div className="rounded-2xl border bg-white/5 p-3 text-xs text-text-body">
-                  Template: <span className="font-medium text-text-hi">{selectedTemplate ?? "None"}</span>
-                </div>
-              </div>
-
-              <button
-                onClick={() => setOpenPicker(true)}
-                className={cn("btn-gradient mt-4 w-full sm:w-auto")}
-              >
-                Browse Items
-              </button>
-            </motion.div>
-
-            {/* Keep prompt box unchanged */}
-            <motion.div className="glass-card p-6" variants={fadeUp}>
-              <h3 className="mb-2">Prompt</h3>
-              <p className="text-sm text-text-body mb-4">
-                Describe the desired style or outcome.
-              </p>
-              <textarea
-                className="input-premium w-full h-24 resize-none"
-                placeholder="e.g., Soft daylight studio, clean backdrop, premium beauty aesthetic"
-              />
-              <button className={cn("btn-gradient mt-4 w-full sm:w-auto")}>Generate</button>
-            </motion.div>
-          </motion.div>
-        </motion.div>
-      </section>
-
-      {/* Dashboard skeleton preview */}
-      <section className="container pb-16">
-        <motion.div initial="hidden" animate="show" variants={staggerContainer}>
-          <motion.h2 className="mb-2" variants={fadeUp}>
-            Dashboard
-          </motion.h2>
-          <motion.p className="mb-8 text-text-body" variants={fadeUp}>
-            Quick look at your workspace. Visit the dashboard for full details.
-          </motion.p>
-
-          <motion.div className="grid gap-6 md:grid-cols-3" variants={staggerContainer}>
-            {[
-              { title: "Projects", value: 12 },
-              { title: "Templates Used", value: 34 },
-              { title: "Pending Jobs", value: 2 },
-            ].map((c) => (
-              <motion.div key={c.title} className="glass-card p-6" variants={fadeUp}>
-                <p className="text-sm text-text-body/80">{c.title}</p>
-                <p className="text-3xl font-semibold text-text-hi mt-1">{c.value}</p>
-              </motion.div>
-            ))}
-          </motion.div>
-
-          <div className="mt-6">
-            <Link href="/dashboard" className="btn-gradient inline-block w-full sm:w-auto text-center">Open Dashboard</Link>
-          </div>
-        </motion.div>
-      </section>
-
-      {/* Unified Picker Modal */}
-      <AnimatePresence>
-        {openPicker && (
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
           <motion.div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            className="relative z-10 w-full max-w-5xl rounded-2xl border bg-white p-4 shadow-soft-1"
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 20, opacity: 0 }}
           >
-            {/* Backdrop */}
-            <div
-              className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-              onClick={() => setOpenPicker(false)}
-            />
-            {/* Dialog */}
-            <motion.div
-              className="relative z-10 w-full max-w-5xl rounded-2xl border bg-white p-4 shadow-soft-1"
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: 20, opacity: 0 }}
-            >
-              <div className="mb-3 flex items-center gap-3">
-                <h3 className="text-h3 flex-1">Browse Items</h3>
-                <input
-                  value={q}
-                  onChange={(e) => setQ(e.target.value)}
-                  placeholder="Search models and templates…"
-                  className="input-premium h-10 w-full max-w-xs"
-                />
-                <button
-                  onClick={() => setOpenPicker(false)}
-                  className="rounded-xl border bg-white/50 px-3 py-2 text-sm hover:bg-white"
-                >
-                  Close
-                </button>
-              </div>
+            <div className="mb-3 flex items-center gap-3">
+              <h3 className="text-h3 flex-1">Browse Items</h3>
+              <input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Search models and templates…"
+                className="input-premium h-10 w-full max-w-xs"
+              />
+              <button
+                onClick={onClose}
+                className="rounded-xl border bg-white/50 px-3 py-2 text-sm hover:bg-white"
+              >
+                Close
+              </button>
+            </div>
 
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {!filtered && (
-                  <div className="text-text-body">Loading…</div>
-                )}
-                {filtered?.map((it, idx) => {
-                  const isModel = it.kind === "model";
-                  const thumb =
-                    isModel
-                      ? (it.styles?.[0]?.thumb || "/catalog/models/model_card.svg")
-                      : (it.thumb || "/catalog/templates/template_card.svg");
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {!filtered && <div className="text-text-body">Loading…</div>}
+              {filtered?.map((it, idx) => {
+                const isModel = it.kind === "model";
+                const thumb = isModel
+                  ? (it.styles?.[0]?.thumb || "/catalog/models/model_card.svg")
+                  : (it.thumb || "/catalog/templates/template_card.svg");
 
-                  const isSelected =
-                    (isModel && selectedModel === it.id) ||
-                    (!isModel && selectedTemplate === it.id);
+                const isSelected =
+                  (isModel && selectedModel === it.id) ||
+                  (!isModel && selectedTemplate === it.id);
 
-                  return (
-                    <motion.button
-                      key={`${it.kind}:${it.id}`}
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.02 * idx }}
-                      onClick={() => {
-                        if (isModel) {
-                          const next = selectedModel === it.id ? null : it.id;
-                          setSelectedModel(next);
-                          setSelectedModelId(next);
-                        } else {
-                          const next = selectedTemplate === it.id ? null : it.id;
-                          setSelectedTemplate(next);
-                          setSelectedTemplateId(next);
-                        }
-                      }}
-                      className={cn(
-                        "group overflow-hidden rounded-2xl border bg-white text-left transition",
-                        isSelected ? "ring-2 ring-emerald-400/50" : "ring-1 ring-[rgba(15,23,42,0.08)]"
-                      )}
-                    >
-                      <div className="relative aspect-[4/3] w-full bg-surface">
-                        <img src={thumb} alt={it.name} className="h-full w-full object-cover" />
-                        <div className="absolute left-3 top-3 flex items-center gap-2">
-                          <TypeBadge kind={it.kind} />
-                          {isSelected && <SelectedBadge />}
-                        </div>
+                return (
+                  <motion.button
+                    key={`${it.kind}:${it.id}`}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.02 * idx }}
+                    onClick={() => {
+                      if (isModel) {
+                        const next = selectedModel === it.id ? null : it.id;
+                        setSelectedModel(next);
+                      } else {
+                        const next = selectedTemplate === it.id ? null : it.id;
+                        setSelectedTemplate(next);
+                      }
+                    }}
+                    className={cn(
+                      "group overflow-hidden rounded-2xl border bg-white text-left transition",
+                      isSelected ? "ring-2 ring-emerald-400/50" : "ring-1 ring-[rgba(15,23,42,0.08)]"
+                    )}
+                  >
+                    <div className="relative aspect-[4/3] w-full bg-surface">
+                      <img src={thumb} alt={it.name} className="h-full w-full object-cover" />
+                      <div className="absolute left-3 top-3 flex items-center gap-2">
+                        <TypeBadge kind={it.kind} />
+                        {isSelected && <SelectedBadge />}
                       </div>
-                      <div className="p-4">
-                        <p className="font-medium text-text-hi">{it.name}</p>
-                        <p className="text-xs text-text-body mt-1">
-                          {isModel
-                            ? (it.gender ? `Model • ${it.gender}` : "Model")
-                            : (it.category ? `Template • ${it.category}` : "Template")}
-                        </p>
-                        <div className="mt-3 text-right">
-                          <span className="text-[11px] text-text-body/80 group-hover:text-text-hi transition">
-                            {isSelected ? "Selected" : "Click to select"}
-                          </span>
-                        </div>
+                    </div>
+                    <div className="p-4">
+                      <p className="font-medium text-text-hi">{it.name}</p>
+                      <p className="text-xs text-text-body mt-1">
+                        {isModel
+                          ? (it.gender ? `Model • ${it.gender}` : "Model")
+                          : (it.category ? `Template • ${it.category}` : "Template")}
+                      </p>
+                      <div className="mt-3 text-right">
+                        <span className="text-[11px] text-text-body/80 group-hover:text-text-hi transition">
+                          {isSelected ? "Selected" : "Click to select"}
+                        </span>
                       </div>
-                    </motion.button>
-                  );
-                })}
-              </div>
-            </motion.div>
+                    </div>
+                  </motion.button>
+                );
+              })}
+            </div>
           </motion.div>
-        )}
-      </AnimatePresence>
-    </main>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
 

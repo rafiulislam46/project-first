@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
+import LeftSidebar from "@/components/layout/left-sidebar";
+import BottomNav from "@/components/layout/bottom-nav";
 
 export const metadata: Metadata = {
   title: "AI Product Studio — Model Try-On, Templates, Copy & Variations",
@@ -13,9 +15,22 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body>
+        {/* Top bar */}
         <Navbar />
-        {children}
+
+        {/* App shell: left sidebar on desktop, content on right */}
+        <div className="flex">
+          <LeftSidebar />
+          <div className="min-h-[calc(100vh-56px)] flex-1">
+            {children}
+          </div>
+        </div>
+
+        {/* Footer */}
         <Footer />
+
+        {/* Mobile bottom navigation */}
+        <BottomNav />
       </body>
     </html>
   );
