@@ -109,49 +109,13 @@ export default function Page() {
                 Upload an outfit and see it applied to a model in seconds. No photoshoots. No retouching. High‑res exports ready for your store.
               </motion.p>
 
-              {/* Waitlist form */}
-              <motion.form
-                variants={fadeUp}
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  const fd = new FormData(e.currentTarget as HTMLFormElement);
-                  const email = String(fd.get("email") || "");
-                  if (email) {
-                    // Simple demo submit – replace with real endpoint when ready.
-                    console.log("Join waitlist:", email);
-                    alert("Thanks! We’ll notify you as soon as we’re ready.");
-                    (e.currentTarget as HTMLFormElement).reset();
-                  }
-                }}
-                className="w-full max-w-md"
-              >
-                <div className="flex flex-col sm:flex-row gap-2">
-                  <input
-                    type="email"
-                    name="email"
-                    required
-                    placeholder="Enter your email"
-                    className="w-full sm:w-auto md:w-[300px] h-11 rounded-2xl border bg-white/90 px-4 text-sm text-text-hi placeholder:text-text-body/50 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-1/30"
-                  />
-                  <button
-                    type="submit"
-                    className="h-11 w-full sm:w-auto shrink-0 rounded-2xl btn-gradient px-5 text-sm font-medium"
-                  >
-                    Join waitlist
-                  </button>
-                </div>
-                <p className="mt-2 text-xs text-text-body">
-                  Get early access and 20 free try‑ons at launch.
-                </p>
-              </motion.form>
-
-              {/* Secondary CTAs */}
-              <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
-                <Link href={"/upload" as Route} className="w-full sm:w-auto rounded-xl px-4 py-2 text-sm text-text-hi hover:bg-white/60 border bg-white/50 backdrop-blur">
-                  Try a demo
-                </Link>
-                <Link href={"/pricing" as Route} className="w-full sm:w-auto rounded-xl px-4 py-2 text-sm text-text-body hover:text-text-hi">
-                  View pricing
+              {/* Primary CTA: Generate */}
+              <motion.div variants={fadeUp} className="w-full flex justify-center">
+                <Link
+                  href={"/generator" as Route}
+                  className="px-6 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-yellow-400 text-white font-bold shadow-lg hover:opacity-90 transition"
+                >
+                  Generate
                 </Link>
               </motion.div>
             </motion.div>
@@ -177,10 +141,6 @@ export default function Page() {
 
                 {/* Front card: model try-on (after) */}
                 <div className="relative rounded-3xl border bg-white shadow-soft-2 overflow-hidden">
-                  <div className="flex items-center justify-between px-4 py-2 border-b">
-                    <span className="text-xs font-medium text-text-hi">AI Try‑On</span>
-                    <span className="text-[11px] text-emerald-700 bg-emerald-50 ring-1 ring-emerald-200 rounded-full px-2 py-0.5">After</span>
-                  </div>
                   <img
                     src="/demo/tryon/1.svg"
                     alt="Model wearing outfit"
