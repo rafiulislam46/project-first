@@ -216,7 +216,7 @@ export default function Page() {
                         {selectedTemplate === it.id ? "Selected" : "Use Template"}
                       </button>
                       <Link
-                        href={typeof it.refUrl === "string" ? it.refUrl : "/upload"}
+                        href={(it.refUrl as string) || "/upload"}
                         className="text-[12px] text-text-body hover:text-text-hi"
                       >
                         Preview
