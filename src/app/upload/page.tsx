@@ -10,6 +10,7 @@ import {
   cn,
 } from "@/lib/utils";
 import Link from "next/link";
+import type { Route } from "next";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { IS_MOCK } from "@/lib/config";
 import { canGenerate as canUseCredit, useOneCredit, getCredits } from "@/lib/credits";
@@ -233,26 +234,41 @@ export default function UploadPage() {
         <motion.div variants={fadeUp} className="mb-5">
           <ol className="grid grid-cols-2 md:grid-cols-4 gap-2">
             {[
-              { key: 1, label: "Upload product", href: "/upload", active: true },
-              { key: 2, label: "Select model", href: "/select?section=models#models", active: !!selectedModelId },
-              { key: 3, label: "Select template", href: "/select?section=templates#templates", active: !!selectedTemplateId },
-              { key: 4, label: "Generate", href: "#", active: canGenerate },
-            ].map((s, idx) => (
-              <li key={idx}>
-                <Link
-                  href={s.href}
-                  className={cn(
-                    "flex items-center gap-2 rounded-2xl border bg-white px-3 py-2 text-xs shadow-soft-1 transition hover:bg-white/90",
-                    s.active ? "ring-1 ring-accent-1/30 text-text-hi" : "text-text-body"
+                { key: 1, label: "Upload product", href: "/upload", active: true },
+                { key: 2, label: "Select model", href: "/select?section=models#models", active: !!selectedModelId },
+                { key: 3, label: "Select template", href: "/select?section=templates#templates", active: !!selectedTemplateId },
+                { key: 4, label: "Generate", href: "#", active: canGenerate },
+              ].map((s, idx) => (
+                <li key={idx}>
+                  {s.href.startsWith("/") ? (
+                    <Link
+                      href={s.href as Route}
+                      className={cn(
+                        "flex items-center gap-2 rounded-2xl border bg-white px-3 py-2 text-xs shadow-soft-1 transition hover:bg-white/90",
+                        s.active ? "ring-1 ring-accent-1/30 text-text-hi" : "text-text-body"
+                      )}
+                    >
+                      <span className={cn("inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px] border", s.active ? "bg-accent-1/10 border-accent-1/30" : "bg-surface")}>
+                        {idx + 1}
+                      </span>
+                      <span>{s.label}</span>
+                    </Link>
+                  ) : (
+                    <a
+                      href={s.href}
+                      className={cn(
+                        "flex items-center gap-2 rounded-2xl border bg-white px-3 py-2 text-xs shadow-soft-1 transition hover:bg-white/90",
+                        s.active ? "ring-1 ring-accent-1/30 text-text-hi" : "text-text-body"
+                      )}
+                    >
+                      <span className={cn("inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px] border", s.active ? "bg-accent-1/10 border-accent-1/30" : "bg-surface")}>
+                        {idx + 1}
+                      </span>
+                      <span>{s.label}</span>
+                    </a>
                   )}
-                >
-                  <span className={cn("inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px] border", s.active ? "bg-accent-1/10 border-accent-1/30" : "bg-surface")}>
-                    {idx + 1}
-                  </span>
-                  <span>{s.label}</span>
-                </Link>
-              </li>
-            ))}
+                </li>
+              ))}
           </ol>
         </motion.div>
 
@@ -279,8 +295,8 @@ export default function UploadPage() {
               <span className="text-sm font-medium">{selectedTemplateId ?? "None"}</span>
             </div>
             <div className="ml-auto flex gap-2">
-              <Link href="/select?section=models#models" className="rounded-xl border bg-white px-3 py-1.5 text-xs hover:bg-white/90">Browse models</Link>
-              <Link href="/select?section=templates#templates" className="rounded-xl border bg-white px-3 py-1.5 text-xs hover:bg-white/90">Browse templates</Link>
+              <Link href={"/select?section=models#models" as Route} className="rounded-xl border bg-white px-3 py-1.5 text-xs hover:bg-white/90">Browse models</Link>
+              <Link href={"/select?section=templates#templates" as Route} className="rounded-xl border bg-white px-3 py-1.5 text-xs hover:bg-white/90">Browse templates</Link>
             </div>
           </div>
 

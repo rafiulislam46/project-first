@@ -4,6 +4,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { fadeUp, staggerContainer } from "@/lib/utils";
 import Link from "next/link";
+import type { Route } from "next";
 import { HAS_SUPABASE } from "@/lib/config";
 
 export default function SignUpPage() {
@@ -22,7 +23,7 @@ export default function SignUpPage() {
         <motion.div className="glass-card p-6" variants={fadeUp}>
           <p className="text-text-body">
             Already have an account?{" "}
-            <Link href="/signin" className="text-accent-1 underline underline-offset-4">
+            <Link href={"/signin" as Route} className="text-accent-1 underline underline-offset-4">
               Sign in
             </Link>
             .
