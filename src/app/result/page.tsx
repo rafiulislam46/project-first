@@ -37,8 +37,8 @@ export default function ResultPage() {
             .catch(() => null),
         ]);
         if (!ignore) {
-          setTryon(padToFive((t1?.images as string[]) || []));
-          setTmpl(padToFive((t2?.images as string[]) || []));
+          setTryon(padToSix((t1?.images as string[]) || []));
+          setTmpl(padToSix((t2?.images as string[]) || []));
           setCopy(cpy);
         }
       } catch {
@@ -182,10 +182,15 @@ export default function ResultPage() {
 }
 
 /* utils */
-function padToFive(arr: string[]) {
+function padToSix(arr: string[]) {
   const base = [...arr];
-  const fallback = [1, 2, 3, 4, 5, 6].map((i) => `/demo/template/${i}.svg`);
-  while (base.length < 6) base.push(fallback[base.length] || fallback[0]);
+  // Only two template demo files exist; cycle between them to fill up to 6.
+  const fallback = ["/demo/template/1.svg", "/demo/template/2.svg"];
+  let i = 0;
+  while (base.length < 6) {
+    base.push(fallback[i % fallback.length]);
+    i++;
+  }
   return base.slice(0, 6);
 }
 function triggerDownload(url: string) {
