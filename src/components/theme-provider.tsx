@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { createContext, useContext, useEffect, useState } from "react";
 
 type Theme = "dark"; // locked to dark, but keeps provider for future expansion
