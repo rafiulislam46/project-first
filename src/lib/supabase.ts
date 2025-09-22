@@ -1,6 +1,5 @@
 import { createBrowserClient } from "@supabase/ssr";
 import { HAS_SUPABASE, SUPABASE_ANON_KEY, SUPABASE_URL } from "@/lib/config";
-export { getServerSupabase } from "@/lib/supabase-server";
 
 /**
  * Creates (and memoizes) a Supabase client for browser/client components.
