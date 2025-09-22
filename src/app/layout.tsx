@@ -8,6 +8,7 @@ import BottomNav from "@/components/layout/bottom-nav";
 import { ThemeProvider } from "@/components/theme-provider";
 import MotionProvider from "@/components/motion-provider";
 import PageTransition from "@/components/page-transition";
+import AuthProvider from "@/lib/AuthProvider";
 
 export const metadata: Metadata = {
   title: "AI Product Studio — Model Try-On, Templates, Copy & Variations",
@@ -26,24 +27,26 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body className="bg-lux-gradient min-h-screen">
         <ThemeProvider>
-          <MotionProvider>
-            {/* Top bar */}
-            <Navbar />
+          <AuthProvider>
+            <MotionProvider>
+              {/* Top bar */}
+              <Navbar />
 
-            {/* App shell: left fixed sidebar (desktop), right scrollable content */}
-            <div className="flex h-[calc(100vh-56px)] overflow-hidden">
-              <LeftSidebar />
-              <div className="flex-1 overflow-y-auto pb-14 md:pb-0">
-                <PageTransition>{children}</PageTransition>
+              {/* App shell: left fixed sidebar (desktop), right scrollable content */}
+              <div className="flex h-[calc(100vh-56px)] overflow-hidden">
+                <LeftSidebar />
+                <div className="flex-1 overflow-y-auto pb-14 md:pb-0">
+                  <PageTransition>{children}</PageTransition>
+                </div>
               </div>
-            </div>
 
-            {/* Footer */}
-            <Footer />
+              {/* Footer */}
+              <Footer />
 
-            {/* Mobile bottom navigation */}
-            <BottomNav />
-          </MotionProvider>
+              {/* Mobile bottom navigation */}
+              <BottomNav />
+            </MotionProvider>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>
