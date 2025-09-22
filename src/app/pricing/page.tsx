@@ -53,7 +53,34 @@ export default function PricingPage() {
     []
   );
 
-  const handleSelect = (title: string) => {
+  const handleSelect = async (title: string) => {
+    if (title === "Pro") {
+      try {
+        const res = await fetch("/api/pay/sslcommerz/create", { method: "POST" });
+        const data = await res.json();
+        if (!res.ok) {
+          const id = idRef.current++;
+          setToasts((prev) => [...prev, { id, message: `Payment error: ${data?.error || "failed"}` }]);
+          setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), 3000);
+          return;
+        }
+        // Prefer GatewayPageURL then redirectGatewayURL
+        const url = data?.GatewayPageURL || data?.redirectGatewayURL;
+        if (url) {
+          window.location.href = url as string;
+          return;
+        }
+        const id = idRef.current++;
+        setToasts((prev) => [...prev, { id, message: "No gateway URL returned." }]);
+        setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), 3000);
+      } catch (e: any) {
+        const id = idRef.current++;
+        setToasts((prev) => [...prev, { id, message: `Network error: ${String(e?.message || e)}` }]);
+        setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), 3000);
+      }
+      return;
+    }
+
     const id = idRef.current++;
     setToasts((prev) => [...prev, { id, message: `${title} upgrade flow coming soon.` }]);
     setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), 3000);
