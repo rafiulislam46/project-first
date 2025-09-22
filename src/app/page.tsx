@@ -18,6 +18,7 @@ import {
   overrideTemplatesWithManifest,
   cn,
 } from "@/lib/utils";
+import GradientCarouselCards from "@/components/gradient-carousel";
 
 type ModelStyle = { key: string; thumb?: string };
 type Model = { id: string; name: string; gender?: string; styles?: ModelStyle[] };
@@ -124,46 +125,14 @@ export default function Page() {
               </motion.div>
             </motion.div>
 
-            {/* Right: Demo stack (before outfit + after on model) */}
+            {/* Right: Gradient Carousel Cards (replaces TRY-ON placeholder) */}
             <motion.div
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ type: "spring", stiffness: 120, damping: 18, delay: 0.05 }}
               className="relative"
             >
-              <div className="relative mx-auto w-full max-w-xl">
-                {/* Back card: outfit (before) */}
-                <div className="pointer-events-none absolute -left-6 -top-6 hidden md:block">
-                  <div className="rounded-2xl border bg-white/90 shadow-soft-2 backdrop-blur overflow-hidden w-44">
-                    <div className="flex items-center justify-between px-3 py-2 border-b">
-                      <span className="text-[11px] text-text-body">Outfit</span>
-                      <span className="text-[10px] text-text-body/70">Before</span>
-                    </div>
-                    <img src="/demo/template/1.svg" alt="Outfit before" className="h-40 w-full object-cover" />
-                  </div>
-                </div>
-
-                {/* Front card: model try-on (after) */}
-                <div className="relative rounded-3xl border bg-white shadow-soft-2 overflow-hidden">
-                  <img
-                    src="/demo/tryon/1.svg"
-                    alt="Model wearing outfit"
-                    className="w-full h-auto"
-                  />
-                </div>
-
-                {/* Floating small previews */}
-                <div className="pointer-events-none absolute -right-6 bottom-8 hidden md:block">
-                  <div className="rounded-2xl border bg-white/90 shadow-soft-2 backdrop-blur overflow-hidden w-28">
-                    <img src="/demo/tryon/2.svg" alt="Preview 2" className="h-24 w-full object-cover" />
-                  </div>
-                </div>
-                <div className="pointer-events-none absolute -right-10 -top-6 hidden md:block">
-                  <div className="rounded-2xl border bg-white/90 shadow-soft-2 backdrop-blur overflow-hidden w-32">
-                    <img src="/demo/tryon/3.svg" alt="Preview 3" className="h-28 w-full object-cover" />
-                  </div>
-                </div>
-              </div>
+              <GradientCarouselCards />
             </motion.div>
           </div>
         </div>
