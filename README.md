@@ -125,7 +125,7 @@ You can disable this by upgrading PLAN (set PLAN=pro) or switching to live mode.
 
 If NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are present, the app will:
 
-- Use Supabase Auth for user sessions (cookies via @supabase/auth-helpers-nextjs).
+- Use Supabase Auth for user sessions (cookies via @supabase/ssr).
 - Store user profiles and saved assets in Postgres.
 - Provide server adapters for plan/credits and saving assets.
 - Fall back to local mock storage when env vars are missing.
@@ -147,6 +147,7 @@ Optional:
 Use the Supabase SQL editor or psql against your Supabase database and run:
 
 - sql/000_init.sql
+- (optional) sql/001_images.sql if you plan to store generated images too
 
 This will create:
 
@@ -154,6 +155,7 @@ This will create:
 - assets   (id uuid PK default gen_random_uuid(), user_id uuid, kind text, src_urls jsonb, copy jsonb, created_at timestamp default now())
 - catalog_models (id text PK, name text, gender text, thumb_url text, styles jsonb)
 - catalog_templates (id text PK, name text, category text, ref_url text, thumb text)
+- images (optional) for storing generated image URLs
 - RLS policies
 - RPC public.use_one_credit(p_user_id uuid) to decrement a credit atomically
 
