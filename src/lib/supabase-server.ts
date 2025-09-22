@@ -11,5 +11,27 @@ import { HAS_SUPABASE, SUPABASE_ANON_KEY, SUPABASE_URL } from "@/lib/config";
 export async function getServerSupabase() {
   if (!HAS_SUPABASE) return null;
 
-  return createServerClient(SUPABASE_URL!, SUPABASE_ANON_KEY!, { cookies });
+  const cookieStore = cookies();
+
+  return createServerClient(SUPABASE_URL!, SUPABASE_ANON_KEY!, {
+    cookies: {
+      get(name: string) {
+        return cookieStore.get(name)?.value;
+      },
+      set(name, value, options) {
+        try {
+          cookieStore.set({ name, value, ...options });
+        } catch {
+          // In some contexts (e.g. during rendering), cookies may be immutable.
+        }
+      },
+      remove(name, _options) {
+        try {
+          cookieStore.delete(name);
+        } catch {
+          // In some contexts (e.g. during rendering), cookies may be immutable.
+        }
+      },
+    },
+  });
 }
