@@ -35,7 +35,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
     let mounted = true;
 
     // Initialize from current session
-    supabase.auth.getSession().then(({ data }) => {
+    supabase.auth.getSession().then(({ data }: { data: { session: Session | null } }) => {
       if (!mounted) return;
       setSession(data.session ?? null);
       setUser(data.session?.user ?? null);
