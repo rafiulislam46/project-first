@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
-import type { Session, User } from "@supabase/supabase-js";
+import type { AuthChangeEvent, Session, User } from "@supabase/supabase-js";
 import { getClientSupabase } from "@/lib/supabase";
 
 type AuthContextType = {
@@ -43,10 +43,12 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
     });
 
     // Listen for auth state changes
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, newSession) => {
-      setSession(newSession);
-      setUser(newSession?.user ?? null);
-    });
+    const { data: sub } = supabase.auth.onAuthStateChange(
+      (_event: AuthChangeEvent, newSession: Session | null) => {
+        setSession(newSession);
+        setUser(newSession?.user ?? null);
+      }
+    );
 
     return () => {
       mounted = false;
