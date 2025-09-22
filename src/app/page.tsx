@@ -27,7 +27,7 @@ type PickerItem =
   | ({ kind: "model" } & Model)
   | ({ kind: "template" } & Template);
 
-const FILTER_TABS = ["Featured", "Tshirt", "Hoodie", "Book", "Tote Bag"] as const;
+const FILTER_TABS = ["Featured", "Perfume", "Book", "Pant", "Tote Bag"] as const;
 
 export default function Page() {
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
@@ -75,10 +75,14 @@ export default function Page() {
     // Show only templates in the grid to mimic Mockey's mockups gallery
     const all = (items || []).filter((i) => i.kind === "template") as ({ kind: "template" } & Template)[];
     if (activeTab === "Featured") return all;
-    const s = activeTab.toLowerCase();
+    let s = activeTab.toLowerCase();
+    // Normalize common synonyms
+    if (s === "tote bag") s = "tote";
+    if (s === "tshirt") s = "t-shirt";
+    // keep other tabs as-is (perfume, book, pant)
     return all.filter((t) => {
       const cat = (t.category || "").toLowerCase() + " " + (t.name || "").toLowerCase();
-      return cat.includes(s.replace("tshirt", "t-shirt").replace("tote bag", "tote"));
+      return cat.includes(s);
     });
   }, [items, activeTab]);
 
@@ -165,35 +169,88 @@ export default function Page() {
         </div>
       </section>
 
-      {/* Templates grid */}
+      {/* Templates grid - Pic 02 style with heading, top chips and left sidebar */}
       <section className="w-full max-w-7xl mx-auto py-6 md:py-8">
         <div className="w-full px-4">
+          {/* Section heading */}
+          <h2 className="text-xl md:text-2xl font-semibold tracking-tight mb-3">
+            Pro quality product images
+          </h2>
+
+          {/* Top chips (filters) */}
+          <div className="flex flex-wrap items-center gap-2 mb-4">
+            {FILTER_TABS.map((tab) => (
+              <button
+                key={`chip-${tab}`}
+                onClick={() => setActiveTab(tab)}
+                className={cn(
+                  "h-8 rounded-full px-3 text-sm border transition",
+                  activeTab === tab
+                    ? "bg-black text-white border-black"
+                    : "bg-white text-text-hi hover:bg-surface border-[rgba(15,23,42,0.08)]"
+                )}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+
           {!items ? (
             <div className="text-text-body">Loading…</div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 w-full">
-              {mockups.map((it, idx) => {
-                const thumb = it.thumb || "/catalog/templates/template_card.svg";
-                const href = (`/generator?item=${it.id}`) as Route;
+            <div className="flex gap-6">
+              {/* Left sidebar categories (vertical) */}
+              <aside className="hidden md:block w-56 shrink-0">
+                <div className="sticky top-24">
+                  <div className="rounded-2xl border bg-white p-3">
+                    <p className="text-xs font-semibold text-text-body/80 px-2 mb-2">Categories</p>
+                    <div className="flex flex-col">
+                      {FILTER_TABS.map((tab) => (
+                        <button
+                          key={`side-${tab}`}
+                          onClick={() => setActiveTab(tab)}
+                          className={cn(
+                            "text-left px-2 py-2 rounded-lg text-sm transition",
+                            activeTab === tab
+                              ? "bg-surface text-text-hi"
+                              : "hover:bg-surface/60 text-text-body"
+                          )}
+                        >
+                          {tab}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </aside>
 
-                return (
-                  <motion.div
-                    key={it.id}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.015 * (idx % 10) }}
-                    className="overflow-hidden rounded-2xl"
-                  >
-                    <Link href={href} className="block">
-                      <img
-                        src={thumb}
-                        alt="Template"
-                        className="w-full h-48 object-cover rounded-xl shadow hover:scale-105 transition-transform duration-300"
-                      />
-                    </Link>
-                  </motion.div>
-                );
-              })}
+              {/* Grid */}
+              <div className="flex-1">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 w-full">
+                  {mockups.map((it, idx) => {
+                    const thumb = it.thumb || "/catalog/templates/template_card.svg";
+                    const href = (`/generator?item=${it.id}`) as Route;
+
+                    return (
+                      <motion.div
+                        key={it.id}
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.015 * (idx % 10) }}
+                        className="overflow-hidden rounded-2xl"
+                      >
+                        <Link href={href} className="block">
+                          <img
+                            src={thumb}
+                            alt="Template"
+                            className="w-full aspect-[4/3] object-cover rounded-xl shadow hover:scale-105 transition-transform duration-300"
+                          />
+                        </Link>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
           )}
         </div>
