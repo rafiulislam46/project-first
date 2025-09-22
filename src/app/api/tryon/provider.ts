@@ -1,5 +1,5 @@
 import { IS_MOCK, MODE, HAS_SUPABASE } from "@/lib/config";
-import { uploadImage, hasCloudinary } from "@/lib/cloudinary";
+import { uploadImage, hasCloudinary, uploadImageBuffer } from "@/lib/cloudinary";
 import { getServerSupabase } from "@/lib/supabase-server";
 
 /**
@@ -133,6 +133,10 @@ export async function generateTryOnImages(opts: TryOnOptions): Promise<string[]>
             src_urls: urls,
             copy: { prompt: prompt || "", productImageUrl },
           });
+
+          // Also store each URL in images table
+          const rows = urls.map((u) => ({ user_id: user.id, url: u }));
+          await (supabase as any).from("images").insert(rows);
         }
       }
     } catch {
@@ -199,7 +203,7 @@ async function generateWithReplicate(args: { imageUrl: string; style: StyleKey; 
     });
     if (!getRes.ok) {
       const text = await getRes.text().catch(() => "");
-      throw new Error(`replicate poll failed ${getRes.status}: ${text || getRes.statusText}`);
+      throw new Error(`replicate poll failed ${getRes.status}: ${text || ${}}`);
     }
     const data = (await getRes.json()) as any;
     if (data.status === "succeeded") {
@@ -254,8 +258,8 @@ async function generateWithHF(args: { imageUrl: string; style: StyleKey; prompt?
   const contentType = res.headers.get("content-type") || "";
   if (contentType.startsWith("image/")) {
     const buf = Buffer.from(await res.arrayBuffer());
-    const uploaded = await uploadImage(buf, { folder: "tryon", localExt: contentType.includes("jpeg") ? "jpg" : "png" });
-    return uploaded.secureUrl;
+    const url = await uploadImageBuffer(buf, { folder: "tryon", formatHint: contentType.includes("jpeg") ? "jpg" : "png" });
+    return url;
   }
 
   const data = await res.json().catch(() => null);
