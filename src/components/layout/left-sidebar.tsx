@@ -55,7 +55,7 @@ export default function LeftSidebar() {
   const [openCat, setOpenCat] = useState<string | null>("apparel");
 
   return (
-    <aside className="hidden lg:flex lg:w-64 xl:w-72 shrink-0 flex-col border-r bg-white/80 backdrop-blur-md">
+    <aside className="hidden lg:flex lg:w-64 xl:w-72 shrink-0 flex-col border-r bg-white/80 backdrop-blur-md sticky top-14 h-[calc(100vh-56px)] overflow-y-auto">
       <div className="h-14 px-4 flex items-center">
         <Link href={"/" as Route} className="flex items-center gap-2">
           <span className="text-text-hi font-semibold">Mockey</span>

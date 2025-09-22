@@ -167,58 +167,30 @@ export default function Page() {
           {!items ? (
             <div className="text-text-body">Loading…</div>
           ) : (
-            <div className="flex gap-6">
-              {/* Left sidebar categories (vertical) */}
-              <aside className="hidden md:block w-56 shrink-0">
-                <div className="sticky top-24">
-                  <div className="rounded-2xl border bg-white p-3">
-                    <p className="text-xs font-semibold text-text-body/80 px-2 mb-2">Categories</p>
-                    <div className="flex flex-col">
-                      {FILTER_TABS.map((tab) => (
-                        <button
-                          key={`side-${tab}`}
-                          onClick={() => setActiveTab(tab)}
-                          className={cn(
-                            "text-left px-2 py-2 rounded-lg text-sm transition",
-                            activeTab === tab
-                              ? "bg-surface text-text-hi"
-                              : "hover:bg-surface/60 text-text-body"
-                          )}
-                        >
-                          {tab}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </aside>
+            <div className="w-full">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 w-full">
+                {mockups.map((it, idx) => {
+                  const thumb = it.thumb || "/catalog/templates/template_card.svg";
+                  const href = (`/generator?item=${it.id}`) as Route;
 
-              {/* Grid */}
-              <div className="flex-1">
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 w-full">
-                  {mockups.map((it, idx) => {
-                    const thumb = it.thumb || "/catalog/templates/template_card.svg";
-                    const href = (`/generator?item=${it.id}`) as Route;
-
-                    return (
-                      <motion.div
-                        key={it.id}
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.015 * (idx % 10) }}
-                        className="overflow-hidden rounded-2xl"
-                      >
-                        <Link href={href} className="block">
-                          <img
-                            src={thumb}
-                            alt="Template"
-                            className="w-full aspect-[4/3] object-cover rounded-xl shadow hover:scale-105 transition-transform duration-300"
-                          />
-                        </Link>
-                      </motion.div>
-                    );
-                  })}
-                </div>
+                  return (
+                    <motion.div
+                      key={it.id}
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.015 * (idx % 10) }}
+                      className="overflow-hidden rounded-2xl"
+                    >
+                      <Link href={href} className="block">
+                        <img
+                          src={thumb}
+                          alt="Template"
+                          className="w-full aspect-[4/3] object-cover rounded-xl shadow hover:scale-105 transition-transform duration-300"
+                        />
+                      </Link>
+                    </motion.div>
+                  );
+                })}
               </div>
             </div>
           )}
