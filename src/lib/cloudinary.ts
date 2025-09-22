@@ -1,6 +1,7 @@
 import path from "node:path";
 import fs from "node:fs/promises";
 import crypto from "node:crypto";
+import { v2 as cloudinary } from "cloudinary";
 
 import { IS_MOCK } from "@/lib/config";
 
@@ -32,10 +33,32 @@ export const CLOUDINARY_UPLOAD_PRESET =
   "";
 
 /**
- * Whether Cloudinary is configured well enough to use uploads (unsigned)
+ * Initialize Cloudinary SDK once (server-side)
+ */
+let cloudinaryConfigured = false;
+function ensureCloudinaryConfig() {
+  if (cloudinaryConfigured) return;
+  if (CLOUDINARY_CLOUD_NAME) {
+    cloudinary.config({
+      cloud_name: CLOUDINARY_CLOUD_NAME,
+      api_key: CLOUDINARY_API_KEY || undefined,
+      api_secret: CLOUDINARY_API_SECRET || undefined,
+      secure: true,
+    });
+    cloudinaryConfigured = true;
+  }
+}
+
+/**
+ * Whether Cloudinary is configured well enough to use uploads.
+ * Accept either:
+ * - unsigned uploads (cloud_name + upload_preset), or
+ * - signed uploads (cloud_name + api_key + api_secret)
  */
 export function hasCloudinary(): boolean {
-  return !!(CLOUDINARY_CLOUD_NAME && CLOUDINARY_UPLOAD_PRESET);
+  const hasUnsigned = !!(CLOUDINARY_CLOUD_NAME && CLOUDINARY_UPLOAD_PRESET);
+  const hasSigned = !!(CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDINARY_API_SECRET);
+  return hasUnsigned || hasSigned;
 }
 
 /**
@@ -215,6 +238,68 @@ export type UploadResult = {
 };
 
 /**
+ * Helper to upload a raw image buffer via Cloudinary SDK (signed upload).
+ * Returns secure_url string.
+ */
+export async function uploadImageBuffer(
+  buf: Buffer,
+  opts?: {
+    folder?: string;
+    publicId?: string;
+    tags?: string[];
+    overwrite?: boolean;
+    resource_type?: "image" | "auto";
+    formatHint?: "png" | "jpg" | "jpeg" | "webp";
+  }
+): Promise<string> {
+  if (IS_MOCK || !hasCloudinary()) {
+    // Save locally during mock/dev
+    const ext = opts?.formatHint || "png";
+    const fileName = `${Date.now()}-${crypto.randomBytes(6).toString("hex")}.${ext}`;
+    const outDir = path.join(process.cwd(), "public", "generated");
+    await fs.mkdir(outDir, { recursive: true });
+    const outPath = path.join(outDir, fileName);
+    await fs.writeFile(outPath, buf);
+    return `/generated/${fileName}`;
+  }
+
+  ensureCloudinaryConfig();
+
+  // Prefer signed upload when API creds are provided, otherwise fall back to unsigned preset.
+  const useSigned = !!(CLOUDINARY_API_KEY && CLOUDINARY_API_SECRET);
+
+  if (useSigned) {
+    const params: Record<string, any> = {
+      folder: opts?.folder,
+      public_id: opts?.publicId,
+      overwrite: typeof opts?.overwrite === "boolean" ? opts?.overwrite : undefined,
+      tags: opts?.tags?.length ? opts.tags.join(",") : undefined,
+      resource_type: opts?.resource_type || "image",
+    };
+
+    const res = await new Promise<any>((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(params, (error, result) => {
+        if (error) return reject(error);
+        resolve(result);
+      });
+      stream.end(buf);
+    });
+
+    return String(res.secure_url || res.url || "");
+  }
+
+  // Fallback to unsigned preset via REST if no API secret available
+  const uploaded = await uploadImage(buf, {
+    folder: opts?.folder,
+    publicId: opts?.publicId,
+    tags: opts?.tags,
+    overwrite: opts?.overwrite,
+    localExt: opts?.formatHint || "png",
+  });
+  return uploaded.secureUrl;
+}
+
+/**
  * Upload an image either to local filesystem (MOCK) or to Cloudinary (LIVE).
  * - input can be:
  *   - a local absolute or relative filepath (string)
@@ -265,7 +350,62 @@ export async function uploadImage(
     return { secureUrl: `/generated/${fileName}` };
   }
 
-  // LIVE: upload to Cloudinary via unsigned upload
+  // Prefer signed SDK when credentials are present
+  if (CLOUDINARY_API_KEY && CLOUDINARY_API_SECRET && CLOUDINARY_CLOUD_NAME) {
+    ensureCloudinaryConfig();
+    // Allow string URL or buffer/blob
+    const uploadParams: Record<string, any> = {
+      folder: opts?.folder,
+      public_id: opts?.publicId,
+      overwrite: typeof opts?.overwrite === "boolean" ? opts?.overwrite : undefined,
+      tags: opts?.tags?.length ? opts.tags.join(",") : undefined,
+      resource_type: "image",
+    };
+
+    if (typeof input === "string") {
+      const result = await cloudinary.uploader.upload(input, uploadParams);
+      return {
+        publicId: result.public_id,
+        secureUrl: result.secure_url || result.url,
+        width: result.width,
+        height: result.height,
+        bytes: result.bytes,
+        format: result.format,
+        createdAt: result.created_at,
+        resourceType: result.resource_type,
+        raw: result,
+      };
+    }
+
+    const buf =
+      input instanceof Buffer
+        ? input
+        : input instanceof Blob
+        ? Buffer.from(await input.arrayBuffer())
+        : Buffer.from(input as ArrayBuffer);
+
+    const result: any = await new Promise((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(uploadParams, (error, res) => {
+        if (error) return reject(error);
+        resolve(res);
+      });
+      stream.end(buf);
+    });
+
+    return {
+      publicId: result.public_id,
+      secureUrl: result.secure_url || result.url,
+      width: result.width,
+      height: result.height,
+      bytes: result.bytes,
+      format: result.format,
+      createdAt: result.created_at,
+      resourceType: result.resource_type,
+      raw: result,
+    };
+  }
+
+  // Otherwise: LIVE unsigned upload via preset
   const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
 
   const form = new FormData();
