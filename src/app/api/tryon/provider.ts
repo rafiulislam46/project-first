@@ -123,7 +123,7 @@ export async function generateTryOnImages(opts: TryOnOptions): Promise<string[]>
   // Optionally save to Supabase as an asset row
   if (opts.saveAsset && HAS_SUPABASE) {
     try {
-      const supabase = getServerSupabase();
+      const supabase = await getServerSupabase();
       if (supabase) {
         const { data: { user } } = await (supabase as any).auth.getUser();
         if (user) {

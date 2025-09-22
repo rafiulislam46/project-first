@@ -12,7 +12,7 @@ import AdminNav from "./ui/admin-nav";
  */
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   if (HAS_SUPABASE) {
-    const supabase = getServerSupabase();
+    const supabase = await getServerSupabase();
     if (supabase) {
       const {
         data: { user },
