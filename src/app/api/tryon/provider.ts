@@ -205,8 +205,7 @@ async function generateWithReplicate(args: { imageUrl: string; style: StyleKey; 
       const text = await getRes.text().catch(() => "");
       throw new Error(`replicate poll failed ${getRes.status}: ${text || getRes.statusText}`);
     }
-    const data = (await getRes.json()) as _codeannewy</;
-y;
+    const data = (await getRes.json()) as any;
     if (data.status === "succeeded") {
       // Replicate returns output: string | string[]
       const out = data.output;
