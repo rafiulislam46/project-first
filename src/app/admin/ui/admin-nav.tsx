@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import type { Route } from "next";
 import { LayoutDashboard, Users, Image as ImageIcon, FileText, CreditCard, Settings } from "lucide-react";
 
 const items = [
