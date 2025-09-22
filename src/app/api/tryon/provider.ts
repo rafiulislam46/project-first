@@ -1,4 +1,4 @@
-import { IS_MOCK, MODE, HAS_SUPABASE } from "@/lib/config";
+import { MODE, HAS_SUPABASE } from "@/lib/config";
 import { uploadImage, hasCloudinary, uploadImageBuffer } from "@/lib/cloudinary";
 import { getServerSupabase } from "@/lib/supabase-server";
 
@@ -203,9 +203,10 @@ async function generateWithReplicate(args: { imageUrl: string; style: StyleKey; 
     });
     if (!getRes.ok) {
       const text = await getRes.text().catch(() => "");
-      throw new Error(`replicate poll failed ${getRes.status}: ${text || ${}}`);
+      throw new Error(`replicate poll failed ${getRes.status}: ${text || getRes.statusText}`);
     }
-    const data = (await getRes.json()) as any;
+    const data = (await getRes.json()) as _codeannewy</;
+y;
     if (data.status === "succeeded") {
       // Replicate returns output: string | string[]
       const out = data.output;
