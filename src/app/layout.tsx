@@ -30,10 +30,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             {/* Top bar */}
             <Navbar />
 
-            {/* App shell: left sidebar on desktop, content on right */}
-            <div className="flex">
+            {/* App shell: left fixed sidebar (desktop), right scrollable content */}
+            <div className="flex h-[calc(100vh-56px)] overflow-hidden">
               <LeftSidebar />
-              <div className="min-h-[calc(100vh-56px)] flex-1 pb-14 md:pb-0">
+              <div className="flex-1 overflow-y-auto pb-14 md:pb-0">
                 <PageTransition>{children}</PageTransition>
               </div>
             </div>
