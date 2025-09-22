@@ -12,7 +12,7 @@ export async function GET(_req: NextRequest) {
   if (!HAS_SUPABASE) {
     return json({ plan: "free", credits: 0 });
   }
-  const supabase = getServerSupabase();
+  const supabase = await getServerSupabase();
   if (!supabase) return json({ plan: "free", credits: 0 });
 
   const { data: { user }, error: userErr } = await (supabase as any).auth.getUser();
@@ -39,7 +39,7 @@ export async function POST(_req: NextRequest) {
     // client-side mock handles credits; return ok so flow continues
     return json({ ok: true });
   }
-  const supabase = getServerSupabase();
+  const supabase = await getServerSupabase();
   if (!supabase) return json({ ok: false }, 200);
 
   const { data: { user } } = await (supabase as any).auth.getUser();

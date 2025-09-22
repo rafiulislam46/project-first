@@ -10,7 +10,7 @@ import { json } from "../_utils";
  */
 export async function GET() {
   if (!HAS_SUPABASE) return json({ items: [] });
-  const supabase = getServerSupabase();
+  const supabase = await getServerSupabase();
   if (!supabase) return json({ items: [] });
   const { data: { user } } = await (supabase as any).auth.getUser();
   if (!user) return json({ items: [] });
@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
     // Return a local echo structure to satisfy client expectations
     return json({ item: { id: `local_${Date.now()}`, kind: body.kind, src_urls: body.src_urls, created_at: new Date().toISOString() } });
   }
-  const supabase = getServerSupabase();
+  const supabase = await getServerSupabase();
   if (!supabase) return json({ item: null });
 
   const { data: { user } } = await (supabase as any).auth.getUser();

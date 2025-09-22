@@ -8,7 +8,7 @@ import { getServerSupabase } from "@/lib/supabase-server";
  */
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   if (HAS_SUPABASE) {
-    const supabase = getServerSupabase();
+    const supabase = await getServerSupabase();
     if (supabase) {
       const { data: { user } } = await (supabase as any).auth.getUser();
       if (!user) {

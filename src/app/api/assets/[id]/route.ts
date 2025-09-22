@@ -8,7 +8,7 @@ export async function DELETE(_req: Request, { params }: Params) {
   if (!HAS_SUPABASE) {
     return json({ ok: true });
   }
-  const supabase = getServerSupabase();
+  const supabase = await getServerSupabase();
   if (!supabase) return json({ ok: false });
 
   const { data: { user } } = await (supabase as any).auth.getUser();
