@@ -12,7 +12,10 @@ import {
   staggerContainer,
 } from "@/lib/utils";
 import { getClientSupabase } from "@/lib/supabase-browser";
-import { CLOUDINARY_CLOUD_NAME, CLOUDINARY_UPLOAD_PRESET } from "@/lib/cloudinary";
+
+// Prefer client-safe NEXT_PUBLIC_ envs, do not import server-only values here.
+const NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+const NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
 
 /**
  * Catalog model shape stored in Supabase
@@ -119,19 +122,19 @@ function GeneratorContent() {
 
   // Client-side unsigned Cloudinary upload for garment image (JPG/PNG only)
   const uploadToCloudinary = useCallback(async (blob: Blob): Promise<string> => {
-    if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_UPLOAD_PRESET) {
+    if (!NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || !NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET) {
       throw new Error("Upload not configured. Missing Cloudinary env.");
     }
-    const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
+    const url = `https://api.cloudinary.com/v1_1/${NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`;
     const form = new FormData();
-    form.set("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+    form.set("upload_preset", NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!);
     form.set("folder", "uploads");
     form.set("tags", "generator,garment");
     form.set("file", blob, "product.png");
 
     const res = await fetch(url, { method: "POST", body: form });
     if (!res.ok) {
-      const text = await res.text().catch(() => "");
+");
       throw new Error(`Upload failed (${res.status}): ${text || res.statusText}`);
     }
     const json = await res.json();
