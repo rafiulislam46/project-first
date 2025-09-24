@@ -9,8 +9,8 @@ import { getClientSupabase } from "@/lib/supabase-browser";
 type CatalogModel = {
   id: string;
   name: string;
-  gender?: "male" | "female" | string | null;
-  thumb_url?: string | null;
+  gender: string;
+  thumb_url: string;
   styles?: { key: string; thumb_url?: string | null; thumb?: string | null }[] | null;
 };
 
@@ -88,10 +88,10 @@ export default function ModelsList() {
   }
 
   if (state.status === "error") {
+    // Log and render empty grid so UI doesn't break
+    console.error("Error fetching models", state.error);
     return (
-      <div className="text-red-600 px-4 md:px-6">
-        Failed to load models. {state.error}
-      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-4 md:px-6" />
     );
   }
 
