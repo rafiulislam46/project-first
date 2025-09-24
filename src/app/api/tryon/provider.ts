@@ -1,5 +1,5 @@
 import { MODE, HAS_SUPABASE } from "@/lib/config";
-import { uploadImage, checkCloudinaryConfig, uploadImageBuffer } from "@/lib/cloudinary";
+import { CLOUDINARY_CLOUD_NAME, CLOUDINARY_UPLOAD_PRESET, hasCloudinary } from "@/lib/cloudinary";
 import { getServerSupabase } from "@/lib/supabase-server";
 
 /**
@@ -104,18 +104,15 @@ export async function generateTryOnImages(opts: TryOnOptions): Promise<string[]>
   }
 
   const { productImageUrl, prompt } = opts;
-  const upload = !!opts.upload && checkCloudinaryConfig();
+  const doUpload = !!opts.upload && hasCloudinary();
 
   const tasks = STYLES.map((style) => async () => {
     const url = await generateOne({ imageUrl: productImageUrl, style, prompt });
-    if (!upload) return url;
+    if (!doUpload) return url;
 
-    const uploaded = await uploadImage(url, {
-      folder: "tryon",
-      tags: ["tryon", String(style)],
-      overwrite: false,
-    });
-    return uploaded.secureUrl;
+    // Unsigned upload to Cloudinary from URL
+    const uploadedUrl = await uploadUrlToCloudinary(url, ["tryon", String(style)]);
+    return uploadedUrl;
   });
 
   const urls = await runWithQueue(tasks, { concurrency: 3, retries: 2, timeoutMs: 90_000, backoffBaseMs: 800 });
@@ -225,7 +222,7 @@ async function generateWithReplicate(args: { imageUrl: string; style: StyleKey; 
  * Expects:
  * - HF_TOKEN
  * - HF_TRYON_MODEL (e.g., "user/tryon-model")
- * Returns a data URL uploaded or saved locally by uploadImage.
+ * Returns a URL uploaded to Cloudinary when configured, otherwise upstream URL.
  */
 async function generateWithHF(args: { imageUrl: string; style: StyleKey; prompt?: string }): Promise<string> {
   const token = String(process.env.HF_TOKEN);
@@ -258,14 +255,52 @@ async function generateWithHF(args: { imageUrl: string; style: StyleKey; prompt?
   const contentType = res.headers.get("content-type") || "";
   if (contentType.startsWith("image/")) {
     const buf = Buffer.from(await res.arrayBuffer());
-    const url = await uploadImageBuffer(buf, { folder: "tryon", formatHint: contentType.includes("jpeg") ? "jpg" : "png" });
-    return url;
+    if (hasCloudinary()) {
+      return await uploadBufferToCloudinary(buf);
+    }
+    // If Cloudinary not configured, return data URL fallback
+    const b64 = buf.toString("base64");
+    const ext = contentType.includes("jpeg") ? "jpeg" : contentType.includes("png") ? "png" : "octet-stream";
+    return `data:image/${ext};base64,${b64}`;
   }
 
   const data = await res.json().catch(() => null);
   if (data && typeof data.url === "string") {
+    // If HF returns a URL and Cloudinary is configured and upload requested elsewhere, just return URL.
     return data.url;
   }
   // Fallback: return source image
   return args.imageUrl;
+}
+
+/**
+ * Helpers to perform unsigned uploads to Cloudinary using fetch.
+ */
+async function uploadBufferToCloudinary(buffer: Buffer): Promise<string> {
+  const form = new FormData();
+  form.append("file", new Blob([buffer]));
+  form.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+  const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/upload`, {
+    method: "POST",
+    body: form,
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`cloudinary upload failed ${res.status}: ${text || res.statusText}`);
+  }
+  const json = (await res.json()) as any;
+  const url = json?.secure_url as string | undefined;
+  if (!url) throw new Error("cloudinary: missing secure_url");
+  return url;
+}
+
+async function uploadUrlToCloudinary(url: string, tags?: string[]): Promise<string> {
+  // Fetch remote image then upload as buffer
+  const r = await fetch(url, { cache: "no-store" });
+  if (!r.ok) {
+    const text = await r.text().catch(() => "");
+    throw new Error(`download failed ${r.status}: ${text || r.statusText}`);
+  }
+  const buf = Buffer.from(await r.arrayBuffer());
+  return await uploadBufferToCloudinary(buf);
 }
