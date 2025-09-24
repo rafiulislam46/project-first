@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { rateLimitOk, requireApiKey, tooManyRequests, unauthorized } from "./app/api/_utils";
+import { rateLimitOk, requireApiKey, tooManyRequests, unauthorized } from "./app/api/_middleware-utils";
 import { createServerClient } from "@supabase/ssr";
 import { HAS_SUPABASE, SUPABASE_ANON_KEY, SUPABASE_URL } from "@/lib/config";
 
