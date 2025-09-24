@@ -6,19 +6,19 @@ import { fadeUp, staggerContainer } from "@/lib/utils";
 import Link from "next/link";
 import type { Route } from "next";
 import { HAS_SUPABASE } from "@/lib/config";
-import { getClientSupabase } from "@/lib/supabase";
+import { getClientSupabase } from "@/lib/supabase-browser";
 
 export default function SignInPage() {
   const supabase = getClientSupabase();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
   const [loading, setLoading] = useState<"idle" | "signin" | "signup">("idle");
   const [message, setMessage] = useState<string>("");
   const [error, setError] = useState<string>("");
 
-  const disabled = useMemo(() => loading !== "idle", [loading]);
+  const disabled = useMemo<boolean>(() => loading !== "idle", [loading]);
 
-  const onSignIn = useCallback(async () => {
+  const onSignIn = useCallback(async (): Promise<void> => {
     if (!supabase) return;
     setError("");
     setMessage("");
@@ -36,7 +36,7 @@ export default function SignInPage() {
     setLoading("idle");
   }, [supabase, email, password]);
 
-  const onSignUp = useCallback(async () => {
+  const onSignUp = useCallback(async (): Promise<void> => {
     if (!supabase) return;
     setError("");
     setMessage("");
@@ -45,9 +45,7 @@ export default function SignInPage() {
       email,
       password,
       options: {
-        // If your Supabase project requires email confirmation, this will send an email.
-        emailRedirectTo:
-          typeof window !== "undefined" ? `${window.location.origin}` : undefined,
+        emailRedirectTo: typeof window !== "undefined" ? `${window.location.origin}` : undefined,
       },
     });
     if (err) {
@@ -124,7 +122,7 @@ export default function SignInPage() {
                 <button
                   onClick={onSignIn}
                   disabled={disabled || !email || !password}
-                  className="inline-flex items-center rounded-md bg-accent-1 px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50"
+                  className="inline-flex items-center rounded-md bg-gradient-to-r from-indigo-500 to-fuchsia-500 px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50"
                 >
                   {loading === "signin" ? "Signing in..." : "Sign In"}
                 </button>
@@ -138,7 +136,7 @@ export default function SignInPage() {
               </div>
 
               <p className="text-text-body text-sm">
-                Don't have an account?{" "}
+                {"Don't have an account?"}{" "}
                 <Link href={"/signup" as Route} className="text-accent-1 underline underline-offset-4">
                   Create one
                 </Link>
