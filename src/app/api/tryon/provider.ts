@@ -1,5 +1,5 @@
 import { MODE, HAS_SUPABASE } from "@/lib/config";
-import { uploadImage, hasCloudinary, uploadImageBuffer } from "@/lib/cloudinary";
+import { uploadImage, checkCloudinaryConfig, uploadImageBuffer } from "@/lib/cloudinary";
 import { getServerSupabase } from "@/lib/supabase-server";
 
 /**
@@ -104,7 +104,7 @@ export async function generateTryOnImages(opts: TryOnOptions): Promise<string[]>
   }
 
   const { productImageUrl, prompt } = opts;
-  const upload = !!opts.upload && hasCloudinary();
+  const upload = !!opts.upload && checkCloudinaryConfig();
 
   const tasks = STYLES.map((style) => async () => {
     const url = await generateOne({ imageUrl: productImageUrl, style, prompt });

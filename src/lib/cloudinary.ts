@@ -1,5 +1,3 @@
-"use server";
-
 import { v2 as cloudinary } from "cloudinary";
 
 /**
@@ -52,9 +50,13 @@ function ensureCloudinaryConfig() {
  * - unsigned uploads (cloud_name + upload_preset), or
  * - signed uploads (cloud_name + api_key + api_secret)
  */
-export function hasCloudinary(): boolean {
+export function checkCloudinaryConfig(): boolean {
   const hasUnsigned = !!(CLOUDINARY_CLOUD_NAME && CLOUDINARY_UPLOAD_PRESET);
-  const hasSigned = !!(CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDINARY_API_SECRET);
+  const hasSigned = !!(
+    CLOUDINARY_CLOUD_NAME &&
+    CLOUDINARY_API_KEY &&
+    CLOUDINARY_API_SECRET
+  );
   return hasUnsigned || hasSigned;
 }
 
@@ -129,7 +131,7 @@ export async function uploadImageBuffer(
     formatHint?: "png" | "jpg" | "jpeg" | "webp";
   }
 ): Promise<string> {
-  if (!hasCloudinary()) {
+  if (!checkCloudinaryConfig()) {
     // If Cloudinary is not configured, return empty string to let caller handle error.
     return "";
   }
@@ -178,7 +180,7 @@ export async function uploadImage(
     overwrite?: boolean;
   }
 ): Promise<UploadResult> {
-  if (!hasCloudinary()) {
+  if (!checkCloudinaryConfig()) {
     // If not configured, passthrough strings; otherwise return empty.
     if (typeof input === "string") return { secureUrl: input };
     return { secureUrl: "" };

@@ -60,7 +60,7 @@ export default function TemplatesPage() {
       <div className="w-full">
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-4 md:px-6">
           {list.length === 0 && <div className="text-text-body">No templates found.</div>}
-          {list.map((t) => {
+          {list.map((t: Template) => {
             const id = String(t.id);
             const thumb = t.thumb_url || "/catalog/templates/template_card.svg";
             const hasFailed = !!failedImages[id];
