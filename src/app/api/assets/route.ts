@@ -3,6 +3,8 @@ import { HAS_SUPABASE } from "@/lib/config";
 import { getServerSupabase } from "@/lib/supabase-server";
 import { json } from "../_utils";
 
+export const dynamic = "force-dynamic";
+
 /**
  * GET: list saved assets for current user (supabase mode).
  * POST: create a saved asset.
