@@ -30,7 +30,7 @@ export default function TryOnPage() {
     // Poll every 1.5s until status is terminal
     // eslint-disable-next-line no-constant-condition
     for (;;) {
-      const res = await fetch(`/api/tryon?id=${encodeURIComponent(id)}`, {
+      const res = await fetch(`/api/generator?id=${encodeURIComponent(id)}`, {
         method: "GET",
         cache: "no-store",
       });
@@ -80,7 +80,7 @@ export default function TryOnPage() {
 
     try {
       setLoading(true);
-      const res = await fetch("/api/tryon", {
+      const res = await fetch("/api/generator", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

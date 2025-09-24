@@ -12,17 +12,13 @@ import {
   getSelectedTemplateId,
   setSelectedModelId,
   setSelectedTemplateId,
-  loadAssetManifest,
-  loadLocalJSON,
-  overrideModelsWithManifest,
-  overrideTemplatesWithManifest,
   cn,
 } from "@/lib/utils";
 import GradientCarouselCards from "@/components/gradient-carousel";
 
-type ModelStyle = { key: string; thumb?: string };
-type Model = { id: string; name: string; gender?: string; styles?: ModelStyle[] };
-type Template = { id: string; name: string; category?: string; refUrl?: string; thumb?: string };
+type ModelStyle = { key: string; thumb?: string; thumb_url?: string | null };
+type Model = { id: string; name: string; gender?: string | null; thumb_url?: string | null; styles?: ModelStyle[] };
+type Template = { id: string; name: string; category?: string | null; refUrl?: string | null; thumb?: string | null };
 
 type PickerItem =
   | ({ kind: "model" } & Model)
@@ -50,19 +46,28 @@ export default function Page() {
     let ignore = false;
     async function load() {
       try {
-        const [modelsLocal, templatesLocal, manifest] = await Promise.all([
-          loadLocalJSON<Model[]>("/data/models.json"),
-          loadLocalJSON<Template[]>("/data/templates.json"),
-          loadAssetManifest(),
+        // Fetch from API routes (Supabase-backed)
+        const [modelsRes, templatesRes] = await Promise.all([
+          fetch("/api/models", { cache: "no-store" }),
+          fetch("/api/templates", { cache: "no-store" }),
         ]);
-        const models = overrideModelsWithManifest(modelsLocal || [], manifest).map(
-          (m) => ({ ...m, kind: "model" as const })
-        );
-        const templates = overrideTemplatesWithManifest(templatesLocal || [], manifest).map(
-          (t) => ({ ...t, kind: "template" as const })
-        );
+        const modelsJson = await modelsRes.json().catch(() => ({ items: [] as Model[] }));
+        const templatesJson = await templatesRes.json().catch(() => ({ items: [] as Template[] }));
+
+        const models = (modelsJson.items || []).map((m: Model) => {
+          const styleThumb = m.styles?.[0]?.thumb_url || m.styles?.[0]?.thumb;
+          const thumb = m.thumb_url || styleThumb || "/catalog/models/model_card.svg";
+          return { ...m, thumb };
+        }).map((m) => ({ ...m, kind: "model" as const }));
+
+        const templates = (templatesJson.items || []).map((t: Template) => ({
+          ...t,
+          thumb: t.thumb || "/catalog/templates/template_card.svg",
+        })).map((t) => ({ ...t, kind: "template" as const }));
+
         if (!ignore) setItems([...models, ...templates]);
-      } catch {
+      } catch (e) {
+        console.error("Failed to load models/templates:", e);
         if (!ignore) setItems([]);
       }
     }
@@ -73,14 +78,13 @@ export default function Page() {
   }, []);
 
   const mockups = useMemo(() => {
-    // Show only templates in the grid to mimic Mockey's mockups gallery
+    // Show only templates in the grid
     const all = (items || []).filter((i) => i.kind === "template") as ({ kind: "template" } & Template)[];
     if (activeTab === "Featured") return all;
     let s = activeTab.toLowerCase();
     // Normalize common synonyms
     if (s === "tote bag") s = "tote";
     if (s === "tshirt") s = "t-shirt";
-    // keep other tabs as-is (perfume, book, pant)
     return all.filter((t) => {
       const cat = (t.category || "").toLowerCase() + " " + (t.name || "").toLowerCase();
       return cat.includes(s);
@@ -197,7 +201,7 @@ export default function Page() {
         </div>
       </section>
 
-      {/* Unified Picker Modal for selecting model/template (kept for feature parity) */}
+      {/* Unified Picker Modal for selecting model/template */}
       <PickerModal
         open={openPicker}
         onClose={() => setOpenPicker(false)}
@@ -295,9 +299,10 @@ function PickerModal({
               {!filtered && <div className="text-text-body">Loading…</div>}
               {filtered?.map((it, idx) => {
                 const isModel = it.kind === "model";
+                const styleThumb = it.styles?.[0]?.thumb_url || it.styles?.[0]?.thumb;
                 const thumb = isModel
-                  ? (it.styles?.[0]?.thumb || "/catalog/models/model_card.svg")
-                  : (it.thumb || "/catalog/templates/template_card.svg");
+                  ? (it as any).thumb_url || styleThumb || "/catalog/models/model_card.svg"
+                  : (it as any).thumb || "/catalog/templates/template_card.svg";
 
                 const isSelected =
                   (isModel && selectedModel === it.id) ||
@@ -324,7 +329,7 @@ function PickerModal({
                     )}
                   >
                     <div className="relative aspect-[4/3] w-full bg-surface">
-                      <img src={thumb} alt={it.name} className="h-full w-full object-cover" />
+                      <img src={thumb as string} alt={it.name} className="h-full w-full object-cover" />
                       <div className="absolute left-3 top-3 flex items-center gap-2">
                         <TypeBadge kind={it.kind} />
                         {isSelected && <SelectedBadge />}
