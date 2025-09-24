@@ -1,22 +1,54 @@
 import { NextResponse } from "next/server";
+import { CLOUDINARY_CLOUD_NAME, CLOUDINARY_UPLOAD_PRESET, hasCloudinary } from "@/lib/cloudinary";
 
 /**
  * POST /api/generator
- * Accepts either JSON or multipart/form-data with:
- * - human_img: URL of human/model image
- * - garm_img: URL of clothing image
- * Calls Replicate idm-vton and returns the prediction JSON.
+ * Dual-mode:
+ * - If multipart/form-data with "file" is provided, uploads to Cloudinary unsigned endpoint and returns { url }.
+ * - Otherwise expects JSON or multipart values for idm-vton (human_img, garm_img) and proxies to Replicate.
  *
  * Always returns JSON and never throws.
  */
 export async function POST(req: Request) {
   console.log("API /generator called");
   try {
-    // Support both JSON and multipart forms
+    const contentType = (req.headers.get("content-type") || "").toLowerCase();
+
+    // Branch 1: Cloudinary upload when a file is posted
+    if (contentType.includes("multipart/form-data")) {
+      const form = await req.formData();
+      const file = form.get("file");
+      if (file instanceof File) {
+        if (!hasCloudinary()) {
+          return NextResponse.json({ error: "Cloudinary is not configured" }, { status: 500 });
+        }
+        const uploadForm = new FormData();
+        uploadForm.append("file", file);
+        uploadForm.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+        const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/upload`, {
+          method: "POST",
+          body: uploadForm,
+        });
+        const uploaded = await uploadRes.json().catch(() => ({}));
+        if (!uploadRes.ok) {
+          return NextResponse.json(
+            { error: uploaded?.error?.message || uploadRes.statusText || "Cloudinary upload failed" },
+            { status: 502 }
+          );
+        }
+        const url = uploaded?.secure_url;
+        if (!url) {
+          return NextResponse.json({ error: "Cloudinary upload failed" }, { status: 502 });
+        }
+        return NextResponse.json({ url }, { status: 200 });
+      }
+    }
+
+    // Branch 2: Replicate idm-vton when URLs are provided
+    // Support both JSON and multipart forms without files
     let human_img: string | null = null;
     let garm_img: string | null = null;
 
-    const contentType = (req.headers.get("content-type") || "").toLowerCase();
     if (contentType.includes("application/json")) {
       const body = (await req.json().catch(() => ({}))) as any;
       human_img = typeof body.human_img === "string" ? body.human_img : null;
