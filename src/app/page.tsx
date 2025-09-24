@@ -16,9 +16,21 @@ import {
 } from "@/lib/utils";
 import GradientCarouselCards from "@/components/gradient-carousel";
 
-type ModelStyle = { key: string; thumb?: string; thumb_url?: string | null };
-type Model = { id: string; name: string; gender?: string | null; thumb_url?: string | null; styles?: ModelStyle[] };
-type Template = { id: string; name: string; category?: string | null; refUrl?: string | null; thumb?: string | null };
+// Strongly-typed domain models (match catalog tables)
+interface Model {
+  id: string;
+  name: string;
+  gender: string;
+  thumb_url: string;
+  styles: string[]; // keys for style names on the model
+}
+
+interface Template {
+  id: string;
+  name: string;
+  category: string;
+  thumb?: string;
+}
 
 type PickerItem =
   | ({ kind: "model" } & Model)
@@ -54,18 +66,22 @@ export default function Page() {
         const modelsJson = await modelsRes.json().catch(() => ({ items: [] as Model[] }));
         const templatesJson = await templatesRes.json().catch(() => ({ items: [] as Template[] }));
 
-        const models = (modelsJson.items || []).map((m: Model) => {
-          const styleThumb = m.styles?.[0]?.thumb_url || m.styles?.[0]?.thumb;
-          const thumb = m.thumb_url || styleThumb || "/catalog/models/model_card.svg";
-          return { ...m, thumb };
-        }).map((m) => ({ ...m, kind: "model" as const }));
+        // Ensure strong typing in map callbacks and default thumbs
+        const models = (modelsJson.items || [])
+          .map((m: Model) => {
+            const thumb = m.thumb_url ? m.thumb_url : "/catalog/models/model_card.svg";
+            return { ...m, thumb };
+          })
+          .map((m: Model & { thumb: string }) => ({ ...m, kind: "model" as const }));
 
-        const templates = (templatesJson.items || []).map((t: Template) => ({
-          ...t,
-          thumb: t.thumb || "/catalog/templates/template_card.svg",
-        })).map((t) => ({ ...t, kind: "template" as const }));
+        const templates = (templatesJson.items || [])
+          .map((t: Template) => ({
+            ...t,
+            thumb: t.thumb ? t.thumb : "/catalog/templates/template_card.svg",
+          }))
+          .map((t: Template) => ({ ...t, kind: "template" as const }));
 
-        if (!ignore) setItems([...models, ...templates]);
+        if (!ignore) setItems([...models, ...templates] as PickerItem[]);
       } catch (e) {
         console.error("Failed to load models/templates:", e);
         if (!ignore) setItems([]);
@@ -253,8 +269,8 @@ function PickerModal({
         const m = it as PickerItem & { kind: "model" };
         return (
           m.name.toLowerCase().includes(s) ||
-          (m.gender || "").toLowerCase().includes(s) ||
-          (m.styles || []).some((st) => st.key.toLowerCase().includes(s))
+          m.gender.toLowerCase().includes(s) ||
+          (m.styles || []).some((st) => st.toLowerCase().includes(s))
         );
       } else {
         const t = it as PickerItem & { kind: "template" };
@@ -299,10 +315,9 @@ function PickerModal({
               {!filtered && <div className="text-text-body">Loading…</div>}
               {filtered?.map((it, idx) => {
                 const isModel = it.kind === "model";
-                const styleThumb = it.styles?.[0]?.thumb_url || it.styles?.[0]?.thumb;
                 const thumb = isModel
-                  ? (it as any).thumb_url || styleThumb || "/catalog/models/model_card.svg"
-                  : (it as any).thumb || "/catalog/templates/template_card.svg";
+                  ? ((it as any).thumb as string | undefined) || (it as any).thumb_url || "/catalog/models/model_card.svg"
+                  : it.thumb || "/catalog/templates/template_card.svg";
 
                 const isSelected =
                   (isModel && selectedModel === it.id) ||
