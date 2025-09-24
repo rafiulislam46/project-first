@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { getServerSupabase } from "@/lib/supabase-server";
 
+export const dynamic = "force-dynamic";
+
 /**
  * GET /api/dashboard
  * Returns app health and simple counts from Supabase.

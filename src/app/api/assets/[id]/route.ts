@@ -2,6 +2,8 @@ import { HAS_SUPABASE } from "@/lib/config";
 import { getServerSupabase } from "@/lib/supabase-server";
 import { json, notFound } from "../../_utils";
 
+export const dynamic = "force-dynamic";
+
 type Params = { params: { id: string } };
 
 export async function DELETE(_req: Request, { params }: Params) {
