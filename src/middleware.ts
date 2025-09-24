@@ -5,7 +5,7 @@ import { HAS_SUPABASE, SUPABASE_ANON_KEY, SUPABASE_URL } from "@/lib/config";
 
 // Apply to API routes and gated pages
 export const config = {
-  matcher: ["/api/:path*", "/dashboard/:path*", "/generator/:path*"],
+  matcher: ["/api/:path*", "/generator/:path*"],
 };
 
 export default async function middleware(req: NextRequest) {

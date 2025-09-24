@@ -10,7 +10,6 @@ const items = [
   { href: "/", label: "Home", icon: HomeIcon },
   { href: "/select", label: "Search", icon: SearchIcon },
   { href: "/pricing", label: "Upgrade", icon: StarIcon },
-  { href: "/dashboard", label: "Profile", icon: UserIcon },
 ] as const;
 
 export default function BottomNav() {

@@ -14,8 +14,11 @@ type Category = {
 };
 
 const NAV_LINKS: { href: string; label: string }[] = [
+  { href: "/", label: "Home" },
   { href: "/models", label: "Models" },
-  { href: "/templates", label: "Templates" }
+  { href: "/templates", label: "Templates" },
+  { href: "/generator", label: "Generator" },
+  { href: "/pricing", label: "Pricing" }
 ];
 
 const CATEGORIES: Category[] = [
