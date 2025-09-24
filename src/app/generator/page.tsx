@@ -12,7 +12,6 @@ import {
   staggerContainer,
 } from "@/lib/utils";
 import { getClientSupabase } from "@/lib/supabase-browser";
-import { CLOUDINARY_UPLOAD_PRESET, CLOUDINARY_CLOUD_NAME } from "@/lib/cloudinary";
 
 /**
  * Catalog model shape stored in Supabase
