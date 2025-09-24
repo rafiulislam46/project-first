@@ -10,8 +10,11 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
 const CENTER_NAV: { href: string; label: string }[] = [
+  { href: "/", label: "Home" },
   { href: "/models", label: "Models" },
-  { href: "/templates", label: "Templates" }
+  { href: "/templates", label: "Templates" },
+  { href: "/generator", label: "Generator" },
+  { href: "/pricing", label: "Pricing" }
 ];
 
 export default function Navbar() {
