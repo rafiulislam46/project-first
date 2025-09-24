@@ -254,14 +254,12 @@ async function generateWithHF(args: { imageUrl: string; style: StyleKey; prompt?
   // Response may be bytes (image/*) or JSON; handle both
   const contentType = res.headers.get("content-type") || "";
   if (contentType.startsWith("image/")) {
-    const buf = Buffer.from(await res.arrayBuffer());
+    const blob = await res.blob();
     if (hasCloudinary()) {
-      return await uploadBufferToCloudinary(buf);
+      return await uploadBlobToCloudinary(blob);
     }
-    // If Cloudinary not configured, return data URL fallback
-    const b64 = buf.toString("base64");
-    const ext = contentType.includes("jpeg") ? "jpeg" : contentType.includes("png") ? "png" : "octet-stream";
-    return `data:image/${ext};base64,${b64}`;
+    // If Cloudinary not configured, return source image URL as fallback.
+    return args.imageUrl;
   }
 
   const data = await res.json().catch(() => null);
@@ -276,9 +274,9 @@ async function generateWithHF(args: { imageUrl: string; style: StyleKey; prompt?
 /**
  * Helpers to perform unsigned uploads to Cloudinary using fetch.
  */
-async function uploadBufferToCloudinary(buffer: Buffer): Promise<string> {
+async function uploadBlobToCloudinary(blob: Blob): Promise<string> {
   const form = new FormData();
-  form.append("file", new Blob([buffer]));
+  form.append("file", blob);
   form.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
   const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/upload`, {
     method: "POST",
@@ -294,13 +292,21 @@ async function uploadBufferToCloudinary(buffer: Buffer): Promise<string> {
   return url;
 }
 
-async function uploadUrlToCloudinary(url: string, tags?: string[]): Promise<string> {
-  // Fetch remote image then upload as buffer
-  const r = await fetch(url, { cache: "no-store" });
-  if (!r.ok) {
-    const text = await r.text().catch(() => "");
-    throw new Error(`download failed ${r.status}: ${text || r.statusText}`);
+async function uploadUrlToCloudinary(url: string, _tags?: string[]): Promise<string> {
+  // Upload remote URL directly to Cloudinary (no Buffer/ArrayBuffer usage)
+  const form = new FormData();
+  form.append("file", url);
+  form.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+  const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/upload`, {
+    method: "POST",
+    body: form,
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`cloudinary upload failed ${res.status}: ${text || res.statusText}`);
   }
-  const buf = Buffer.from(await r.arrayBuffer());
-  return await uploadBufferToCloudinary(buf);
+  const json = (await res.json()) as any;
+  const uploaded = json?.secure_url as string | undefined;
+  if (!uploaded) throw new Error("cloudinary: missing secure_url");
+  return uploaded;
 }
