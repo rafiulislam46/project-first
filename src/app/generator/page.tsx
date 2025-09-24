@@ -59,16 +59,16 @@ function GeneratorContent() {
   const [results, setResults] = useState<string[]>([]);
   const [pollId, setPollId] = useState<string | null>(null);
 
-  // Read ?item and redirect if missing
+  // Read ?item; if missing, keep user on the page and show a hint instead of redirecting
   useEffect(() => {
     const item = params.get("item");
     if (!item) {
-      // No model provided -> redirect to /models
-      router.replace("/models");
+      setSelectedModelId(null);
+      push({ type: "info", message: "No model selected. Open the Models page to pick one." });
       return;
     }
     setSelectedModelId(String(item));
-  }, [params, router]);
+  }, [params, router, push]);
 
   // Fetch model details from Supabase
   useEffect(() => {

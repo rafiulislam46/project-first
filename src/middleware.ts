@@ -3,16 +3,16 @@ import { rateLimitOk, requireApiKey, tooManyRequests, unauthorized } from "./app
 import { createServerClient } from "@supabase/ssr";
 import { HAS_SUPABASE, SUPABASE_ANON_KEY, SUPABASE_URL } from "@/lib/config";
 
-// Apply to API routes and gated pages
+// Apply to API routes only. Generator should be publicly accessible.
 export const config = {
-  matcher: ["/api/:path*", "/generator/:path*"],
+  matcher: ["/api/:path*"],
 };
 
 export default async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   // Gate selected pages behind auth if Supabase is configured
-  const isGated = pathname.startsWith("/dashboard") || pathname.startsWith("/generator");
+  const isGated = pathname.startsWith("/dashboard");
   if (HAS_SUPABASE && isGated) {
     const res = NextResponse.next();
 
