@@ -1,16 +1,6 @@
 import { NextRequest } from "next/server";
 import { db, json, badRequest } from "../_utils";
-import { promises as fs } from "fs";
-import path from "path";
-import crypto from "crypto";
-
-const uploadsDir = path.join(process.cwd(), "public", "uploads");
-
-async function ensureUploadsDir() {
-  try {
-    await fs.mkdir(uploadsDir, { recursive: true });
-  } catch {}
-}
+import { hasCloudinary, CLOUDINARY_CLOUD_NAME, CLOUDINARY_UPLOAD_PRESET } from "@/lib/cloudinary";
 
 export async function GET() {
   const items = await db.listProducts();
@@ -37,17 +27,32 @@ export async function POST(req: NextRequest) {
 
   if (!file) return badRequest("Missing file");
 
-  await ensureUploadsDir();
-  const arrayBuffer = await file.arrayBuffer();
-  const buffer = Buffer.from(arrayBuffer);
+  if (!hasCloudinary()) {
+    return json({ error: "Cloudinary is not configured" }, 500);
+  }
 
-  const hash = crypto.createHash("sha1").update(buffer).digest("hex").slice(0, 10);
-  const ext = (file.name.split(".").pop() || "bin").toLowerCase();
-  const filename = `${Date.now()}_${hash}.${ext}`;
-  const filepath = path.join(uploadsDir, filename);
-  await fs.writeFile(filepath, buffer);
+  // Upload directly to Cloudinary unsigned upload
+  const uploadForm = new FormData();
+  uploadForm.append("file", file);
+  uploadForm.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
 
-  const url = `/uploads/${filename}`;
-  const created = await db.createProduct({ name, imageUrl: url });
+  const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/upload`, {
+    method: "POST",
+    body: uploadForm,
+  });
+
+  if (!uploadRes.ok) {
+    const text = await uploadRes.text().catch(() => "");
+    return json({ error: `Cloudinary upload failed (${uploadRes.status}): ${text || uploadRes.statusText}` }, 502);
+  }
+
+  const uploaded: any = await uploadRes.json();
+  const secureUrl = uploaded?.secure_url as string | undefined;
+
+  if (!secureUrl) {
+    return json({ error: "Cloudinary upload failed" }, 502);
+  }
+
+  const created = await db.createProduct({ name, imageUrl: secureUrl });
   return json(created, 201);
 }
