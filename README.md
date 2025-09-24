@@ -66,6 +66,54 @@ Accessibility
 
 ---
 
+## Replicate Virtual Try-On (idm-vton)
+
+This project includes a Virtual Try-On page and API using Replicate's idm-vton model.
+
+### 1) Environment
+
+Set REPLICATE_API_TOKEN in your environment.
+
+- On Vercel:
+  - Project → Settings → Environment Variables
+  - Add key: REPLICATE_API_TOKEN
+  - Value: your Replicate API token
+  - Redeploy
+
+- Locally (optional):
+  - Create .env.local in the project root
+  - Add:
+    REPLICATE_API_TOKEN=your_token_here
+  - Restart dev server
+
+Note: The token is only used on the server in the Next.js API route and is never exposed to the client.
+
+### 2) API Route
+
+- Path: src/app/api/tryon/route.ts
+- POST /api/tryon expects JSON:
+  { "human_img": "https://...", "garm_img": "https://..." }
+- It calls Replicate with version:
+  0513734a452173b8173e907e3a59d19a36266e55b48528559432bd21c7d7e985
+  and input:
+  { human_img, garm_img, garment_des: "test cloth", category: "upper_body" }
+- Returns the full Replicate response as JSON.
+- Also supports GET /api/tryon?id=<prediction_id> to poll a prediction on the server without exposing the token.
+
+### 3) Frontend Page
+
+- Path: src/app/tryon/page.tsx
+- Client page with two inputs (Human Image URL, Cloth Image URL) and a Generate button.
+- Calls POST /api/tryon and then polls GET /api/tryon?id=... until the prediction completes.
+- Displays the resulting image on success and shows an error on failure.
+
+Usage:
+- Visit /tryon
+- Paste your human and garment image URLs
+- Click Generate
+
+---
+
 ## Premium placeholders and Cloudinary manifest
 
 Out of the box, the app ships with premium placeholders:
