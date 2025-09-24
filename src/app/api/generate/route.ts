@@ -21,20 +21,43 @@ export async function POST(req: NextRequest) {
     const imageBase64 = typeof body.imageBase64 === "string" ? body.imageBase64 : "";
     const prompt = typeof body.prompt === "string" ? body.prompt.trim() : "";
 
-    let buffer: Buffer | null = null;
+    // Use web-friendly binary types to avoid Node Buffer types in FormData/Blob.
+    let bytes: Uint8Array | null = null;
+    let mime: string | undefined;
 
     // If a base64 image is provided, prefer uploading that directly.
     if (imageBase64) {
-      const base64 = imageBase64.replace(/^data:image\/[a-zA-Z]+;base64,/, "");
+      // Extract mime if it's a data URL
+      const dataUrlMatch = imageBase64.match(/^data:([^;]+);base64,(.+)$/i);
+      let base64: string;
+      if (dataUrlMatch) {
+        mime = dataUrlMatch[1] || undefined;
+        base64 = dataUrlMatch[2] || "";
+      } else {
+        base64 = imageBase64.replace(/^data:image\/[a-zA-Z]+;base64,/, "");
+      }
+
       try {
-        buffer = Buffer.from(base64, "base64");
+        // Convert base64 to Uint8Array without relying on Buffer as the BlobPart
+        if (typeof atob === "function") {
+          const bin = atob(base64);
+          const len = bin.length;
+          const arr = new Uint8Array(len);
+          for (let i = 0; i < len; i++) arr[i] = bin.charCodeAt(i);
+          bytes = arr;
+        } else {
+          // Fallback in Node environments
+          // eslint-disable-next-line @typescript-eslint/no-var-requires
+          const nodeBuf: any = Buffer.from(base64, "base64");
+          bytes = new Uint8Array(nodeBuf.buffer, nodeBuf.byteOffset, nodeBuf.byteLength);
+        }
       } catch {
         return badRequest("Invalid base64 image data");
       }
     }
 
     // Otherwise, generate an image via Replicate using the prompt.
-    if (!buffer) {
+    if (!bytes) {
       if (!prompt) return badRequest("Missing prompt");
 
       const REPLICATE_API_TOKEN = process.env.REPLICATE_API_TOKEN || "";
@@ -128,17 +151,21 @@ export async function POST(req: NextRequest) {
         return json({ error: `Failed to download generated image (${imgRes.status}): ${text || imgRes.statusText}` }, 502);
       }
       const arrayBuf = await imgRes.arrayBuffer();
-      buffer = Buffer.from(arrayBuf);
+      bytes = new Uint8Array(arrayBuf);
+      mime = imgRes.headers.get("content-type") || undefined;
     }
 
-    // Upload buffer to Cloudinary via unsigned upload (no SDK, direct fetch)
+    // Upload to Cloudinary via unsigned upload (no SDK, direct fetch)
     if (!hasCloudinary()) {
       return json({ error: "Cloudinary is not configured" }, 500);
     }
 
     const form = new FormData();
-    // Provide a default filename; Cloudinary will infer format. You may include type if known.
-    form.append("file", new Blob([buffer!]));
+
+    // Convert bytes to Blob to satisfy Web FormData contract and TypeScript.
+    const blob = new Blob([bytes!], { type: mime || "image/png" });
+    // Provide a default filename; Cloudinary will infer/keep format.
+    form.append("file", blob, "image.png");
     form.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
 
     const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/upload`, {
