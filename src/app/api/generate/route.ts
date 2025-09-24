@@ -162,8 +162,12 @@ export async function POST(req: NextRequest) {
 
     const form = new FormData();
 
-    // Convert bytes to Blob to satisfy Web FormData contract and TypeScript.
-    const blob = new Blob([bytes!], { type: mime || "image/png" });
+    // Convert Uint8Array to ArrayBuffer slice for BlobPart to avoid TS mismatch.
+    const arrayBuffer = bytes!.buffer.slice(
+      bytes!.byteOffset,
+      bytes!.byteOffset + bytes!.byteLength
+    );
+    const blob = new Blob([arrayBuffer], { type: mime || "image/png" });
     // Provide a default filename; Cloudinary will infer/keep format.
     form.append("file", blob, "image.png");
     form.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
