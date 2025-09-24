@@ -134,7 +134,7 @@ function GeneratorContent() {
 
     const res = await fetch(url, { method: "POST", body: form });
     if (!res.ok) {
-");
+      const text = await res.text().catch(() => "");
       throw new Error(`Upload failed (${res.status}): ${text || res.statusText}`);
     }
     const json = await res.json();
