@@ -1,20 +1,34 @@
 "use client";
 
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { fadeUp, staggerContainer } from "@/lib/utils";
 import Link from "next/link";
 import type { Route } from "next";
 import { HAS_SUPABASE } from "@/lib/config";
 import { getClientSupabase } from "@/lib/supabase-browser";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function SignInPage() {
   const supabase = getClientSupabase();
+  const router = useRouter();
+  const search = useSearchParams();
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [loading, setLoading] = useState<"idle" | "signin" | "signup">("idle");
   const [message, setMessage] = useState<string>("");
   const [error, setError] = useState<string>("");
+
+  // If already logged in, redirect out of the sign-in page
+  useEffect(() => {
+    if (!supabase) return;
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session) {
+        const redirectedFrom = search.get("redirectedFrom");
+        router.replace((redirectedFrom || "/dashboard") as Route);
+      }
+    });
+  }, [supabase, router, search]);
 
   const disabled = useMemo<boolean>(() => loading !== "idle", [loading]);
 
@@ -32,9 +46,14 @@ export default function SignInPage() {
     } else {
       // Session should be set and persisted by Supabase
       setMessage(data.session ? "Signed in successfully." : "Check your email to complete sign in.");
+      // Redirect to dashboard when session exists
+      if (data.session) {
+        const redirectedFrom = search.get("redirectedFrom");
+        router.replace((redirectedFrom || "/dashboard") as Route);
+      }
     }
     setLoading("idle");
-  }, [supabase, email, password]);
+  }, [supabase, email, password, router, search]);
 
   const onSignUp = useCallback(async (): Promise<void> => {
     if (!supabase) return;
@@ -55,10 +74,14 @@ export default function SignInPage() {
         setMessage("Sign up successful. Please check your email to confirm your account.");
       } else {
         setMessage("Sign up successful.");
+        // Redirect after sign up if session exists
+        if (data.session) {
+          router.replace("/dashboard" as Route);
+        }
       }
     }
     setLoading("idle");
-  }, [supabase, email, password]);
+  }, [supabase, email, password, router]);
 
   return (
     <section className="container py-12 md:py-16">

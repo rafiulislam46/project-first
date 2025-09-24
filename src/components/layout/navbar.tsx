@@ -1,13 +1,14 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import type { Route } from "next";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/lib/AuthProvider";
+import { getClientSupabase } from "@/lib/supabase-browser";
 
 const CENTER_NAV: { href: string; label: string }[] = [
   { href: "/", label: "Home" },
@@ -19,7 +20,40 @@ const CENTER_NAV: { href: string; label: string }[] = [
 
 export default function Navbar() {
   const pathname = usePathname();
+  const { user } = useAuth();
+  const supabase = getClientSupabase();
   const [open, setOpen] = useState(false);
+  const [credits, setCredits] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!user) {
+      setCredits(null);
+      return;
+    }
+    let mounted = true;
+    fetch("/api/user/credits", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((d) => {
+        if (!mounted) return;
+        setCredits(typeof d.credits === "number" ? d.credits : 0);
+      })
+      .catch(() => setCredits(0));
+    return () => {
+      mounted = false;
+    };
+  }, [user]);
+
+  const displayCredits = useMemo(() => {
+    if (credits === null) return "";
+    return credits === -1 ? "∞" : String(credits);
+  }, [credits]);
+
+  const onLogout = async () => {
+    if (!supabase) return;
+    await supabase.auth.signOut();
+    // hard refresh to reset auth UI
+    window.location.href = "/";
+  };
 
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-white/80 backdrop-blur-md">
@@ -59,12 +93,31 @@ export default function Navbar() {
 
         {/* Right: auth */}
         <div className="hidden md:flex items-center gap-2">
-          <Button asChild variant="outline" className="rounded-xl hover:-translate-y-0.5 transition-transform">
-            <Link href={"/signin" as Route}>Log in</Link>
-          </Button>
-          <Button asChild className="btn-gradient rounded-xl hover:-translate-y-0.5 transition-transform">
-            <Link href={"/signup" as Route}>Sign up</Link>
-          </Button>
+          {!user ? (
+            <>
+              <Button asChild variant="outline" className="rounded-xl hover:-translate-y-0.5 transition-transform">
+                <Link href={"/signin" as Route}>Log in</Link>
+              </Button>
+              <Button asChild className="btn-gradient rounded-xl hover:-translate-y-0.5 transition-transform">
+                <Link href={"/signup" as Route}>Sign up</Link>
+              </Button>
+            </>
+          ) : (
+            <>
+              <Link
+                href={"/dashboard" as Route}
+                className="inline-flex items-center rounded-xl border bg-white h-9 px-3 text-sm"
+              >
+                Dashboard
+              </Link>
+              <div className="inline-flex items-center rounded-xl border bg-white h-9 px-3 text-sm text-text-body">
+                Credits: {displayCredits || "…"}
+              </div>
+              <Button variant="outline" className="rounded-xl" onClick={onLogout}>
+                Log out
+              </Button>
+            </>
+          )}
         </div>
 
         {/* Mobile hamburger */}
@@ -108,16 +161,37 @@ export default function Navbar() {
                 <div className="mt-2 pt-2 border-t">
                   {/* Auth buttons stack on small screens */}
                   <div className="mt-2 flex flex-col gap-2">
-                    <Link href={"/signin" as Route} onClick={() => setOpen(false)}>
-                      <div className="inline-flex w-full items-center justify-center rounded-xl border bg-white h-10 px-3 text-sm">
-                        Login
-                      </div>
-                    </Link>
-                    <Link href={"/signup" as Route} onClick={() => setOpen(false)}>
-                      <div className="inline-flex w-full items-center justify-center rounded-xl btn-gradient h-10 px-3 text-sm text-white">
-                        Sign up
-                      </div>
-                    </Link>
+                    {!user ? (
+                      <>
+                        <Link href={"/signin" as Route} onClick={() => setOpen(false)}>
+                          <div className="inline-flex w-full items-center justify-center rounded-xl border bg-white h-10 px-3 text-sm">
+                            Login
+                          </div>
+                        </Link>
+                        <Link href={"/signup" as Route} onClick={() => setOpen(false)}>
+                          <div className="inline-flex w-full items-center justify-center rounded-xl btn-gradient h-10 px-3 text-sm text-white">
+                            Sign up
+                          </div>
+                        </Link>
+                      </>
+                    ) : (
+                      <>
+                        <Link href={"/dashboard" as Route} onClick={() => setOpen(false)}>
+                          <div className="inline-flex w-full items-center justify-center rounded-xl border bg-white h-10 px-3 text-sm">
+                            Dashboard
+                          </div>
+                        </Link>
+                        <button
+                          onClick={() => {
+                            setOpen(false);
+                            onLogout();
+                          }}
+                          className="inline-flex w-full items-center justify-center rounded-xl border bg-white h-10 px-3 text-sm"
+                        >
+                          Log out
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
