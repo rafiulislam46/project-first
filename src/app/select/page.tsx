@@ -7,10 +7,6 @@ import {
   cn,
   fadeUp,
   staggerContainer,
-  loadLocalJSON,
-  loadAssetManifest,
-  overrideModelsWithManifest,
-  overrideTemplatesWithManifest,
   getSelectedModelId,
   setSelectedModelId,
   getSelectedTemplateId,
@@ -24,13 +20,11 @@ import SearchBar from "@/components/ui/search-bar";
  * Combined selection page that shows:
  * - Models section (with gender + style filters)
  * - Templates section (with category filter)
- * Each section is independently scrollable, responsive, and updates global selection on click,
- * then navigates back to the generator page (upload) by going back in history.
  */
 
-type ModelStyle = { key: string; thumb?: string };
-type Model = { id: string; name: string; gender?: string; styles?: ModelStyle[] };
-type Template = { id: string; name: string; category?: string; refUrl?: string; thumb?: string };
+type ModelStyle = { key: string; thumb?: string | null; thumb_url?: string | null };
+type Model = { id: string; name: string; gender?: string | null; thumb_url?: string | null; styles?: ModelStyle[] };
+type Template = { id: string; name: string; category?: string | null; refUrl?: string | null; thumb?: string | null };
 
 type Gender = "male" | "female" | "all";
 type StyleKey = string | "all";
@@ -67,29 +61,39 @@ function SelectPageInner() {
     setSelectedTemplate(getSelectedTemplateId());
   }, []);
 
-  // Load data
+  // Load data from API
   useEffect(() => {
     let ignore = false;
     async function load() {
       try {
-        const [modelsLocal, templatesLocal, manifest] = await Promise.all([
-          loadLocalJSON<Model[]>("/data/models.json"),
-          loadLocalJSON<Template[]>("/data/templates.json"),
-          loadAssetManifest(),
+        const [modelsRes, templatesRes] = await Promise.all([
+          fetch("/api/models", { cache: "no-store" }),
+          fetch("/api/templates", { cache: "no-store" }),
         ]);
+        const mjson = await modelsRes.json().catch(() => ({ items: [] as Model[] }));
+        const tjson = await templatesRes.json().catch(() => ({ items: [] as Template[] }));
 
-        let mergedModels = overrideModelsWithManifest(modelsLocal || [], manifest);
+        let listModels: Model[] = (mjson.items || []).map((m: Model) => {
+          return {
+            ...m,
+            styles: (m.styles || []) as ModelStyle[],
+          };
+        });
         if (IS_MOCK && IS_FREE) {
-          mergedModels = mergedModels.slice(0, 12);
+          listModels = listModels.slice(0, 12);
         }
 
-        const mergedTemplates = overrideTemplatesWithManifest(templatesLocal || [], manifest);
+        const listTemplates: Template[] = (tjson.items || []).map((t: Template) => ({
+          ...t,
+          thumb: t.thumb || "/catalog/templates/template_card.svg",
+        }));
 
         if (!ignore) {
-          setModels(mergedModels);
-          setTemplates(mergedTemplates);
+          setModels(listModels);
+          setTemplates(listTemplates);
         }
-      } catch {
+      } catch (e) {
+        console.error("Failed to load models/templates:", e);
         if (!ignore) {
           setModels([]);
           setTemplates([]);
@@ -105,7 +109,7 @@ function SelectPageInner() {
   // Derive chips/options
   const modelStyleOptions = useMemo(() => {
     const set = new Set<string>();
-    (models || []).forEach((m) => (m.styles || []).forEach((s) => set.add(s.key)));
+    (models || []).forEach((m) => (m.styles || []).forEach((s) => s?.key && set.add(s.key)));
     return ["all", ...Array.from(set).sort()];
   }, [models]);
 
@@ -264,10 +268,8 @@ function SelectPageInner() {
                   </motion.div>
                 )}
                 {filteredModels?.map((m, idx) => {
-                  const styleThumb = m.styles?.[0]?.thumb;
-                  const isAbsolute = styleThumb && /^https?:\/\//.test(styleThumb);
-                  const fallbackThumb = `/catalog/models/model_card.svg`;
-                  const thumb = isAbsolute ? styleThumb! : fallbackThumb;
+                  const styleThumb = m.styles?.[0]?.thumb_url || m.styles?.[0]?.thumb;
+                  const thumb = m.thumb_url || styleThumb || `/catalog/models/model_card.svg`;
 
                   const selected = selectedModel === m.id;
 
@@ -284,7 +286,7 @@ function SelectPageInner() {
                       className={cn("glass-card p-0 overflow-hidden cursor-pointer transition bg-white", IS_MOCK && IS_FREE ? "demo-watermark" : "")}
                     >
                       <div className="relative aspect-[4/3] w-full bg-surface">
-                        <img src={thumb} alt={m.name} className="h-full w-full object-cover" />
+                        <img src={thumb as string} alt={m.name} className="h-full w-full object-cover" />
                         {selected && <SelectedBadge className="absolute right-3 top-3" />}
                       </div>
                       <div className="p-5">
@@ -361,7 +363,7 @@ function SelectPageInner() {
                       className={cn("glass-card p-0 overflow-hidden cursor-pointer transition bg-white", IS_MOCK && IS_FREE ? "demo-watermark" : "")}
                     >
                       <div className="relative aspect-[4/3] w-full bg-surface">
-                        <img src={thumb} alt={t.name} className="h-full w-full object-cover" />
+                        <img src={thumb as string} alt={t.name} className="h-full w-full object-cover" />
                         <div className="absolute left-3 top-3 flex gap-2">
                           <Badge kind={isPro ? "pro" : "free"} />
                           {selected && <SelectedBadge />}
@@ -472,7 +474,7 @@ function Badge({ kind }: { kind: "pro" | "free" }) {
 
 function SelectedBadge({ className = "" }: { className?: string }) {
   return (
-    <span className={cn("inline-flex items-center gap-1 rounded-full bg-emerald-500/90 px-2 py-1 text-[10px] font-medium text-white shadow", className)}>
+    <span className={cn("inline-flex items-center gap-1 rounded-full bg-emerald-500/90 px-2 py-1 text-[10px] font-medium text_white shadow", className)}>
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
         <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
