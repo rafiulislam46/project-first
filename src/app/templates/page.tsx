@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { loadAssetManifest, loadLocalJSON, overrideTemplatesWithManifest } from "@/lib/utils";
 import { IS_MOCK } from "@/lib/config";
 import Link from "next/link";
@@ -20,12 +20,18 @@ export default function TemplatesPage() {
             loadLocalJSON<Template[]>("/data/templates.json"),
             loadAssetManifest(),
           ]);
+
+          // Debug logs to verify templates.json and manifest payloads
+          console.log("[Mock] Loaded templates.json:", local);
+          console.log("[Mock] Loaded asset manifest:", manifest);
+
           const merged = overrideTemplatesWithManifest(local || [], manifest);
           if (!ignore) setTemplates(merged);
         } else {
           if (!ignore) setTemplates([]);
         }
-      } catch {
+      } catch (e) {
+        console.warn("[Mock] Failed to load templates.json or manifest:", e);
         if (!ignore) setTemplates([]);
       }
     }
@@ -35,7 +41,7 @@ export default function TemplatesPage() {
     };
   }, []);
 
-  const list = templates;
+  const list = useMemo(() => templates, [templates]);
 
   return (
     <section className="w-full">

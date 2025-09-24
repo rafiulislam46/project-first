@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import type { Route } from "next";
 import { loadAssetManifest, loadLocalJSON, overrideModelsWithManifest } from "@/lib/utils";
 import { IS_MOCK } from "@/lib/config";
+import ModelsList from "@/components/ModelsList";
 
 type Model = {
   id: string;
@@ -14,23 +15,28 @@ type Model = {
 };
 
 export default function ModelsPage() {
+  // Keep mock flow for local development; otherwise show live Supabase-backed list
   const [models, setModels] = useState<Model[] | null>(null);
 
   useEffect(() => {
+    if (!IS_MOCK) return;
+
     let ignore = false;
     async function load() {
       try {
-        if (IS_MOCK) {
-          const [local, manifest] = await Promise.all([
-            loadLocalJSON<Model[]>("/data/models.json"),
-            loadAssetManifest(),
-          ]);
-          const merged = overrideModelsWithManifest(local || [], manifest);
-          if (!ignore) setModels(merged);
-        } else {
-          if (!ignore) setModels([]);
-        }
-      } catch {
+        const [local, manifest] = await Promise.all([
+          loadLocalJSON<Model[]>("/data/models.json"),
+          loadAssetManifest(),
+        ]);
+
+        // Debug logging for models.json path
+        console.log("[Mock] Loaded models.json:", local);
+        console.log("[Mock] Loaded asset manifest:", manifest);
+
+        const merged = overrideModelsWithManifest(local || [], manifest);
+        if (!ignore) setModels(merged);
+      } catch (e) {
+        console.warn("[Mock] Failed to load models.json or manifest:", e);
         if (!ignore) setModels([]);
       }
     }
@@ -40,8 +46,18 @@ export default function ModelsPage() {
     };
   }, []);
 
-  const list = models;
+  const list = useMemo(() => models, [models]);
 
+  if (!IS_MOCK) {
+    // Live mode: use Supabase-backed component with robust error handling
+    return (
+      <section className="w-full">
+        <ModelsList />
+      </section>
+    );
+  }
+
+  // Mock mode: render local JSON-backed grid (with safe fallback)
   return (
     <section className="w-full">
       <div className="w-full">
