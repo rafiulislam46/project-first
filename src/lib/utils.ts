@@ -66,16 +66,18 @@ export async function loadAssetManifest(): Promise<AssetManifest | null> {
 
 export function overrideModelsWithManifest(local: any[], manifest: AssetManifest | null) {
   if (!manifest?.models?.length) return local;
-  const byId = new Map(manifest.models.map((m) => [m.id.toLowerCase(), m]));
-  return local.map((m) => {
+  const byId = new Map<string, NonNullable<AssetManifest["models"]>[number]>(
+    manifest.models.map((m: NonNullable<AssetManifest["models"]>[number]) => [m.id.toLowerCase(), m])
+  );
+  return local.map((m: any) => {
     const over = byId.get(String(m.id).toLowerCase());
     if (!over) return m;
     return {
       ...m,
       name: over.name ?? m.name,
       gender: over.gender ?? m.gender,
-      styles: (m.styles || []).map((s: any) => {
-        const found = over.styles?.find((x) => x.key === s.key);
+      styles: (m.styles || []).map((s: { key: string; thumb?: string }) => {
+        const found = over.styles?.find((x: { key: string; thumb?: string }) => x.key === s.key);
         return found ? { ...s, thumb: found.thumb ?? s.thumb } : s;
       }),
     };

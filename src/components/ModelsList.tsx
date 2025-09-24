@@ -74,7 +74,7 @@ export default function ModelsList() {
 
   const items = useMemo(() => {
     if (state.status !== "success") return [];
-    return state.data.map((m) => {
+    return state.data.map((m: CatalogModel) => {
       // Prefer top-level thumb_url, otherwise styles[0].thumb or styles[0].thumb_url
       const styleThumb =
         (m.styles?.[0] as any)?.thumb_url || (m.styles?.[0] as any)?.thumb || null;
