@@ -3,23 +3,13 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import type { Route } from "next";
-import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/AuthProvider";
 import { getClientSupabase } from "@/lib/supabase-browser";
 
-const CENTER_NAV: { href: string; label: string }[] = [
-  { href: "/", label: "Home" },
-  { href: "/models", label: "Models" },
-  { href: "/templates", label: "Templates" },
-  { href: "/generator", label: "Generator" },
-  { href: "/pricing", label: "Pricing" }
-];
-
 export default function Navbar() {
-  const pathname = usePathname();
   const { user } = useAuth();
   const supabase = getClientSupabase();
   const [open, setOpen] = useState(false);
@@ -51,7 +41,6 @@ export default function Navbar() {
   const onLogout = async () => {
     if (!supabase) return;
     await supabase.auth.signOut();
-    // hard refresh to reset auth UI
     window.location.href = "/";
   };
 
@@ -59,69 +48,35 @@ export default function Navbar() {
     <header className="sticky top-0 z-40 w-full border-b bg-white/80 backdrop-blur-md">
       <div className="max-w-screen-xl mx-auto px-4 flex h-14 items-center">
         {/* Left: Logo */}
-        <div className="flex-1 md:flex-none">
+        <div className="flex items-center gap-2">
           <Link href={"/" as Route} className="flex items-center gap-2">
             <span className="text-text-hi font-semibold">Mockey</span>
             <span className="text-text-body/70">Clone</span>
           </Link>
         </div>
 
-        {/* Center: main nav */}
-        <nav className="hidden md:flex flex-1 items-center justify-center gap-2">
-          {CENTER_NAV.map((item) => {
-            const active = pathname === item.href || pathname.startsWith(item.href + "/");
-            return (
-              <Link
-                key={item.href}
-                href={item.href as Route}
-                className={cn(
-                  "relative rounded-xl px-3 py-2 text-sm text-text-body transition-colors hover:text-text-hi focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-1/20",
-                  active && "text-text-hi"
-                )}
-              >
-                {item.label}
-                {active && (
-                  <motion.span
-                    layoutId="nav-underline"
-                    className="absolute inset-x-1 -bottom-1 h-0.5 bg-accent-1/60"
-                  />
-                )}
-              </Link>
-            );
-          })}
-        </nav>
-
-        {/* Right: auth */}
-        <div className="hidden md:flex items-center gap-2">
-          {!user ? (
-            <>
-              <Button asChild variant="outline" className="rounded-xl hover:-translate-y-0.5 transition-transform">
-                <Link href={"/signin" as Route}>Log in</Link>
-              </Button>
-              <Button asChild className="btn-gradient rounded-xl hover:-translate-y-0.5 transition-transform">
-                <Link href={"/signup" as Route}>Sign up</Link>
-              </Button>
-            </>
-          ) : (
-            <>
-              <Link
-                href={"/dashboard" as Route}
-                className="inline-flex items-center rounded-xl border bg-white h-9 px-3 text-sm"
-              >
-                Dashboard
-              </Link>
-              <div className="inline-flex items-center rounded-xl border bg-white h-9 px-3 text-sm text-text-body">
-                Credits: {displayCredits || "…"}
-              </div>
-              <Button variant="outline" className="rounded-xl" onClick={onLogout}>
-                Log out
-              </Button>
-            </>
-          )}
-        </div>
-
-        {/* Mobile hamburger */}
+        {/* Mobile: right-side action buttons */}
         <div className="md:hidden ml-auto flex items-center gap-2">
+          <Link
+            href={"/pricing" as Route}
+            className="inline-flex items-center rounded-xl border bg-white h-9 px-3 text-sm"
+          >
+            Pricing
+          </Link>
+          <Link
+            href={"/signin" as Route}
+            className="inline-flex items-center rounded-xl border bg-white h-9 px-3 text-sm"
+          >
+            Sign In
+          </Link>
+          <Link
+            href={"/signup" as Route}
+            className="inline-flex items-center rounded-xl btn-gradient text-white h-9 px-3 text-sm"
+          >
+            Sign Up
+          </Link>
+
+          {/* Mobile hamburger */}
           <button
             aria-label="Open menu"
             className={cn(
@@ -134,9 +89,25 @@ export default function Navbar() {
             </svg>
           </button>
         </div>
+
+        {/* Desktop: right-side ONLY three buttons */}
+        <div className="hidden md:flex items-center gap-2 ml-auto">
+          <Link
+            href={"/pricing" as Route}
+            className="inline-flex items-center rounded-xl border bg-white h-9 px-3 text-sm"
+          >
+            Pricing
+          </Link>
+          <Button asChild variant="outline" className="rounded-xl hover:-translate-y-0.5 transition-transform">
+            <Link href={"/signin" as Route}>Sign In</Link>
+          </Button>
+          <Button asChild className="btn-gradient rounded-xl hover:-translate-y-0.5 transition-transform">
+            <Link href={"/signup" as Route}>Sign Up</Link>
+          </Button>
+        </div>
       </div>
 
-      {/* Mobile sheet */}
+      {/* Mobile drawer menu: sections for Home, Models, Templates, Generator, Categories */}
       <AnimatePresence>
         {open && (
           <motion.div
@@ -147,7 +118,13 @@ export default function Navbar() {
           >
             <div className="container py-3">
               <div className="flex flex-col gap-1">
-                {CENTER_NAV.map((item) => (
+                {/* Primary sections */}
+                {[
+                  { href: "/", label: "Home" },
+                  { href: "/models", label: "Models" },
+                  { href: "/templates", label: "Templates" },
+                  { href: "/generator", label: "Generator" },
+                ].map((item) => (
                   <Link
                     key={item.href}
                     href={item.href as Route}
@@ -158,42 +135,35 @@ export default function Navbar() {
                   </Link>
                 ))}
 
+                {/* Categories group */}
                 <div className="mt-2 pt-2 border-t">
-                  {/* Auth buttons stack on small screens */}
-                  <div className="mt-2 flex flex-col gap-2">
-                    {!user ? (
-                      <>
-                        <Link href={"/signin" as Route} onClick={() => setOpen(false)}>
-                          <div className="inline-flex w-full items-center justify-center rounded-xl border bg-white h-10 px-3 text-sm">
-                            Login
-                          </div>
-                        </Link>
-                        <Link href={"/signup" as Route} onClick={() => setOpen(false)}>
-                          <div className="inline-flex w-full items-center justify-center rounded-xl btn-gradient h-10 px-3 text-sm text-white">
-                            Sign up
-                          </div>
-                        </Link>
-                      </>
-                    ) : (
-                      <>
-                        <Link href={"/dashboard" as Route} onClick={() => setOpen(false)}>
-                          <div className="inline-flex w-full items-center justify-center rounded-xl border bg-white h-10 px-3 text-sm">
-                            Dashboard
-                          </div>
-                        </Link>
-                        <button
-                          onClick={() => {
-                            setOpen(false);
-                            onLogout();
-                          }}
-                          className="inline-flex w-full items-center justify-center rounded-xl border bg-white h-10 px-3 text-sm"
-                        >
-                          Log out
-                        </button>
-                      </>
-                    )}
+                  <p className="mb-2 text-xs font-medium uppercase tracking-wide text-text-body/70">Categories</p>
+                  <div className="flex flex-col gap-1">
+                    {[
+                      { href: "/models?tshirt=1", label: "T-shirt" },
+                      { href: "/models?hoodie=1", label: "Hoodie" },
+                      { href: "/models?jacket=1", label: "Jacket" },
+                      { href: "/models?accessories=1", label: "Accessories" },
+                      { href: "/models?home=1", label: "Home & Living" },
+                    ].map((c) => (
+                      <Link
+                        key={c.href}
+                        href={c.href as Route}
+                        className="rounded-xl px-3 py-2 text-sm text-text-body hover:text-text-hi"
+                        onClick={() => setOpen(false)}
+                      >
+                        {c.label}
+                      </Link>
+                    ))}
                   </div>
                 </div>
+
+                {/* Logged-in only: credits indicator (non-interactive) */}
+                {user && (
+                  <div className="mt-3 rounded-xl border bg-white h-9 px-3 inline-flex items-center text-sm text-text-body">
+                    Credits: {displayCredits || "…"}
+                  </div>
+                )}
               </div>
             </div>
           </motion.div>

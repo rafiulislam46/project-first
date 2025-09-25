@@ -18,41 +18,24 @@ const NAV_LINKS: { href: string; label: string }[] = [
   { href: "/models", label: "Models" },
   { href: "/templates", label: "Templates" },
   { href: "/generator", label: "Generator" },
-  { href: "/pricing", label: "Pricing" }
 ];
 
 const CATEGORIES: Category[] = [
   {
-    key: "apparel",
-    label: "Apparel",
+    key: "categories",
+    label: "Categories",
     children: [
-      { key: "tshirt", label: "T-shirt", href: "/models?t=shirt" },
+      { key: "tshirt", label: "T-shirt", href: "/models?tshirt=1" },
       { key: "hoodie", label: "Hoodie", href: "/models?hoodie=1" },
       { key: "jacket", label: "Jacket", href: "/models?jacket=1" },
-    ],
-  },
-  {
-    key: "accessories",
-    label: "Accessories",
-    children: [
-      { key: "tote", label: "Tote Bag", href: "/models?tote=1" },
-      { key: "cap", label: "Cap", href: "/models?cap=1" },
-      { key: "phone", label: "Phone Case", href: "/models?phone=1" },
-    ],
-  },
-  {
-    key: "home",
-    label: "Home & Living",
-    children: [
-      { key: "book", label: "Book", href: "/models?book=1" },
-      { key: "box", label: "Box", href: "/models?box=1" },
-      { key: "mug", label: "Mug", href: "/models?mug=1" },
+      { key: "accessories", label: "Accessories", href: "/models?accessories=1" },
+      { key: "home", label: "Home & Living", href: "/models?home=1" },
     ],
   },
 ];
 
 export default function LeftSidebar() {
-  const [openCat, setOpenCat] = useState<string | null>("apparel");
+  const [openCat, setOpenCat] = useState<string | null>("categories");
 
   return (
     <aside className="hidden lg:flex lg:w-64 xl:w-72 shrink-0 flex-col border-r bg-white/80 backdrop-blur-md sticky top-14 h-[calc(100vh-56px)] overflow-y-auto">
