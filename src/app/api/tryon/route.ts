@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { MODE } from "@/lib/config";
 import { generateTryOnImages } from "./provider";
 
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
 interface TryOnBody {
   human_img?: string;
   garm_img?: string;
@@ -28,8 +31,10 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: "Missing REPLICATE_API_TOKEN on server" }, { status: 500 });
       }
 
-      // Model/version: default to fofr/virtual-try-on:latest; allow override via env
-      const modelVersion = String(process.env.REPLICATE_MODEL_VERSION || "fofr/virtual-try-on:latest");
+      // Replicate accepts either a specific version hash or a model slug.
+      // If REPLICATE_MODEL_VERSION is not provided, use the model slug to target latest.
+      const version = process.env.REPLICATE_MODEL_VERSION;
+      const modelSlug = String(process.env.REPLICATE_MODEL_SLUG || "fofr/virtual-try-on");
       const personUrl = body.human_img;
       const productUrl = body.garm_img;
 
@@ -37,11 +42,12 @@ export async function POST(req: Request) {
       const createRes = await fetch("https://api.replicate.com/v1/predictions", {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${token}`,
+          // Replicate uses "Token <token>" scheme (not Bearer)
+          "Authorization": `Token ${token}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          version: modelVersion,
+          ...(version ? { version } : { model: modelSlug }),
           input: {
             // Common VTO model keys; adjust via env/model if needed
             person_image: personUrl,
@@ -71,7 +77,7 @@ export async function POST(req: Request) {
 
       while (waited < maxWaitMs) {
         const getRes = await fetch(`https://api.replicate.com/v1/predictions/${prediction.id}`, {
-          headers: { "Authorization": `Bearer ${token}` },
+          headers: { "Authorization": `Token ${token}` },
           cache: "no-store",
         });
 
