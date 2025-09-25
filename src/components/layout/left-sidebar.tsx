@@ -18,6 +18,7 @@ const NAV_LINKS: { href: string; label: string }[] = [
   { href: "/models", label: "Models" },
   { href: "/templates", label: "Templates" },
   { href: "/generator", label: "Generator" },
+  { href: "/test-prompts", label: "Product Ad" },
 ];
 
 const CATEGORIES: Category[] = [
