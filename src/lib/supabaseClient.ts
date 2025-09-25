@@ -10,7 +10,12 @@ let client: ReturnType<typeof createClient> | null = null;
 export function getSupabaseClient() {
   if (!HAS_SUPABASE) return null;
   if (!client) {
-    client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+      },
+    });
   }
   return client;
 }

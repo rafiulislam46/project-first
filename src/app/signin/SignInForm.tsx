@@ -4,10 +4,12 @@ import React, { useCallback, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import type { Route } from "next";
+import { getClientSupabase } from "@/lib/supabase-browser";
 
 export default function SignInForm() {
   const router = useRouter();
   const search = useSearchParams();
+  const supabase = getClientSupabase();
 
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
@@ -18,37 +20,40 @@ export default function SignInForm() {
   const disabled = useMemo<boolean>(() => loading !== "idle", [loading]);
 
   const onSignIn = useCallback(async (): Promise<void> => {
+    if (!supabase) return;
     setError("");
     setMessage("");
     setLoading("signin");
 
-    // Placeholder for Supabase sign-in:
-    // const { data, error: err } = await supabase.auth.signInWithPassword({ email, password });
-    // if (err) { setError(err.message); } else { ... }
+    const { data, error: err } = await supabase.auth.signInWithPassword({ email, password });
+    if (err) {
+      setError(err.message);
+      setLoading("idle");
+      return;
+    }
 
-    // Simulate successful sign-in for now
-    await new Promise((resolve) => setTimeout(resolve, 500));
     setMessage("Signed in successfully.");
-
     const redirectedFrom = search.get("redirectedFrom");
     router.replace((redirectedFrom || "/dashboard") as Route);
 
     setLoading("idle");
-  }, [email, password, router, search]);
+  }, [supabase, email, password, router, search]);
 
   const onSignUp = useCallback(async (): Promise<void> => {
+    if (!supabase) return;
     setError("");
     setMessage("");
     setLoading("signup");
 
-    // Placeholder for Supabase sign-up:
-    // const { data, error: err } = await supabase.auth.signUp({ email, password });
-
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    setMessage("Sign up successful.");
+    const { error: err } = await supabase.auth.signUp({ email, password });
+    if (err) {
+      setError(err.message);
+    } else {
+      setMessage("Sign up successful. Please check your email to confirm.");
+    }
 
     setLoading("idle");
-  }, [email, password]);
+  }, [supabase, email, password]);
 
   return (
     <>
