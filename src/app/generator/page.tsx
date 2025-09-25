@@ -170,7 +170,9 @@ function GeneratorContent() {
   // Generate via /api/tryon and set plain JSON result
   const onGenerate = useCallback(async () => {
     if (!canGenerate || !model?.thumb_url || !uploadedUrl) {
-      push({ type: "error", message: "Please select a model and upload a product image." });
+      const msg = "Please select a model and upload a product";
+      push({ type: "error", message: msg });
+      alert(msg);
       return;
     }
     try {
@@ -190,13 +192,23 @@ function GeneratorContent() {
       if (!res.ok) {
         const msg = data?.error ? String(data.error) : "Generation failed. Please try again.";
         push({ type: "error", message: msg });
+        alert(msg);
         setSubmitting(false);
         return;
       }
 
-      setResult(data);
+      // Ensure we only show a single generated image as required
+      if (Array.isArray(data?.images) && data.images.length > 0) {
+        setResult({ images: [data.images[0]] });
+      } else if (typeof data?.url === "string") {
+        setResult({ images: [data.url] });
+      } else {
+        setResult(data);
+      }
     } catch {
-      push({ type: "error", message: "Network error. Please try again." });
+      const msg = "Network error. Please try again.";
+      push({ type: "error", message: msg });
+      alert(msg);
     } finally {
       setSubmitting(false);
     }
