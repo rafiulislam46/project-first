@@ -21,87 +21,100 @@ export async function POST(req: Request) {
   try {
     const body: TryOnBody = (await req.json().catch(() => null)) || {};
 
-    // Replicate Virtual Try-On path (idm-vton)
+    // Replicate Virtual Try-On path — use REST (fofr/virtual-try-on) and poll
     if (typeof body.human_img === "string" && typeof body.garm_img === "string") {
       const token = process.env.REPLICATE_API_TOKEN;
       if (!token) {
         return NextResponse.json({ error: "Missing REPLICATE_API_TOKEN on server" }, { status: 500 });
       }
 
-      // If version hash not provided via env, use a reasonable default known working for idm-vton
-      const version =
-        String(process.env.REPLICATE_MODEL_VERSION || "0513734a452173b8173e907e3a59d19a36266e55b48528559432bd21c7d7e985");
+      // Model/version: default to fofr/virtual-try-on:latest; allow override via env
+      const modelVersion = String(process.env.REPLICATE_MODEL_VERSION || "fofr/virtual-try-on:latest");
+      const personUrl = body.human_img;
+      const productUrl = body.garm_img;
 
-      // Create prediction
+      // 4) Create prediction
       const createRes = await fetch("https://api.replicate.com/v1/predictions", {
         method: "POST",
         headers: {
+          "Authorization": `Bearer ${token}`,
           "Content-Type": "application/json",
-          Authorization: `Token ${token}`,
         },
         body: JSON.stringify({
-          version,
+          version: modelVersion,
           input: {
-            human_img: body.human_img,
-            garm_img: body.garm_img,
-            garment_des: "virtual try-on",
-            category: "upper_body",
+            // Common VTO model keys; adjust via env/model if needed
+            person_image: personUrl,
+            garment_image: productUrl,
           },
         }),
       });
 
       if (!createRes.ok) {
         const text = await createRes.text().catch(() => "");
+        console.error("[TRYON] create prediction failed", createRes.status, text);
         return NextResponse.json(
-          { error: `replicate create failed ${createRes.status}: ${text || createRes.statusText}` },
+          { error: `Replicate create failed (${createRes.status}): ${text}` },
           { status: 502 }
         );
       }
 
-      const created = (await createRes.json()) as { id?: string };
-      const id = created?.id;
-      if (!id) {
-        return NextResponse.json({ error: "replicate: missing prediction id" }, { status: 502 });
-      }
+      const prediction = await createRes.json();
+      const startedAt = Date.now();
+      console.log("[TRYON] prediction id", prediction?.id);
 
-      // Poll until completion
-      for (;;) {
-        await new Promise((r) => setTimeout(r, 1200));
-        const pollRes = await fetch(`https://api.replicate.com/v1/predictions/${id}`, {
-          headers: { Authorization: `Token ${token}` },
+      // 5) Poll until completed (avoid 502 from timeouts/unhandled)
+      let outputUrl: string | null = null;
+      const maxWaitMs = 120_000; // 2 min
+      const pollEveryMs = 1500;
+      let waited = 0;
+
+      while (waited < maxWaitMs) {
+        const getRes = await fetch(`https://api.replicate.com/v1/predictions/${prediction.id}`, {
+          headers: { "Authorization": `Bearer ${token}` },
           cache: "no-store",
         });
 
-        if (!pollRes.ok) {
-          const text = await pollRes.text().catch(() => "");
+        if (!getRes.ok) {
+          const t = await getRes.text().catch(() => "");
+          console.error("[TRYON] get prediction failed", getRes.status, t);
           return NextResponse.json(
-            { error: `replicate poll failed ${pollRes.status}: ${text || pollRes.statusText}` },
+            { error: `Replicate get failed (${getRes.status}): ${t}` },
             { status: 502 }
           );
         }
 
-        const data = (await pollRes.json()) as any;
-        const status = data?.status;
-        if (status === "succeeded") {
-          const out = data?.output;
-          const urls: string[] = Array.isArray(out)
-            ? out.filter((x: any) => typeof x === "string")
-            : typeof out === "string"
-            ? [out]
-            : [];
-          if (urls.length === 0) {
-            return NextResponse.json({ error: "replicate: empty output" }, { status: 502 });
-          }
-          if (urls.length === 1) {
-            return NextResponse.json({ url: urls[0] });
-          }
-          return NextResponse.json({ images: urls });
+        const data = await getRes.json();
+
+        if (data.status === "succeeded") {
+          // Some models return array of urls in data.output
+          const out = Array.isArray(data.output) ? data.output : [data.output];
+          outputUrl = (out.find((v: any) => typeof v === "string" && v) as string) || null;
+          console.log("[TRYON] succeeded in", Date.now() - startedAt, "ms", { outputUrl });
+          break;
         }
-        if (status === "failed" || status === "canceled") {
-          return NextResponse.json({ error: `replicate: ${status}` }, { status: 502 });
+
+        if (data.status === "failed" || data.error) {
+          console.error("[TRYON] failed", data.error || data.status);
+          return NextResponse.json(
+            { error: data.error || "Replicate prediction failed" },
+            { status: 502 }
+          );
         }
-        // continue polling for starting/processing/queued
+
+        await new Promise((r) => setTimeout(r, pollEveryMs));
+        waited += pollEveryMs;
       }
+
+      if (!outputUrl) {
+        return NextResponse.json(
+          { error: "Generation timed out" },
+          { status: 504 }
+        );
+      }
+
+      // 6) Respond with EXACT shape the frontend expects
+      return NextResponse.json({ images: [outputUrl] }, { status: 200 });
     }
 
     // Legacy generator path: returns styled images array
