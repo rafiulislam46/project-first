@@ -6,14 +6,37 @@ import type { Route } from "next";
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/lib/AuthProvider";
 import { getClientSupabase } from "@/lib/supabase-browser";
+import type { User } from "@supabase/supabase-js";
 
 export default function Navbar() {
-  const { user } = useAuth();
   const supabase = getClientSupabase();
   const [open, setOpen] = useState(false);
   const [credits, setCredits] = useState<number | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+
+  // Manage local user state using Supabase auth
+  useEffect(() => {
+    if (!supabase) return;
+
+    let mounted = true;
+
+    supabase.auth.getUser().then(({ data }) => {
+      if (!mounted) return;
+      setUser(data.user ?? null);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, [supabase]);
 
   useEffect(() => {
     if (!user) {
@@ -41,6 +64,7 @@ export default function Navbar() {
   const onLogout = async () => {
     if (!supabase) return;
     await supabase.auth.signOut();
+    // Navbar will update immediately via onAuthStateChange
     window.location.href = "/";
   };
 
@@ -63,18 +87,38 @@ export default function Navbar() {
           >
             Pricing
           </Link>
-          <Link
-            href={"/signin" as Route}
-            className="inline-flex items-center rounded-xl border bg-white h-9 px-3 text-sm"
-          >
-            Sign In
-          </Link>
-          <Link
-            href={"/signup" as Route}
-            className="inline-flex items-center rounded-xl btn-gradient text-white h-9 px-3 text-sm"
-          >
-            Sign Up
-          </Link>
+
+          {!user ? (
+            <>
+              <Link
+                href={"/signin" as Route}
+                className="inline-flex items-center rounded-xl border bg-white h-9 px-3 text-sm"
+              >
+                Sign In
+              </Link>
+              <Link
+                href={"/signup" as Route}
+                className="inline-flex items-center rounded-xl btn-gradient text-white h-9 px-3 text-sm"
+              >
+                Sign Up
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link
+                href={"/dashboard" as Route}
+                className="inline-flex items-center rounded-xl border bg-white h-9 px-3 text-sm"
+              >
+                My Profile
+              </Link>
+              <button
+                onClick={onLogout}
+                className="inline-flex items-center rounded-xl border bg-white h-9 px-3 text-sm"
+              >
+                Log out
+              </button>
+            </>
+          )}
 
           {/* Mobile hamburger */}
           <button
@@ -90,7 +134,7 @@ export default function Navbar() {
           </button>
         </div>
 
-        {/* Desktop: right-side ONLY three buttons */}
+        {/* Desktop: right-side buttons */}
         <div className="hidden md:flex items-center gap-2 ml-auto">
           <Link
             href={"/pricing" as Route}
@@ -98,12 +142,29 @@ export default function Navbar() {
           >
             Pricing
           </Link>
-          <Button asChild variant="outline" className="rounded-xl hover:-translate-y-0.5 transition-transform">
-            <Link href={"/signin" as Route}>Sign In</Link>
-          </Button>
-          <Button asChild className="btn-gradient rounded-xl hover:-translate-y-0.5 transition-transform">
-            <Link href={"/signup" as Route}>Sign Up</Link>
-          </Button>
+          {!user ? (
+            <>
+              <Button asChild variant="outline" className="rounded-xl hover:-translate-y-0.5 transition-transform">
+                <Link href={"/signin" as Route}>Sign In</Link>
+              </Button>
+              <Button asChild className="btn-gradient rounded-xl hover:-translate-y-0.5 transition-transform">
+                <Link href={"/signup" as Route}>Sign Up</Link>
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button asChild variant="outline" className="rounded-xl hover:-translate-y-0.5 transition-transform">
+                <Link href={"/dashboard" as Route}>My Profile</Link>
+              </Button>
+              <Button
+                onClick={onLogout}
+                variant="outline"
+                className="rounded-xl hover:-translate-y-0.5 transition-transform"
+              >
+                Log out
+              </Button>
+            </>
+          )}
         </div>
       </div>
 
