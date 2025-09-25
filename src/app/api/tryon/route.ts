@@ -2,67 +2,41 @@ import { NextResponse } from "next/server";
 import { MODE } from "@/lib/config";
 import { generateTryOnImages } from "./provider";
 
-/**
- * Replicate prediction shape (partial, sufficient for typing without implicit any).
- */
-interface ReplicatePrediction {
-  id: string;
-  version: string;
-  status:
-    | "starting"
-    | "processing"
-    | "succeeded"
-    | "failed"
-    | "canceled"
-    | "queued";
-  created_at?: string;
-  started_at?: string | null;
-  completed_at?: string | null;
-  output?: unknown;
-  error?: unknown;
-  logs?: string | null;
-  metrics?: Record<string, unknown>;
-}
-
 interface TryOnBody {
   human_img?: string;
   garm_img?: string;
-  // Back-compat fields from existing route
   productImageUrl?: string;
   imageUrl?: string;
   prompt?: string;
 }
 
 /**
- * Try-on API.
- *
- * Modes:
- * - If body contains { human_img, garm_img }, call Replicate idm-vton and return the full response.
- * - Otherwise, preserve existing behavior for { productImageUrl, prompt? }.
+ * POST /api/tryon
+ * - If { human_img, garm_img } present: call Replicate idm-vton, wait for completion, and return:
+ *   { url: "https://..." } or { images: ["https://...", ...] }
+ * - Else: use existing generator and return { images: [...] }
+ * - Errors: return { error: "message" } with appropriate status.
  */
 export async function POST(req: Request) {
   try {
     const body: TryOnBody = (await req.json().catch(() => null)) || {};
 
-    // New Replicate Virtual Try-On path
+    // Replicate Virtual Try-On path (idm-vton)
     if (typeof body.human_img === "string" && typeof body.garm_img === "string") {
       const token = process.env.REPLICATE_API_TOKEN;
       if (!token) {
-        // Return 200 with error payload to avoid hard API failures surfacing as 5xx pages
-        return NextResponse.json(
-          { error: "Missing REPLICATE_API_TOKEN on server" },
-          { status: 200 }
-        );
+        return NextResponse.json({ error: "Missing REPLICATE_API_TOKEN on server" }, { status: 500 });
       }
 
+      // If version hash not provided via env, use a reasonable default known working for idm-vton
       const version =
-        "0513734a452173b8173e907e3a59d19a36266e55b48528559432bd21c7d7e985";
+        String(process.env.REPLICATE_MODEL_VERSION || "0513734a452173b8173e907e3a59d19a36266e55b48528559432bd21c7d7e985");
 
-      const resp = await fetch("https://api.replicate.com/v1/predictions", {
+      // Create prediction
+      const createRes = await fetch("https://api.replicate.com/v1/predictions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          // Replicate expects "Token <token>" (not Bearer)
           Authorization: `Token ${token}`,
         },
         body: JSON.stringify({
@@ -70,45 +44,75 @@ export async function POST(req: Request) {
           input: {
             human_img: body.human_img,
             garm_img: body.garm_img,
-            garment_des: "test cloth",
+            garment_des: "virtual try-on",
             category: "upper_body",
           },
         }),
-      }).catch(async (err) => {
-        // Normalize network errors to a safe response
-        return new Response(
-          JSON.stringify({
-            id: "",
-            status: "failed",
-            error: String((err && err.message) || "network_error"),
-          }),
-          { status: 200, headers: { "content-type": "application/json" } }
-        );
       });
 
-      const contentType = resp.headers.get("content-type") || "";
-      let data: ReplicatePrediction;
-      if (contentType.includes("application/json")) {
-        data = (await resp.json()) as ReplicatePrediction;
-      } else {
-        // Fallback shape
-        data = { id: "", version: "", status: "failed", error: "invalid_response" };
+      if (!createRes.ok) {
+        const text = await createRes.text().catch(() => "");
+        return NextResponse.json(
+          { error: `replicate create failed ${createRes.status}: ${text || createRes.statusText}` },
+          { status: 502 }
+        );
       }
-      // Return full Replicate response; keep status 200 on error to avoid 5xx surfacing
-      const status = resp.ok ? resp.status : 200;
-      return NextResponse.json<ReplicatePrediction>(data, { status });
+
+      const created = (await createRes.json()) as { id?: string };
+      const id = created?.id;
+      if (!id) {
+        return NextResponse.json({ error: "replicate: missing prediction id" }, { status: 502 });
+      }
+
+      // Poll until completion
+      for (;;) {
+        await new Promise((r) => setTimeout(r, 1200));
+        const pollRes = await fetch(`https://api.replicate.com/v1/predictions/${id}`, {
+          headers: { Authorization: `Token ${token}` },
+          cache: "no-store",
+        });
+
+        if (!pollRes.ok) {
+          const text = await pollRes.text().catch(() => "");
+          return NextResponse.json(
+            { error: `replicate poll failed ${pollRes.status}: ${text || pollRes.statusText}` },
+            { status: 502 }
+          );
+        }
+
+        const data = (await pollRes.json()) as any;
+        const status = data?.status;
+        if (status === "succeeded") {
+          const out = data?.output;
+          const urls: string[] = Array.isArray(out)
+            ? out.filter((x: any) => typeof x === "string")
+            : typeof out === "string"
+            ? [out]
+            : [];
+          if (urls.length === 0) {
+            return NextResponse.json({ error: "replicate: empty output" }, { status: 502 });
+          }
+          if (urls.length === 1) {
+            return NextResponse.json({ url: urls[0] });
+          }
+          return NextResponse.json({ images: urls });
+        }
+        if (status === "failed" || status === "canceled") {
+          return NextResponse.json({ error: `replicate: ${status}` }, { status: 502 });
+        }
+        // continue polling for starting/processing/queued
+      }
     }
 
-    // Legacy path preserved for compatibility with existing app features
-    const productImageUrl: string | undefined =
-      body.productImageUrl || body.imageUrl;
+    // Legacy generator path: returns styled images array
+    const productImageUrl: string | undefined = body.productImageUrl || body.imageUrl;
     const prompt: string | undefined = body.prompt;
 
     if (!productImageUrl) {
-      // For compatibility, still return mock if missing in mock mode
+      // Mock/demo images
       const base = "/demo/tryon";
       const demo = [1, 2, 3, 4, 5].map((i) => `${base}/${i}.svg`);
-      return NextResponse.json({ urls: demo, mode: MODE });
+      return NextResponse.json({ images: demo, mode: MODE });
     }
 
     const uploadFlag = String(process.env.UPLOAD_TO_CLOUDINARY || "1") !== "0";
@@ -121,62 +125,15 @@ export async function POST(req: Request) {
       saveAsset: saveFlag,
     });
 
-    return NextResponse.json({ urls, mode: MODE });
+    if (urls.length === 0) {
+      return NextResponse.json({ error: "no images generated" }, { status: 500 });
+    }
+    if (urls.length === 1) {
+      return NextResponse.json({ url: urls[0], mode: MODE });
+    }
+    return NextResponse.json({ images: urls, mode: MODE });
   } catch (e) {
-    const message =
-      e instanceof Error ? e.message : typeof e === "string" ? e : "unexpected_error";
-    // Graceful fallback for legacy path
-    const base = "/demo/tryon";
-    const demo = [1, 2, 3, 4, 5].map((i) => `${base}/${i}.svg`);
-    return NextResponse.json(
-      { urls: demo, error: message, mode: MODE },
-      { status: 200 }
-    );
+    const message = e instanceof Error ? e.message : typeof e === "string" ? e : "unexpected_error";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
-}
-
-/**
- * Optional: GET /api/tryon?id=... to poll a Replicate prediction by id without exposing the token.
- */
-export async function GET(req: Request) {
-  const url = new URL(req.url);
-  const id = url.searchParams.get("id");
-  if (!id) {
-    return NextResponse.json({ error: "Missing id" }, { status: 400 });
-  }
-  const token = process.env.REPLICATE_API_TOKEN;
-  if (!token) {
-    // Keep 200 to avoid hard API failures
-    return NextResponse.json(
-      { error: "Missing REPLICATE_API_TOKEN on server" },
-      { status: 200 }
-    );
-  }
-
-  const resp = await fetch(`https://api.replicate.com/v1/predictions/${id}`, {
-    headers: {
-      // Replicate expects "Token <token>"
-      Authorization: `Token ${token}`,
-    },
-    cache: "no-store",
-  }).catch(async (err) => {
-    return new Response(
-      JSON.stringify({
-        id,
-        status: "failed",
-        error: String((err && err.message) || "network_error"),
-      }),
-      { status: 200, headers: { "content-type": "application/json" } }
-    );
-  });
-
-  const contentType = resp.headers.get("content-type") || "";
-  let data: ReplicatePrediction;
-  if (contentType.includes("application/json")) {
-    data = (await resp.json()) as ReplicatePrediction;
-  } else {
-    data = { id: id || "", version: "", status: "failed", error: "invalid_response" };
-  }
-  const status = resp.ok ? resp.status : 200;
-  return NextResponse.json<ReplicatePrediction>(data, { status });
 }

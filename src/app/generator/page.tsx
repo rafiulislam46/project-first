@@ -6,11 +6,7 @@ import Link from "next/link";
 import type { Route } from "next";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import {
-  cn,
-  fadeUp,
-  staggerContainer,
-} from "@/lib/utils";
+import { cn, fadeUp, staggerContainer } from "@/lib/utils";
 import { getClientSupabase } from "@/lib/supabase-browser";
 import { CLOUDINARY_CLOUD_NAME, CLOUDINARY_UPLOAD_PRESET } from "@/lib/cloudinary";
 
@@ -56,8 +52,7 @@ function GeneratorContent() {
   const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
 
   const [submitting, setSubmitting] = useState(false);
-  const [results, setResults] = useState<string[]>([]);
-  const [pollId, setPollId] = useState<string | null>(null);
+  const [result, setResult] = useState<any | null>(null);
 
   // Read ?item; if missing, keep user on the page and show a hint instead of redirecting
   useEffect(() => {
@@ -77,7 +72,6 @@ function GeneratorContent() {
       try {
         const client = getClientSupabase();
         if (!client) {
-          // Allow page to render but show a friendly message
           push({ type: "error", message: "Supabase is not configured. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY." });
           return;
         }
@@ -125,7 +119,6 @@ function GeneratorContent() {
     const form = new FormData();
     form.append("file", blob);
     form.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
-    // optional extras
     form.append("folder", "uploads");
     form.append("tags", "generator,garment");
 
@@ -174,7 +167,7 @@ function GeneratorContent() {
     return !!(selectedModelId && model?.thumb_url && uploadedUrl);
   }, [selectedModelId, model, uploadedUrl]);
 
-  // Generate via Replicate idm-vton through our /api/tryon
+  // Generate via /api/tryon and set plain JSON result
   const onGenerate = useCallback(async () => {
     if (!canGenerate || !model?.thumb_url || !uploadedUrl) {
       push({ type: "error", message: "Please select a model and upload a product image." });
@@ -182,95 +175,47 @@ function GeneratorContent() {
     }
     try {
       setSubmitting(true);
-      setResults([]);
-      setPollId(null);
+      setResult(null);
 
       const res = await fetch("/api/tryon", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          human_img: model.thumb_url, // model image from Supabase
-          garm_img: uploadedUrl,      // garment/product image uploaded by user
+          human_img: model.thumb_url,
+          garm_img: uploadedUrl,
         }),
       });
 
-      const data = await res.json().catch(() => null);
+      const data = await res.json();
       if (!res.ok) {
-        const msg = (data && data.error) ? String(data.error) : "Generation failed. Please try again.";
+        const msg = data?.error ? String(data.error) : "Generation failed. Please try again.";
         push({ type: "error", message: msg });
         setSubmitting(false);
         return;
       }
 
-      const pid = data?.id ? String(data.id) : null;
-      if (!pid) {
-        // If output already present, show it immediately
-        const out = data?.output;
-        const urls = Array.isArray(out) ? out.filter((x: any) => typeof x === "string") : (typeof out === "string" ? [out] : []);
-        if (urls.length) {
-          setResults(urls.slice(0, 5));
-        } else {
-          push({ type: "error", message: "No output returned from Replicate." });
-        }
-        setSubmitting(false);
-        return;
-      }
-
-      setPollId(pid);
+      setResult(data);
     } catch {
       push({ type: "error", message: "Network error. Please try again." });
+    } finally {
       setSubmitting(false);
     }
   }, [canGenerate, model, uploadedUrl, push]);
 
-  // Poll /api/tryon?id=... for completion
-  useEffect(() => {
-    if (!pollId) return;
-    let cancelled = false;
-    let delay = 1200;
-    const startedAt = Date.now();
-    const timeoutMs = 120_000;
-
-    async function poll() {
-      if (!pollId) return;
-      if (Date.now() - startedAt > timeoutMs) {
-        push({ type: "error", message: "Generation timed out. Please try again." });
-        setSubmitting(false);
-        return;
-      }
-      try {
-        const resp = await fetch(`/api/tryon?id=${encodeURIComponent(pollId)}`, { cache: "no-store" });
-        const data = await resp.json().catch(() => null);
-        if (!resp.ok) {
-          push({ type: "error", message: data?.error ? String(data.error) : "Polling error." });
-          setSubmitting(false);
-          return;
-        }
-        const status = data?.status;
-        if (status === "succeeded") {
-          const out = data?.output;
-          const urls = Array.isArray(out) ? out.filter((x: any) => typeof x === "string") : (typeof out === "string" ? [out] : []);
-          setResults(urls.slice(0, 5));
-          setSubmitting(false);
-          return;
-        }
-        if (status === "failed" || status === "canceled") {
-          push({ type: "error", message: "Generation failed. Please try another image." });
-          setSubmitting(false);
-          return;
-        }
-      } catch {
-        // transient errors -> continue polling
-      }
-      await new Promise((r) => setTimeout(r, delay));
-      delay = Math.min(5000, Math.round(delay * 1.4));
-      if (!cancelled) poll();
+  const images: string[] = React.useMemo(() => {
+    if (!result) return [];
+    if (result.images && Array.isArray(result.images)) {
+      return result.images.filter((u: any) => typeof u === "string");
     }
-    poll();
-    return () => {
-      cancelled = true;
-    };
-  }, [pollId, push]);
+    if (result.url && typeof result.url === "string") {
+      return [result.url];
+    }
+    // Back-compat if backend returns { urls: [...] }
+    if (result.urls && Array.isArray(result.urls)) {
+      return result.urls.filter((u: any) => typeof u === "string");
+    }
+    return [];
+  }, [result]);
 
   return (
     <section className="container py-12 md:py-16">
@@ -376,19 +321,18 @@ function GeneratorContent() {
 
         {/* Results */}
         <motion.div variants={fadeUp} className="mt-6">
-          {results.length > 0 ? (
+          {images.length > 0 ? (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-              {results.map((u, i) => (
+              {images.map((u, i) => (
                 <div key={`${u}_${i}`} className="rounded-xl overflow-hidden border bg-white/5">
-                  {/* Use plain img to avoid Next Image domain restrictions */}
-                  <img src={u} alt={`Result ${i + 1}`} className="w-full h-40 object-cover" referrerPolicy="no-referrer" />
+                  <img src={u} alt={`Generated ${i + 1}`} className="w-full h-40 object-cover" referrerPolicy="no-referrer" />
                 </div>
               ))}
             </div>
           ) : submitting ? (
             <div className="flex items-center gap-3 text-sm text-text-body">
               <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-t-accent-1" />
-              Waiting for Replicate…
+              Generating…
             </div>
           ) : null}
         </motion.div>
