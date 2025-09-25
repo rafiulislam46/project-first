@@ -184,7 +184,7 @@ function TestPromptsContent() {
           ) : loading ? (
             <div className="flex items-center gap-3 text-sm text-text-body">
               <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-t-accent-1" />
-              Generating with OpenAI…
+              Generating with Gemini…
             </div>
           ) : null}
         </motion.div>
