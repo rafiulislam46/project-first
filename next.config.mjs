@@ -5,8 +5,8 @@ const nextConfig = {
     typedRoutes: true
   },
   images: {
-    // Allow Cloudinary + placeholder + Supabase storage
-    domains: ["res.cloudinary.com", "placehold.co"],
+    // Allow Cloudinary + placeholder + Supabase storage + external generators
+    domains: ["res.cloudinary.com", "placehold.co", "via.placeholder.com", "replicate.delivery"],
     remotePatterns: [
       {
         protocol: "https",
@@ -20,6 +20,16 @@ const nextConfig = {
       {
         protocol: "https",
         hostname: "placehold.co",
+      },
+      {
+        protocol: "https",
+        hostname: "via.placeholder.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "replicate.delivery",
+        pathname: "/**",
       },
     ],
   },
