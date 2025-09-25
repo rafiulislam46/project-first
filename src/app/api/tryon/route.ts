@@ -24,8 +24,18 @@ export async function POST(req: Request) {
   try {
     const body: TryOnBody = (await req.json().catch(() => null)) || {};
 
+    // If one of the expected inputs is present but the other is missing, return 400
+    const hasHuman = typeof body.human_img === "string" && body.human_img.length > 0;
+    const hasGarm = typeof body.garm_img === "string" && body.garm_img.length > 0;
+    if ((hasHuman && !hasGarm) || (!hasHuman && hasGarm)) {
+      return NextResponse.json(
+        { error: "Missing required inputs: human_img and garm_img are both required" },
+        { status: 400 }
+      );
+    }
+
     // Replicate Virtual Try-On path — use REST (fofr/virtual-try-on) and poll
-    if (typeof body.human_img === "string" && typeof body.garm_img === "string") {
+    if (hasHuman && hasGarm) {
       const token = process.env.REPLICATE_API_TOKEN;
       if (!token) {
         return NextResponse.json({ error: "Missing REPLICATE_API_TOKEN on server" }, { status: 500 });
@@ -35,8 +45,10 @@ export async function POST(req: Request) {
       // If REPLICATE_MODEL_VERSION is not provided, use the model slug to target latest.
       const version = process.env.REPLICATE_MODEL_VERSION;
       const modelSlug = String(process.env.REPLICATE_MODEL_SLUG || "fofr/virtual-try-on");
-      const personUrl = body.human_img;
-      const productUrl = body.garm_img;
+      const personUrl = body.human_img!;
+      const productUrl = body.garm_img!;
+
+      console.log("[TRYON] inputs", { human_img: personUrl, garm_img: productUrl });
 
       // 4) Create prediction
       const createRes = await fetch("https://api.replicate.com/v1/predictions", {
@@ -49,7 +61,7 @@ export async function POST(req: Request) {
         body: JSON.stringify({
           ...(version ? { version } : { model: modelSlug }),
           input: {
-            // Common VTO model keys; adjust via env/model if needed
+            // Map frontend inputs to Replicate API expected keys
             person_image: personUrl,
             garment_image: productUrl,
           },
