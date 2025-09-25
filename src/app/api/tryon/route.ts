@@ -34,36 +34,32 @@ export async function POST(req: Request) {
       );
     }
 
-    // Replicate Virtual Try-On path — use REST (fofr/virtual-try-on) and poll
+    // Replicate Virtual Try-On path — use cuuupid/idm-vton with explicit version and poll
     if (hasHuman && hasGarm) {
       const token = process.env.REPLICATE_API_TOKEN;
       if (!token) {
         return NextResponse.json({ error: "Missing REPLICATE_API_TOKEN on server" }, { status: 500 });
       }
 
-      // Replicate accepts either a specific version hash or a model slug.
-      // If REPLICATE_MODEL_VERSION is not provided, use the model slug to target latest.
-      const version = process.env.REPLICATE_MODEL_VERSION;
-      const modelSlug = String(process.env.REPLICATE_MODEL_SLUG || "fofr/virtual-try-on");
-      const personUrl = body.human_img!;
-      const productUrl = body.garm_img!;
+      // Use the required version from Replicate (cuuupid/idm-vton)
+      const version = "0513734a";
+      const humanUrl = body.human_img!;
+      const garmUrl = body.garm_img!;
 
-      console.log("[TRYON] inputs", { human_img: personUrl, garm_img: productUrl });
+      console.log("[TRYON] inputs", { human_img: humanUrl, garm_img: garmUrl });
 
-      // 4) Create prediction
+      // Create prediction with required payload
       const createRes = await fetch("https://api.replicate.com/v1/predictions", {
         method: "POST",
         headers: {
-          // Replicate uses "Token <token>" scheme (not Bearer)
-          "Authorization": `Token ${token}`,
+          "Authorization": `Token ${token}`, // Replicate uses "Token" scheme
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          ...(version ? { version } : { model: modelSlug }),
+          version,
           input: {
-            // Map frontend inputs to Replicate API expected keys
-            person_image: personUrl,
-            garment_image: productUrl,
+            human_img: humanUrl,
+            garm_img: garmUrl,
           },
         }),
       });
@@ -81,7 +77,7 @@ export async function POST(req: Request) {
       const startedAt = Date.now();
       console.log("[TRYON] prediction id", prediction?.id);
 
-      // 5) Poll until completed (avoid 502 from timeouts/unhandled)
+      // Poll until completed
       let outputUrl: string | null = null;
       const maxWaitMs = 120_000; // 2 min
       const pollEveryMs = 1500;
@@ -105,9 +101,9 @@ export async function POST(req: Request) {
         const data = await getRes.json();
 
         if (data.status === "succeeded") {
-          // Some models return array of urls in data.output
+          // Return the first output image URL (prediction.output[0])
           const out = Array.isArray(data.output) ? data.output : [data.output];
-          outputUrl = (out.find((v: any) => typeof v === "string" && v) as string) || null;
+          outputUrl = (out[0] && typeof out[0] === "string") ? out[0] : null;
           console.log("[TRYON] succeeded in", Date.now() - startedAt, "ms", { outputUrl });
           break;
         }
@@ -131,7 +127,7 @@ export async function POST(req: Request) {
         );
       }
 
-      // 6) Respond with EXACT shape the frontend expects
+      // Respond with one generated image below the form
       return NextResponse.json({ images: [outputUrl] }, { status: 200 });
     }
 
