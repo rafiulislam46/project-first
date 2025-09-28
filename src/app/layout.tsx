@@ -3,7 +3,6 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
-import LeftSidebar from "@/components/layout/left-sidebar";
 import BottomNav from "@/components/layout/bottom-nav";
 import { ThemeProvider } from "@/components/theme-provider";
 import MotionProvider from "@/components/motion-provider";
@@ -32,12 +31,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               {/* Top bar */}
               <Navbar />
 
-              {/* App shell: left fixed sidebar (desktop), right scrollable content */}
-              <div className="flex h-[calc(100vh-56px)] overflow-hidden">
-                <LeftSidebar />
-                <div className="flex-1 overflow-y-auto pb-14 md:pb-0">
-                  <PageTransition>{children}</PageTransition>
-                </div>
+              {/* Content only (no left sidebar) */}
+              <div className="min-h-[calc(100vh-56px)]">
+                <PageTransition>{children}</PageTransition>
               </div>
 
               {/* Footer */}
