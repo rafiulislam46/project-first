@@ -23,7 +23,7 @@ export default function SignUpPage() {
   const onSignUp = useCallback(async (): Promise<void> => {
     if (!supabase) return;
 
-    // Front-end only validations to match the UI in the mock
+    // UI-level validations
     if (!email || !password) {
       setError("Please fill in all required fields.");
       return;
@@ -44,14 +44,17 @@ export default function SignUpPage() {
       email,
       password,
       options: {
-        emailRedirectTo: typeof window !== "undefined" ? `${window.location.origin}` : undefined,
+        emailRedirectTo:
+          typeof window !== "undefined" ? `${window.location.origin}` : undefined,
       },
     });
     if (err) {
       setError(err.message);
     } else {
       if (data.user && !data.session) {
-        setMessage("Sign up successful. Please check your email to confirm your account.");
+        setMessage(
+          "Sign up successful. Please check your email to confirm your account."
+        );
       } else {
         setMessage("Sign up successful.");
       }
@@ -60,21 +63,16 @@ export default function SignUpPage() {
   }, [supabase, email, password, confirmPassword, agree]);
 
   return (
-    <section className="container min-h-[80vh] flex items-center justify-center py-10 md:py-16">
-      <motion.div
-        initial="hidden"
-        animate="show"
-        variants={staggerContainer}
-        className="w-full max-w-md"
-      >
-        <motion.div className="glass-card rounded-2xl p-8 shadow-lg" variants={fadeUp}>
-          <div className="mb-6 text-center">
-            <h2 className="text-2xl font-semibold text-accent-1">Create Your Account</h2>
-            <p className="mt-2 text-sm text-text-body">
-              Enter your details to sign up for AI Product Studio.
-            </p>
-          </div>
+    <section className="container py-12 md:py-16">
+      <motion.div initial="hidden" animate="show" variants={staggerContainer}>
+        <motion.h2 className="mb-2" variants={fadeUp}>
+          Sign up to AI Product Studio
+        </motion.h2>
+        <motion.p className="mb-8 text-text-body" variants={fadeUp}>
+          Welcome! Create your account to start crafting stunning product visuals.
+        </motion.p>
 
+        <motion.div className="glass-card p-6 space-y-6" variants={fadeUp}>
           {HAS_SUPABASE ? (
             <>
               <div className="space-y-2">
@@ -93,7 +91,7 @@ export default function SignUpPage() {
                 />
               </div>
 
-              <div className="mt-4 space-y-2">
+              <div className="space-y-2">
                 <label htmlFor="password" className="block text-sm text-text-body">
                   Password
                 </label>
@@ -102,14 +100,14 @@ export default function SignUpPage() {
                   type="password"
                   autoComplete="new-password"
                   className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-accent-1"
-                  placeholder="Minimum 8 characters"
+                  placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={disabled}
                 />
               </div>
 
-              <div className="mt-4 space-y-2">
+              <div className="space-y-2">
                 <label htmlFor="confirm" className="block text-sm text-text-body">
                   Confirm Password
                 </label>
@@ -118,14 +116,14 @@ export default function SignUpPage() {
                   type="password"
                   autoComplete="new-password"
                   className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-accent-1"
-                  placeholder="Re-enter your password"
+                  placeholder="••••••••"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   disabled={disabled}
                 />
               </div>
 
-              <div className="mt-4 flex items-start gap-2">
+              <div className="flex items-start gap-2">
                 <input
                   id="agree"
                   type="checkbox"
@@ -136,11 +134,17 @@ export default function SignUpPage() {
                 />
                 <label htmlFor="agree" className="text-sm text-text-body">
                   I agree to the{" "}
-                  <Link href={"/terms" as Route} className="text-accent-1 underline underline-offset-4">
+                  <Link
+                    href={"/terms" as Route}
+                    className="text-accent-1 underline underline-offset-4"
+                  >
                     Terms of Service
                   </Link>{" "}
                   and{" "}
-                  <Link href={"/privacy" as Route} className="text-accent-1 underline underline-offset-4">
+                  <Link
+                    href={"/privacy" as Route}
+                    className="text-accent-1 underline underline-offset-4"
+                  >
                     Privacy Policy
                   </Link>
                   .
@@ -148,12 +152,12 @@ export default function SignUpPage() {
               </div>
 
               {error ? (
-                <div className="mt-4 rounded-md border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-300">
+                <div className="rounded-md border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-300">
                   {error}
                 </div>
               ) : null}
               {message ? (
-                <div className="mt-4 rounded-md border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-300">
+                <div className="rounded-md border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-300">
                   {message}
                 </div>
               ) : null}
@@ -161,16 +165,24 @@ export default function SignUpPage() {
               <button
                 onClick={onSignUp}
                 disabled={
-                  disabled || !email || !password || !confirmPassword || password !== confirmPassword || !agree
+                  disabled ||
+                  !email ||
+                  !password ||
+                  !confirmPassword ||
+                  password !== confirmPassword ||
+                  !agree
                 }
-                className="mt-6 inline-flex w-full items-center justify-center rounded-md bg-indigo-500 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500/90 disabled:opacity-50"
+                className="inline-flex w-full items-center justify-center rounded-md bg-indigo-500 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500/90 disabled:opacity-50"
               >
                 {loading === "signup" ? "Signing up..." : "Sign Up"}
               </button>
 
-              <p className="mt-4 text-center text-sm text-text-body">
+              <p className="text-center text-sm text-text-body">
                 Already have an account?{" "}
-                <Link href={"/signin" as Route} className="text-accent-1 underline underline-offset-4">
+                <Link
+                  href={"/signin" as Route}
+                  className="text-accent-1 underline underline-offset-4"
+                >
                   Log In
                 </Link>
               </p>
