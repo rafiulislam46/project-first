@@ -3,11 +3,9 @@
 import React from "react";
 
 /**
- * Redesigned Virtual Try-On UI
- * - Upload product image (garment) via /api/generator multipart to get a URL
- * - Choose a model (male/female) from a dropdown and thumbnails (sets human image URL)
- * - Choose number of images (1–5)
- * - Generate results in a right-side panel without changing backend APIs/routes
+ * Virtual Try-On page UI (exact replica of the provided reference image)
+ * - Same layout, colors, text, buttons, inputs, and typography.
+ * - Light theme, soft borders, white cards, indigo primary button.
  */
 
 type PredictionStatus =
@@ -33,7 +31,6 @@ type ModelItem = {
   imgUrl: string;
 };
 
-// Use existing public assets for demo thumbnails
 const FEMALE_MODELS: ModelItem[] = [
   { id: "F01", label: "Female Model 1", gender: "female", imgUrl: "/catalog/models/M01.svg" },
   { id: "F02", label: "Female Model 2", gender: "female", imgUrl: "/demo/tryon/1.svg" },
@@ -124,7 +121,6 @@ export default function TryOnPage() {
     return null;
   }
 
-  // Upload product image to Cloudinary via our existing /api/generator endpoint (multipart branch)
   async function uploadProductToCloud(file: File): Promise<string> {
     const form = new FormData();
     form.append("file", file);
@@ -154,7 +150,7 @@ export default function TryOnPage() {
       if (prev) URL.revokeObjectURL(prev);
       return obj;
     });
-    setGarmentUrl(null); // will be set on generate after upload
+    setGarmentUrl(null);
   };
 
   const onChooseModel = (id: string) => {
@@ -185,7 +181,6 @@ export default function TryOnPage() {
     try {
       setLoading(true);
 
-      // If we have a local file, upload it first to get a URL
       let garm = garmentUrl;
       if (!garm && productFile) {
         garm = await uploadProductToCloud(productFile);
@@ -230,18 +225,18 @@ export default function TryOnPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="mx-auto max-w-7xl px-6 py-8">
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[360px_1fr]">
         {/* Left column */}
         <div className="space-y-6">
           {/* Upload Product Image */}
-          <div className="rounded-2xl border border-gray-700/60 bg-white/5 p-4">
-            <h3 className="text-sm font-medium text-gray-100 mb-3">Upload Product Image</h3>
+          <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+            <h3 className="mb-3 text-base font-semibold text-gray-900">Upload Product Image</h3>
             <label
               htmlFor="file-input"
               className={classNames(
-                "flex min-h-40 cursor-pointer items-center justify-center rounded-xl border border-dashed p-6 text-center transition",
-                "bg-white/5 hover:bg-white/10"
+                "flex min-h-40 cursor-pointer items-center justify-center rounded-xl border border-dashed border-gray-300 bg-gray-50 p-6 text-center transition",
+                "hover:bg-gray-100"
               )}
             >
               <input
@@ -252,10 +247,24 @@ export default function TryOnPage() {
                 onChange={(e) => onSelectFile(e.target.files)}
               />
               {!productPreview ? (
-                <div className="space-y-1">
-                  <div className="text-sm text-gray-300">Drag & drop your product image here,</div>
-                  <div className="text-sm text-gray-300">or</div>
-                  <div className="inline-flex rounded-md bg-white/10 px-3 py-1.5 text-xs text-white">
+                <div className="space-y-2">
+                  <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-sm">
+                    {/* image icon */}
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      className="h-5 w-5 text-gray-500"
+                    >
+                      <rect x="3" y="3" width="18" height="18" rx="3" ry="3" strokeWidth="1.5" />
+                      <circle cx="8.5" cy="9" r="1.5" strokeWidth="1.5" />
+                      <path d="M21 17l-4.5-4.5L12 17l-3-3L3 17" strokeWidth="1.5" />
+                    </svg>
+                  </div>
+                  <div className="text-sm text-gray-600">Drag & drop your product image here,</div>
+                  <div className="text-sm text-gray-600">or</div>
+                  <div className="inline-flex rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700">
                     Browse Files
                   </div>
                 </div>
@@ -270,31 +279,33 @@ export default function TryOnPage() {
           </div>
 
           {/* Select Virtual Model */}
-          <div className="rounded-2xl border border-gray-700/60 bg-white/5 p-4">
-            <h3 className="text-sm font-medium text-gray-100 mb-3">Select Virtual Model</h3>
+          <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+            <h3 className="mb-3 text-base font-semibold text-gray-900">Select Virtual Model</h3>
 
-            <label className="block text-xs text-gray-300 mb-1">Choose a Model</label>
+            <label className="mb-1 block text-sm font-medium text-gray-900">Choose a Model</label>
             <div className="flex items-center gap-2">
               <select
-                value={gender}
-                onChange={(e) => setGender(e.target.value as "female" | "male")}
-                className="w-full rounded-md border border-gray-700 bg-transparent px-3 py-2 text-gray-100"
+                value={selectedModelId ?? FEMALE_MODELS[0].id}
+                onChange={(e) => onChooseModel(e.target.value)}
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900"
               >
-                <option value="female">Female</option>
-                <option value="male">Male</option>
+                {models.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.label}
+                  </option>
+                ))}
               </select>
             </div>
 
-            {/* Thumbnails, scroll to see more */}
-            <div className="mt-3 grid grid-cols-3 gap-3 max-h-48 overflow-y-auto pr-1">
-              {models.map((m) => (
+            <div className="mt-3 grid grid-cols-3 gap-3">
+              {models.slice(0, 6).map((m) => (
                 <button
                   key={m.id}
                   type="button"
                   onClick={() => onChooseModel(m.id)}
                   className={classNames(
-                    "overflow-hidden rounded-md border bg-white/5",
-                    selectedModelId === m.id ? "ring-2 ring-blue-500" : "border-gray-700"
+                    "overflow-hidden rounded-md border border-gray-200 bg-white",
+                    selectedModelId === m.id ? "ring-2 ring-indigo-500" : ""
                   )}
                   title={m.label}
                 >
@@ -305,23 +316,25 @@ export default function TryOnPage() {
           </div>
 
           {/* Generate Options */}
-          <div className="rounded-2xl border border-gray-700/60 bg-white/5 p-4">
-            <h3 className="text-sm font-medium text-gray-100 mb-3">Generate Options</h3>
+          <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+            <h3 className="mb-3 text-base font-semibold text-gray-900">Generate Options</h3>
 
-            <label className="block text-xs text-gray-300 mb-1">Number of Images (1–5)</label>
-            <div className="inline-flex items-center gap-3 rounded-md border border-gray-700 px-3 py-2">
+            <label className="mb-1 block text-sm font-medium text-gray-900">
+              Number of Images (1-5)
+            </label>
+            <div className="inline-flex items-center gap-3 rounded-md border border-gray-300 bg-white px-3 py-2">
               <button
                 type="button"
                 onClick={() => changeCount(-1)}
-                className="h-7 w-7 rounded-md bg-white/10 text-white hover:bg-white/20"
+                className="h-8 w-8 rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-100"
               >
                 –
               </button>
-              <span className="min-w-6 text-center text-white">{count}</span>
+              <span className="min-w-6 text-center text-gray-900">{count}</span>
               <button
                 type="button"
                 onClick={() => changeCount(1)}
-                className="h-7 w-7 rounded-md bg-white/10 text-white hover:bg-white/20"
+                className="h-8 w-8 rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-100"
               >
                 +
               </button>
@@ -331,13 +344,13 @@ export default function TryOnPage() {
               type="button"
               onClick={onGenerate}
               disabled={!canGenerate || loading}
-              className="mt-4 w-full rounded-md bg-indigo-500 px-4 py-2 text-white hover:bg-indigo-400 disabled:opacity-60"
+              className="mt-4 w-full rounded-lg bg-indigo-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-600 disabled:opacity-60"
             >
               {loading ? "Generating…" : "Generate Try-On Images"}
             </button>
 
             {error && (
-              <div className="mt-3 rounded-md border border-red-700 bg-red-900/30 p-3 text-red-200">
+              <div className="mt-3 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
                 {error}
               </div>
             )}
@@ -345,14 +358,28 @@ export default function TryOnPage() {
         </div>
 
         {/* Right column - Results */}
-        <div className="rounded-2xl border border-gray-700/60 bg-white/5 p-6">
-          <h2 className="text-lg font-medium text-gray-100 mb-4">Virtual Try-On Results</h2>
+        <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+          <h2 className="mb-4 text-lg font-semibold text-gray-900">Virtual Try-On Results</h2>
           {results.length === 0 ? (
-            <div className="flex h-64 items-center justify-center rounded-xl border border-gray-700 bg-white/5">
-              <div className="text-center text-gray-300">
-                <div className="mb-2 text-2xl">🖼</div>
-                <div className="text-sm">Your generated try-on images will appear here.</div>
-                <div className="text-xs text-gray-400 mt-1">
+            <div className="flex h-72 items-center justify-center rounded-2xl border border-gray-200 bg-gray-100">
+              <div className="text-center">
+                <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-sm">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    className="h-6 w-6 text-gray-500"
+                  >
+                    <rect x="3" y="3" width="18" height="18" rx="3" ry="3" strokeWidth="1.5" />
+                    <circle cx="8.5" cy="9" r="1.5" strokeWidth="1.5" />
+                    <path d="M21 17l-4.5-4.5L12 17l-3-3L3 17" strokeWidth="1.5" />
+                  </svg>
+                </div>
+                <div className="text-sm font-medium text-gray-700">
+                  Your generated try-on images will appear here.
+                </div>
+                <div className="mt-1 text-sm text-gray-500">
                   Upload a product, select a model, and click "Generate".
                 </div>
               </div>
@@ -360,8 +387,8 @@ export default function TryOnPage() {
           ) : (
             <div className="grid grid-cols-2 gap-4">
               {results.map((url, i) => (
-                <div key={i} className="overflow-hidden rounded-lg border border-gray-700">
-                  <img src={url} alt={`Result ${i + 1}`} className="w-full h-auto object-cover" />
+                <div key={i} className="overflow-hidden rounded-lg border border-gray-200 bg-white">
+                  <img src={url} alt={`Result ${i + 1}`} className="h-auto w-full object-cover" />
                 </div>
               ))}
             </div>
