@@ -8,9 +8,11 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { getClientSupabase } from "@/lib/supabase-browser";
 import type { User } from "@supabase/supabase-js";
+import { usePathname } from "next/navigation";
 
 export default function Navbar() {
   const supabase = getClientSupabase();
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [credits, setCredits] = useState<number | null>(null);
   const [user, setUser] = useState<User | null>(null);
@@ -67,8 +69,13 @@ export default function Navbar() {
     window.location.href = "/";
   };
 
+  const isActive = (href: string) => {
+    if (href === "/") return pathname === "/";
+    return pathname?.startsWith(href);
+  };
+
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-indigo-700/20 bg-black/90 text-indigo-100 backdrop-blur-md">
+    <header className="sticky top-0 z-40 w-full border-b border-gray-200 bg-white text-gray-900 backdrop-blur">
       <div className="max-w-screen-xl mx-auto px-4 flex h-16 items-center">
         {/* Left: Brand */}
         <div className="flex items-center gap-3">
@@ -77,7 +84,7 @@ export default function Navbar() {
             <svg className="h-6 w-6 text-indigo-500" viewBox="0 0 24 24" fill="none">
               <path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.5 5.5l2.8 2.8M15.7 15.7l2.8 2.8M18.5 5.5l-2.8 2.8M8.3 15.7l-2.8 2.8" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
             </svg>
-            <span className="text-indigo-500 font-semibold text-lg">AIProductStudio</span>
+            <span className="text-indigo-600 font-semibold text-lg">AIProductStudio</span>
           </Link>
         </div>
 
@@ -85,19 +92,28 @@ export default function Navbar() {
         <nav className="hidden md:flex items-center gap-8 mx-12">
           <Link
             href={"/" as Route}
-            className="text-sm font-medium text-indigo-500"
+            className={cn(
+              "text-sm font-medium",
+              isActive("/") ? "text-indigo-600" : "text-gray-700 hover:text-gray-900"
+            )}
           >
             Home
           </Link>
           <Link
             href={"/generator" as Route}
-            className="text-sm text-indigo-200/70 hover:text-indigo-300"
+            className={cn(
+              "text-sm",
+              isActive("/generator") ? "text-indigo-600 font-medium" : "text-gray-700 hover:text-gray-900"
+            )}
           >
             AI Tool
           </Link>
           <Link
             href={"/pricing" as Route}
-            className="text-sm text-indigo-200/70 hover:text-indigo-300"
+            className={cn(
+              "text-sm",
+              isActive("/pricing") ? "text-indigo-600 font-medium" : "text-gray-700 hover:text-gray-900"
+            )}
           >
             Pricing
           </Link>
@@ -107,7 +123,7 @@ export default function Navbar() {
         <div className="hidden md:flex items-center gap-6 ml-auto">
           <Link
             href={"/upload" as Route}
-            className="inline-flex items-center gap-2 rounded-xl border border-indigo-500 text-indigo-400 hover:text-indigo-300 hover:border-indigo-400 h-10 px-4 text-sm"
+            className="inline-flex items-center gap-2 rounded-xl border border-indigo-500 text-indigo-600 hover:text-indigo-700 hover:border-indigo-600 h-10 px-4 text-sm"
           >
             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none">
               <path d="M12 16V8M12 8l-3 3M12 8l3 3M5 20h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -118,7 +134,7 @@ export default function Navbar() {
           {!user ? (
             <Link
               href={"/signin" as Route}
-              className="inline-flex items-center gap-2 text-indigo-400 hover:text-indigo-300 text-sm"
+              className="inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-700 text-sm"
             >
               <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none">
                 <circle cx="12" cy="8" r="3.5" stroke="currentColor" strokeWidth="2"/>
@@ -130,11 +146,11 @@ export default function Navbar() {
             <>
               <Link
                 href={"/dashboard" as Route}
-                className="inline-flex items-center rounded-xl border border-indigo-500 text-indigo-400 hover:text-indigo-300 hover:border-indigo-400 h-10 px-4 text-sm"
+                className="inline-flex items-center rounded-xl border border-indigo-500 text-indigo-600 hover:text-indigo-700 hover:border-indigo-600 h-10 px-4 text-sm"
               >
                 Dashboard
               </Link>
-              <Button onClick={onLogout} variant="outline" className="rounded-xl border-indigo-500 text-indigo-400 hover:text-indigo-300 hover:border-indigo-400">
+              <Button onClick={onLogout} variant="outline" className="rounded-xl border-indigo-500 text-indigo-600 hover:text-indigo-700 hover:border-indigo-600">
                 Logout
               </Button>
             </>
@@ -145,7 +161,7 @@ export default function Navbar() {
         <div className="md:hidden ml-auto flex items-center gap-2">
           <Link
             href={"/upload" as Route}
-            className="inline-flex items-center gap-2 rounded-xl border border-indigo-500 bg-black text-indigo-300 h-9 px-3 text-sm"
+            className="inline-flex items-center gap-2 rounded-xl border border-indigo-500 bg-white text-indigo-700 h-9 px-3 text-sm"
           >
             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none">
               <path d="M12 16V8M12 8l-3 3M12 8l3 3M5 20h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -155,7 +171,7 @@ export default function Navbar() {
           <button
             aria-label="Open menu"
             className={cn(
-              "inline-flex h-9 w-9 items-center justify-center rounded-xl border border-indigo-500 bg-black text-indigo-300 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/30"
+              "inline-flex h-9 w-9 items-center justify-center rounded-xl border border-indigo-500 bg-white text-indigo-700 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/30"
             )}
             onClick={() => setOpen((v) => !v)}
           >
@@ -173,7 +189,7 @@ export default function Navbar() {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="md:hidden overflow-hidden border-t border-indigo-800/30 bg-black/95 backdrop-blur-md"
+            className="md:hidden overflow-hidden border-t border-gray-200 bg-white"
           >
             <div className="container py-3">
               <div className="flex flex-col gap-1">
@@ -188,7 +204,10 @@ export default function Navbar() {
                   <Link
                     key={item.href}
                     href={item.href as Route}
-                    className="rounded-xl px-3 py-2 text-sm text-indigo-200/80 hover:text-indigo-300"
+                    className={cn(
+                      "rounded-xl px-3 py-2 text-sm",
+                      isActive(item.href) ? "text-indigo-600 font-medium" : "text-gray-700 hover:text-gray-900"
+                    )}
                     onClick={() => setOpen(false)}
                   >
                     {item.label}
@@ -196,7 +215,7 @@ export default function Navbar() {
                 ))}
 
                 {user && (
-                  <div className="mt-3 rounded-xl border border-indigo-500 bg-black h-9 px-3 inline-flex items-center text-sm text-indigo-300">
+                  <div className="mt-3 rounded-xl border border-indigo-500 bg-white h-9 px-3 inline-flex items-center text-sm text-indigo-700">
                     Credits: {displayCredits || "…"}
                   </div>
                 )}
