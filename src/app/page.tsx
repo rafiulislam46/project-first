@@ -82,7 +82,7 @@ export default function Page() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
-              { title: "Virtual Try-On", desc: "See your products on diverse models in realistic scenarios.", href: "/generator" },
+              { title: "Virtual Try-On", desc: "See your products on diverse models in realistic scenarios.", href: "/tryon" },
               { title: "AI Ad Generation", desc: "Generate captivating product ads tailored to your brand.", href: "/test-prompts" },
               { title: "Powerful AI Tools", desc: "Enhance images, remove backgrounds, and integrate seamlessly.", href: "/generator" },
             ].map((f) => (
