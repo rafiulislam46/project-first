@@ -68,43 +68,73 @@ export default function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b bg-white/80 backdrop-blur-md">
-      <div className="max-w-screen-xl mx-auto px-4 flex h-14 items-center">
+    <header className="sticky top-0 z-40 w-full border-b border-indigo-700/20 bg-black/90 text-indigo-100 backdrop-blur-md">
+      <div className="max-w-screen-xl mx-auto px-4 flex h-16 items-center">
         {/* Left: Brand */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <Link href={"/" as Route} className="flex items-center gap-2">
-            <span className="text-indigo-600 font-semibold">AIProductStudio</span>
+            {/* Simple starburst icon to match the reference style */}
+            <svg className="h-6 w-6 text-indigo-500" viewBox="0 0 24 24" fill="none">
+              <path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.5 5.5l2.8 2.8M15.7 15.7l2.8 2.8M18.5 5.5l-2.8 2.8M8.3 15.7l-2.8 2.8" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+            </svg>
+            <span className="text-indigo-500 font-semibold text-lg">AIProductStudio</span>
           </Link>
         </div>
 
         {/* Center: primary nav (desktop) */}
-        <nav className="hidden md:flex items-center gap-6 mx-8">
-          <Link href={"/" as Route} className="text-sm text-slate-700 hover:text-slate-900">
+        <nav className="hidden md:flex items-center gap-8 mx-12">
+          <Link
+            href={"/" as Route}
+            className="text-sm font-medium text-indigo-500"
+          >
             Home
           </Link>
-          <Link href={"/generator" as Route} className="text-sm text-slate-700 hover:text-slate-900">
+          <Link
+            href={"/generator" as Route}
+            className="text-sm text-indigo-200/70 hover:text-indigo-300"
+          >
             AI Tool
           </Link>
-          <Link href={"/pricing" as Route} className="text-sm text-slate-700 hover:text-slate-900">
+          <Link
+            href={"/pricing" as Route}
+            className="text-sm text-indigo-200/70 hover:text-indigo-300"
+          >
             Pricing
           </Link>
         </nav>
 
         {/* Right: actions */}
-        <div className="hidden md:flex items-center gap-2 ml-auto">
-          <Button asChild variant="outline" className="rounded-xl">
-            <Link href={"/upload" as Route}>Upload Product</Link>
-          </Button>
+        <div className="hidden md:flex items-center gap-6 ml-auto">
+          <Link
+            href={"/upload" as Route}
+            className="inline-flex items-center gap-2 rounded-xl border border-indigo-500 text-indigo-400 hover:text-indigo-300 hover:border-indigo-400 h-10 px-4 text-sm"
+          >
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none">
+              <path d="M12 16V8M12 8l-3 3M12 8l3 3M5 20h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            Upload Product
+          </Link>
+
           {!user ? (
-            <Button asChild className="rounded-xl btn-gradient">
-              <Link href={"/signin" as Route}>Login</Link>
-            </Button>
+            <Link
+              href={"/signin" as Route}
+              className="inline-flex items-center gap-2 text-indigo-400 hover:text-indigo-300 text-sm"
+            >
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="8" r="3.5" stroke="currentColor" strokeWidth="2"/>
+                <path d="M4 20c1.6-3.5 5-5 8-5s6.4 1.5 8 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+              Login
+            </Link>
           ) : (
             <>
-              <Button asChild variant="outline" className="rounded-xl">
-                <Link href={"/dashboard" as Route}>Dashboard</Link>
-              </Button>
-              <Button onClick={onLogout} variant="outline" className="rounded-xl">
+              <Link
+                href={"/dashboard" as Route}
+                className="inline-flex items-center rounded-xl border border-indigo-500 text-indigo-400 hover:text-indigo-300 hover:border-indigo-400 h-10 px-4 text-sm"
+              >
+                Dashboard
+              </Link>
+              <Button onClick={onLogout} variant="outline" className="rounded-xl border-indigo-500 text-indigo-400 hover:text-indigo-300 hover:border-indigo-400">
                 Logout
               </Button>
             </>
@@ -113,13 +143,19 @@ export default function Navbar() {
 
         {/* Mobile actions */}
         <div className="md:hidden ml-auto flex items-center gap-2">
-          <Link href={"/upload" as Route} className="inline-flex items-center rounded-xl border bg-white h-9 px-3 text-sm">
+          <Link
+            href={"/upload" as Route}
+            className="inline-flex items-center gap-2 rounded-xl border border-indigo-500 bg-black text-indigo-300 h-9 px-3 text-sm"
+          >
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none">
+              <path d="M12 16V8M12 8l-3 3M12 8l3 3M5 20h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
             Upload
           </Link>
           <button
             aria-label="Open menu"
             className={cn(
-              "inline-flex h-9 w-9 items-center justify-center rounded-xl border bg-white text-text-hi shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-1/30"
+              "inline-flex h-9 w-9 items-center justify-center rounded-xl border border-indigo-500 bg-black text-indigo-300 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/30"
             )}
             onClick={() => setOpen((v) => !v)}
           >
@@ -137,7 +173,7 @@ export default function Navbar() {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="md:hidden overflow-hidden border-t bg-white/95 backdrop-blur-md"
+            className="md:hidden overflow-hidden border-t border-indigo-800/30 bg-black/95 backdrop-blur-md"
           >
             <div className="container py-3">
               <div className="flex flex-col gap-1">
@@ -152,7 +188,7 @@ export default function Navbar() {
                   <Link
                     key={item.href}
                     href={item.href as Route}
-                    className="rounded-xl px-3 py-2 text-sm text-text-body hover:text-text-hi"
+                    className="rounded-xl px-3 py-2 text-sm text-indigo-200/80 hover:text-indigo-300"
                     onClick={() => setOpen(false)}
                   >
                     {item.label}
@@ -160,7 +196,7 @@ export default function Navbar() {
                 ))}
 
                 {user && (
-                  <div className="mt-3 rounded-xl border bg-white h-9 px-3 inline-flex items-center text-sm text-text-body">
+                  <div className="mt-3 rounded-xl border border-indigo-500 bg-black h-9 px-3 inline-flex items-center text-sm text-indigo-300">
                     Credits: {displayCredits || "…"}
                   </div>
                 )}
