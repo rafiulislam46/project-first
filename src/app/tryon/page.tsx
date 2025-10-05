@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { getClientSupabase } from "@/lib/supabase-browser";
 
 /**
  * Virtual Try-On page UI (exact replica of the provided reference image)
@@ -24,25 +25,19 @@ interface ReplicatePrediction {
   error?: unknown;
 }
 
-type ModelItem = {
+type CatalogModel = {
   id: string;
-  label: string;
-  gender: "male" | "female";
-  imgUrl: string;
+  name: string;
+  gender: string;
+  thumb_url: string;
+  styles?: { key: string; thumb_url?: string | null; thumb?: string | null }[] | null;
 };
 
-const FEMALE_MODELS: ModelItem[] = [
-  { id: "F01", label: "Female Model 1", gender: "female", imgUrl: "/catalog/models/M01.svg" },
-  { id: "F02", label: "Female Model 2", gender: "female", imgUrl: "/demo/tryon/1.svg" },
-  { id: "F03", label: "Female Model 3", gender: "female", imgUrl: "/demo/tryon/5.svg" },
-];
-
-const MALE_MODELS: ModelItem[] = [
-  { id: "M01", label: "Male Model 1", gender: "male", imgUrl: "/catalog/models/M02.svg" },
-  { id: "M02", label: "Male Model 2", gender: "male", imgUrl: "/demo/tryon/2.svg" },
-  { id: "M03", label: "Male Model 3", gender: "male", imgUrl: "/demo/tryon/3.svg" },
-  { id: "M04", label: "Male Model 4", gender: "male", imgUrl: "/demo/tryon/4.svg" },
-];
+type FetchState =
+  | { status: "idle" }
+  | { status: "loading" }
+  | { status: "error"; error: string }
+  | { status: "success"; data: CatalogModel[] };
 
 function classNames(...xs: (string | false | null | undefined)[]) {
   return xs.filter(Boolean).join(" ");
@@ -54,10 +49,11 @@ export default function TryOnPage() {
   const [productPreview, setProductPreview] = React.useState<string | null>(null);
   const [garmentUrl, setGarmentUrl] = React.useState<string | null>(null);
 
-  // Model selection
-  const [gender, setGender] = React.useState<"female" | "male">("female");
-  const [selectedModelId, setSelectedModelId] = React.useState<string | null>(FEMALE_MODELS[0].id);
-  const [humanUrl, setHumanUrl] = React.useState<string | null>(FEMALE_MODELS[0].imgUrl);
+  // Models (fetched from Supabase, same source as Models page)
+  const [modelsState, setModelsState] = React.useState<FetchState>({ status: "idle" });
+  // Selected model
+  const [selectedModelId, setSelectedModelId] = React.useState<string | null>(null);
+  const [humanUrl, setHumanUrl] = React.useState<string | null>(null);
 
   // Generate options
   const [count, setCount] = React.useState<number>(1);
@@ -67,13 +63,64 @@ export default function TryOnPage() {
   const [loading, setLoading] = React.useState<boolean>(false);
   const [error, setError] = React.useState<string | null>(null);
 
-  const models = gender === "female" ? FEMALE_MODELS : MALE_MODELS;
-
+  // Fetch models from Supabase (same as ModelsList component)
   React.useEffect(() => {
-    const defaultModel = models[0];
-    setSelectedModelId(defaultModel.id);
-    setHumanUrl(defaultModel.imgUrl);
-  }, [gender]); // eslint-disable-line react-hooks/exhaustive-deps
+    let cancelled = false;
+
+    async function run() {
+      setModelsState({ status: "loading" });
+      try {
+        const client = getClientSupabase();
+        if (!client) {
+          if (!cancelled) {
+            setModelsState({
+              status: "error",
+              error:
+                "Supabase is not configured. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.",
+            });
+          }
+          return;
+        }
+
+        const { data, error } = await client
+          .from("catalog_models")
+          .select("id, name, gender, thumb_url, styles")
+          .order("id", { ascending: true });
+
+        console.log("[Supabase] (Try-On) catalog_models response:", { data, error });
+
+        if (error) {
+          if (!cancelled) setModelsState({ status: "error", error: error.message });
+          return;
+        }
+
+        const items = (data as CatalogModel[]).map((m) => {
+          const styleThumb =
+            (m.styles?.[0] as any)?.thumb_url || (m.styles?.[0] as any)?.thumb || null;
+          const thumb = m.thumb_url || styleThumb || "/catalog/models/model_card.svg";
+          return { ...m, thumb };
+        }) as (CatalogModel & { thumb: string })[];
+
+        if (!cancelled) {
+          setModelsState({ status: "success", data: items });
+          // Set default selection if none
+          const first = items[0];
+          if (first) {
+            setSelectedModelId(String(first.id));
+            setHumanUrl(first.thumb);
+          }
+        }
+      } catch (e: unknown) {
+        const msg = e instanceof Error ? e.message : "Unknown error";
+        if (!cancelled) setModelsState({ status: "error", error: msg });
+      }
+    }
+
+    run();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   React.useEffect(() => {
     return () => {
@@ -135,7 +182,7 @@ export default function TryOnPage() {
   const onSelectFile = async (files: FileList | null) => {
     const f = files?.[0];
     if (!f) return;
-    if (!["image/png", "image/jpeg"].includes(f.type)) {
+    if (["image/png", "image/jpeg"].includes(f.type) === false) {
       setError("Please upload a PNG or JPG image.");
       return;
     }
@@ -155,8 +202,16 @@ export default function TryOnPage() {
 
   const onChooseModel = (id: string) => {
     setSelectedModelId(id);
-    const m = models.find((x) => x.id === id);
-    setHumanUrl(m?.imgUrl || null);
+    const items =
+      modelsState.status === "success" ? (modelsState.data as (CatalogModel & { thumb?: string })[]) : [];
+    const m = items.find((x) => String(x.id) === String(id));
+    const thumb =
+      ((m as any)?.thumb as string | undefined) ||
+      m?.thumb_url ||
+      (m?.styles?.[0] as any)?.thumb_url ||
+      (m?.styles?.[0] as any)?.thumb ||
+      null;
+    setHumanUrl(thumb || null);
   };
 
   const changeCount = (delta: number) => {
@@ -224,6 +279,14 @@ export default function TryOnPage() {
     }
   };
 
+  // Helpers to present models UI
+  const isLoadingModels = modelsState.status === "loading" || modelsState.status === "idle";
+  const hasModelsError = modelsState.status === "error";
+  const modelItems =
+    modelsState.status === "success"
+      ? (modelsState.data as (CatalogModel & { thumb?: string })[])
+      : [];
+
   return (
     <div className="mx-auto max-w-7xl px-6 py-8">
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[360px_1fr]">
@@ -284,35 +347,60 @@ export default function TryOnPage() {
 
             <label className="mb-1 block text-sm font-medium text-gray-900">Choose a Model</label>
             <div className="flex items-center gap-2">
-              <select
-                value={selectedModelId ?? FEMALE_MODELS[0].id}
-                onChange={(e) => onChooseModel(e.target.value)}
-                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900"
-              >
-                {models.map((m) => (
-                  <option key={m.id} value={m.id}>
-                    {m.label}
-                  </option>
-                ))}
-              </select>
+              {isLoadingModels ? (
+                <div className="w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-500">
+                  Loading models…
+                </div>
+              ) : hasModelsError ? (
+                <div className="w-full rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                  Failed to load models.
+                </div>
+              ) : (
+                <select
+                  value={selectedModelId ?? (modelItems[0] ? String(modelItems[0].id) : "")}
+                  onChange={(e) => onChooseModel(e.target.value)}
+                  className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900"
+                >
+                  {modelItems.map((m) => (
+                    <option key={String(m.id)} value={String(m.id)}>
+                      {m.name || String(m.id)}
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
 
-            <div className="mt-3 grid grid-cols-3 gap-3">
-              {models.slice(0, 6).map((m) => (
-                <button
-                  key={m.id}
-                  type="button"
-                  onClick={() => onChooseModel(m.id)}
-                  className={classNames(
-                    "overflow-hidden rounded-md border border-gray-200 bg-white",
-                    selectedModelId === m.id ? "ring-2 ring-indigo-500" : ""
-                  )}
-                  title={m.label}
-                >
-                  <img src={m.imgUrl} alt={m.label} className="aspect-square w-full object-cover" />
-                </button>
-              ))}
-            </div>
+            {!isLoadingModels && !hasModelsError && (
+              <div className="mt-3 grid grid-cols-3 gap-3">
+                {modelItems.slice(0, 9).map((m) => {
+                  const thumb =
+                    ((m as any).thumb as string | undefined) ||
+                    m.thumb_url ||
+                    (m.styles?.[0] as any)?.thumb_url ||
+                    (m.styles?.[0] as any)?.thumb ||
+                    "/catalog/models/model_card.svg";
+                  return (
+                    <button
+                      key={String(m.id)}
+                      type="button"
+                      onClick={() => onChooseModel(String(m.id))}
+                      className={classNames(
+                        "overflow-hidden rounded-md border border-gray-200 bg-white",
+                        selectedModelId === String(m.id) ? "ring-2 ring-indigo-500" : ""
+                      )}
+                      title={m.name || String(m.id)}
+                    >
+                      <img
+                        src={thumb}
+                        alt={m.name || String(m.id)}
+                        className="aspect-square w-full object-cover"
+                        referrerPolicy="no-referrer"
+                      />
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           {/* Generate Options */}
