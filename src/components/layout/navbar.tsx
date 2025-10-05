@@ -93,7 +93,7 @@ export default function Navbar() {
         <nav className="hidden md:flex items-center gap-8 mx-12">
           {[
             { href: "/", label: "Home" },
-            { href: "/generator", label: "AI Tools" },
+            { href: "/ai-tool", label: "AI Tool" },
             { href: "/models", label: "Models" },
             { href: "/templates", label: "Templates" },
             { href: "/pricing", label: "Pricing" },
