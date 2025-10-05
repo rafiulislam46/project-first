@@ -18,7 +18,7 @@ export default function Footer() {
       <div className="max-w-screen-xl mx-auto px-4 pb-6">
         <div className="flex items-center justify-end gap-4 text-gray-700">
           {/* Simple social icons */}
-          <a href="#" aria-label="Facebook" className="hover:text-gray-900">
+          <a href="https://www.facebook.com/rafiulislam46" aria-label="Facebook" className="hover:text-gray-900">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
               <path d="M15 8h-2c-.6 0-1 .4-1 1v2h3l-.5 3h-2.5v8H9v-8H7V11h2V9.8C9 8.3 10.2 7 11.7 7H15v1z" stroke="currentColor" strokeWidth="1.5" fill="none"/>
             </svg>
