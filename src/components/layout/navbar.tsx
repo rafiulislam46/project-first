@@ -174,7 +174,7 @@ export default function Navbar() {
               <div className="flex flex-col gap-1">
                 {[
                   { href: "/", label: "Home" },
-                  { href: "/generator", label: "AI Tools" },
+                  { href: "/ai-tool", label: "AI Tools" },
                   { href: "/models", label: "Models" },
                   { href: "/templates", label: "Templates" },
                   { href: "/pricing", label: "Pricing" },
