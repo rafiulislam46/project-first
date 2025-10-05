@@ -56,6 +56,7 @@ export default function AiToolPage() {
               title: "Virtual Try-On",
               desc:
                 "Place your products on AI-generated models, allowing customers to visualize items realistically before purchase, enhancing conversion.",
+                 href: "/tryon",
               iconBg: "bg-indigo-50",
             },
             {
