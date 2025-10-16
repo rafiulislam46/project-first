@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "seed": "echo \"Run SQL seed: psql \\\"$SUPABASE_DB_URL\\\" -f sql/seed.sql\""
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.0.2",
@@ -21,7 +23,9 @@
     "@supabase/supabase-js": "^2.45.4",
     "@supabase/auth-helpers-nextjs": "^0.10.0",
     "@supabase/ssr": "^0.7.0",
-    "cloudinary": "^2.6.0"
+    "cloudinary": "^2.6.0",
+    "@google/generative-ai": "^0.24.1",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@types/node": "^20.12.12",
