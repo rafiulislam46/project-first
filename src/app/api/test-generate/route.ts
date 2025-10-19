@@ -136,8 +136,7 @@ export async function POST(req: NextRequest) {
         },
       ],
       generationConfig: {
-        // ask Gemini to return images
-        responseMimeType: "image/png",
+        // candidateCount retained; deprecated responseMimeType removed
         candidateCount: count,
       },
     };
