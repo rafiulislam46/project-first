@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-export const runtime = 'nodejs';
+export const runtime = "nodejs";
 
 // Map template IDs or names to human-friendly style prompts.
 // Keep labels flexible to match UI without changing its text.
