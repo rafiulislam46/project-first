@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+export const runtime = 'nodejs';
 
 // Map template IDs or names to human-friendly style prompts.
 // Keep labels flexible to match UI without changing its text.
@@ -124,7 +125,7 @@ export async function POST(req: NextRequest) {
 
     const parts: any[] = [{ text: finalPrompt }];
     for (const url of images) {
-      parts.push({ image_url: { url } });
+      parts.push({ fileData: { fileUri: url } });
     }
 
     const body = {
